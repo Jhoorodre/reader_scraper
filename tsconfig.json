@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+      "types": ["jest"], // Adicione "jest" aqui
+      "esModuleInterop": true, // Necessário para usar `jest.mock()`
+      "moduleResolution": "node"
+    }
+  }

@@ -1,0 +1,4 @@
+Flask
+nodriver
+undetected-chromedriver
+bs4

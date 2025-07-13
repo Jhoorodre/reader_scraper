@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  scrap2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    working_dir: /scrap2
+    container_name: scrap2
+    ports:
+      - 8889:8889
