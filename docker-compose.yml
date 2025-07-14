@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   scrap2:
     build:
@@ -8,7 +6,8 @@ services:
     restart: always
     env_file:
       - .env
-    working_dir: /scrap2
+    working_dir: /app
     container_name: scrap2
+    command: python /app/app.py
     ports:
       - 8889:8889
