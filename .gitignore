@@ -2,3 +2,4 @@
 reader_scraper.code-workspace
 reader_scraper.code-workspace.json
 .env
+node_modules
