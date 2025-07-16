@@ -214,6 +214,7 @@ export class ChapterLogger {
     // Detectar capítulos novos baseado nos logs existentes
     detectNewChapters(workName: string, availableChapters: any[]): any[] {
         console.log(`🔍 Verificando logs de sucesso para obra: ${workName}`);
+        console.log(`🔍 DEBUG: Capítulos disponíveis no site (${availableChapters.length}):`, availableChapters.map(ch => ch.number));
         
         // PRIORIDADE 1: Ler logs de sucesso
         let { successful, failed } = this.readWorkChapters(workName);
@@ -235,7 +236,14 @@ export class ChapterLogger {
         
         // Criar lista de capítulos JÁ baixados com sucesso
         const downloadedChapters = successful.map(s => s.chapterNumber);
-        console.log(`📊 Capítulos já baixados: ${downloadedChapters.length}`);
+        console.log(`📊 Capítulos já baixados (${downloadedChapters.length}):`, downloadedChapters);
+        
+        // DEBUG: Comparação detalhada
+        console.log(`🔍 DEBUG: Comparando capítulos...`);
+        availableChapters.forEach(chapter => {
+            const isDownloaded = downloadedChapters.includes(chapter.number);
+            console.log(`  ${isDownloaded ? '✅' : '❌'} "${chapter.number}" - ${isDownloaded ? 'JÁ BAIXADO' : 'NOVO'}`);
+        });
         
         // Filtrar capítulos que NÃO estão nos logs de sucesso
         const missingChapters = availableChapters.filter(chapter => {
@@ -255,6 +263,11 @@ export class ChapterLogger {
                 allToDownload.push(retry);
             }
         });
+        
+        console.log(`🔍 DEBUG: Resultado final da detecção:`);
+        console.log(`  - Capítulos faltantes: ${missingChapters.length}`);
+        console.log(`  - Capítulos para retry: ${retriableChapters.length}`);
+        console.log(`  - Total para download: ${allToDownload.length}`);
         
         if (allToDownload.length > 0) {
             console.log(`🔍 Detectados ${missingChapters.length} capítulos faltantes e ${retriableChapters.length} falhas para reprocessar`);
