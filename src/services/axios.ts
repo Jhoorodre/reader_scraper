@@ -141,6 +141,15 @@ export class CustomAxios {
     }
     
     /**
+     * Aplica timeouts centralizados do TimeoutManager
+     */
+    public applyCentralizedTimeouts(): void {
+        const timeoutManager = TimeoutManager.getInstance();
+        const centralizedTimeout = timeoutManager.getTimeoutFor('axios_request');
+        this.updateTimeout(centralizedTimeout);
+    }
+    
+    /**
      * Restaura o timeout para o valor padrão
      */
     public resetTimeout(): void {
@@ -153,5 +162,28 @@ export class CustomAxios {
      */
     public getCurrentTimeout(): number {
         return this.instance.defaults.timeout || this.defaultTimeout;
+    }
+    
+    /**
+     * Obtém métricas do cliente HTTP
+     */
+    public getMetrics(): {
+        currentTimeout: number;
+        currentProxy: { host: string; port: string } | null;
+        proxyEnabled: boolean;
+    } {
+        return {
+            currentTimeout: this.getCurrentTimeout(),
+            currentProxy: this.currentProxy,
+            proxyEnabled: this.enabledProxies
+        };
+    }
+    
+    /**
+     * Força limpeza do proxy atual
+     */
+    public clearCurrentProxy(): void {
+        this.currentProxy = null;
+        console.log('🧹 Proxy atual limpo');
     }
 }

@@ -5,7 +5,219 @@ import { downloadImage } from '../download/images';
 import { promptUser } from '../utils/prompt';
 import path from 'path';
 import { ChapterLogger } from '../utils/chapter_logger';
-import { TimeoutManager } from '../services/timeout_manager';
+import { TimeoutManager, ErrorType } from '../services/timeout_manager';
+
+class UnifiedRetryStrategy {
+    private maxRetries: number;
+    private baseDelay: number;
+    private maxDelay: number;
+    private backoffMultiplier: number;
+    
+    constructor(maxRetries = 3, baseDelay = 2000, maxDelay = 30000, backoffMultiplier = 1.5) {
+        this.maxRetries = maxRetries;
+        this.baseDelay = baseDelay; // Aumentado para 2s
+        this.maxDelay = maxDelay;
+        this.backoffMultiplier = backoffMultiplier; // Reduzido para 1.5
+    }
+    
+    async executeWithRetry<T>(
+        operation: () => Promise<T>,
+        operationName: string,
+        onRetry?: (attempt: number, error: Error) => void
+    ): Promise<T> {
+        let lastError: Error;
+        const timeoutManager = TimeoutManager.getInstance();
+        
+        for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+            try {
+                if (attempt > 1) {
+                    const delay = this.calculateDelay(attempt);
+                    console.log(`🔄 Tentativa ${attempt}/${this.maxRetries} para ${operationName} - aguardando ${delay/1000}s...`);
+                    await this.delay(delay);
+                }
+                
+                const result = await operation();
+                
+                if (attempt > 1) {
+                    console.log(`✅ ${operationName} bem-sucedido na tentativa ${attempt}`);
+                }
+                
+                return result;
+            } catch (error) {
+                lastError = error;
+                
+                // Registrar erro no timeout manager
+                const errorType = this.categorizeError(error);
+                timeoutManager.recordError(operationName, errorType);
+                
+                console.error(`❌ Tentativa ${attempt}/${this.maxRetries} falhou para ${operationName}: ${error.message}`);
+                
+                if (onRetry) {
+                    onRetry(attempt, error);
+                }
+                
+                // Delay extra para erros de anti-bot
+                if (errorType === ErrorType.ANTI_BOT) {
+                    const extraDelay = Math.min(5000 * attempt, 20000); // 5s, 10s, 15s, máx 20s
+                    console.log(`🛡️ Proteção anti-bot/bypass incompleto - aguardando ${extraDelay/1000}s extra...`);
+                    await this.delay(extraDelay);
+                }
+                
+                if (attempt === this.maxRetries) {
+                    console.error(`💀 Todas as ${this.maxRetries} tentativas falharam para ${operationName}`);
+                    throw lastError;
+                }
+            }
+        }
+        
+        throw lastError;
+    }
+    
+    private calculateDelay(attempt: number): number {
+        const delay = this.baseDelay * Math.pow(this.backoffMultiplier, attempt - 2);
+        return Math.min(delay, this.maxDelay);
+    }
+    
+    private categorizeError(error: Error): ErrorType {
+        const message = error.message.toLowerCase();
+        
+        if (message.includes('anti-bot') || message.includes('ofuscado') || message.includes('cloudflare')) {
+            return ErrorType.ANTI_BOT;
+        }
+        if (message.includes('timeout') || message.includes('timed out')) {
+            return ErrorType.TIMEOUT;
+        }
+        if (message.includes('0 páginas')) {
+            return ErrorType.ANTI_BOT; // Tratar 0 páginas como anti-bot (bypass incompleto)
+        }
+        if (message.includes('proxy') || message.includes('connection refused')) {
+            return ErrorType.PROXY;
+        }
+        if (message.includes('network') || message.includes('fetch')) {
+            return ErrorType.NETWORK;
+        }
+        
+        return ErrorType.UNKNOWN;
+    }
+    
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+}
+
+class BatchProcessor {
+    private batchSize: number;
+    private concurrency: number;
+    private backpressure: boolean;
+    private processingQueue: any[] = [];
+    
+    constructor(batchSize = 10, concurrency = 3, backpressure = true) {
+        this.batchSize = batchSize;
+        this.concurrency = concurrency;
+        this.backpressure = backpressure;
+    }
+    
+    async processBatch<T, R>(
+        items: T[],
+        processor: (item: T, index: number) => Promise<R>,
+        onProgress?: (completed: number, total: number) => void
+    ): Promise<R[]> {
+        const results: R[] = [];
+        const batches = this.createBatches(items);
+        
+        console.log(`📦 Processando ${items.length} itens em ${batches.length} lotes (${this.batchSize} itens/lote)`);
+        
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+            const batch = batches[batchIndex];
+            console.log(`🔄 Processando lote ${batchIndex + 1}/${batches.length}`);
+            
+            const batchResults = await Bluebird.map(batch, async (item, itemIndex) => {
+                const globalIndex = batchIndex * this.batchSize + itemIndex;
+                const result = await processor(item, globalIndex);
+                
+                if (onProgress) {
+                    onProgress(results.length + itemIndex + 1, items.length);
+                }
+                
+                return result;
+            }, { concurrency: this.concurrency });
+            
+            results.push(...batchResults);
+            
+            // Pequena pausa entre lotes para evitar sobrecarga
+            if (batchIndex < batches.length - 1) {
+                await this.delay(1000);
+            }
+        }
+        
+        return results;
+    }
+    
+    private createBatches<T>(items: T[]): T[][] {
+        const batches: T[][] = [];
+        for (let i = 0; i < items.length; i += this.batchSize) {
+            batches.push(items.slice(i, i + this.batchSize));
+        }
+        return batches;
+    }
+    
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    public updateConcurrency(newConcurrency: number): void {
+        this.concurrency = Math.max(1, Math.min(newConcurrency, 10));
+        console.log(`🔧 Concorrência atualizada para: ${this.concurrency}`);
+    }
+}
+
+class PerformanceOptimizer {
+    private successRate: number = 1.0;
+    private avgResponseTime: number = 0;
+    private measurements: number[] = [];
+    private readonly maxMeasurements = 20;
+    
+    public recordOperation(success: boolean, responseTime: number): void {
+        // Atualizar taxa de sucesso
+        this.measurements.push(success ? 1 : 0);
+        if (this.measurements.length > this.maxMeasurements) {
+            this.measurements.shift();
+        }
+        
+        this.successRate = this.measurements.reduce((a, b) => a + b, 0) / this.measurements.length;
+        
+        // Atualizar tempo médio de resposta
+        this.avgResponseTime = (this.avgResponseTime * 0.8) + (responseTime * 0.2);
+    }
+    
+    public calculateOptimalConcurrency(): number {
+        // Reduzir concorrência se taxa de sucesso estiver baixa
+        if (this.successRate < 0.5) {
+            return 1;
+        }
+        if (this.successRate < 0.8) {
+            return 2;
+        }
+        
+        // Ajustar baseado no tempo de resposta
+        if (this.avgResponseTime > 30000) { // 30s
+            return 1;
+        }
+        if (this.avgResponseTime > 15000) { // 15s
+            return 2;
+        }
+        
+        return 3; // Concorrência máxima
+    }
+    
+    public getStats(): { successRate: number; avgResponseTime: number; optimalConcurrency: number } {
+        return {
+            successRate: this.successRate,
+            avgResponseTime: this.avgResponseTime,
+            optimalConcurrency: this.calculateOptimalConcurrency()
+        };
+    }
+}
 
 async function executeAutoRentry(): Promise<void> {
     const chapterLogger = new ChapterLogger();
@@ -14,6 +226,10 @@ async function executeAutoRentry(): Promise<void> {
     
     // Aplicar timeouts progressivos no provider
     provider.applyProgressiveTimeouts();
+    
+    // Aplicar timeouts progressivos globalmente
+    const timeoutManager = TimeoutManager.getInstance();
+    timeoutManager.applyProgressiveTimeoutsToAll();
     
     console.log('\n' + '='.repeat(80));
     console.log('🔄 MODO RENTRY AUTOMÁTICO ATIVADO');
@@ -201,6 +417,7 @@ async function executeCyclicRecovery(): Promise<void> {
         // Aplicar timeouts progressivos para este ciclo
         const timeoutManager = TimeoutManager.getInstance();
         timeoutManager.setCycle(cycleCount);
+        timeoutManager.forceUpdateAllComponents();
         
         if (cycleCount > 1) {
             const increasePercent = timeoutManager.getIncreasePercentage();
@@ -283,6 +500,7 @@ async function executeRentryPhase(cycleNumber: number): Promise<number> {
     // Configurar timeouts para este ciclo
     const timeoutManager = TimeoutManager.getInstance();
     timeoutManager.setCycle(cycleNumber);
+    timeoutManager.forceUpdateAllComponents();
     
     // Executar rentry
     await executeAutoRentry();
@@ -307,6 +525,13 @@ async function downloadManga() {
     const isRetryMode = args.includes('rentry');
     const maxRetries = 3;
     const chapterLogger = new ChapterLogger();
+    const retryStrategy = new UnifiedRetryStrategy(maxRetries);
+    const performanceOptimizer = new PerformanceOptimizer();
+
+    // Escanear pasta manga e criar/atualizar logs automaticamente
+    console.log('📂 Escaneando pasta manga e atualizando logs...');
+    chapterLogger.initializeLogsFromManga('manga');
+    console.log('✅ Logs atualizados com base na pasta manga\n');
 
     try {
         let mangaUrls: string[] = [];
@@ -335,6 +560,10 @@ async function downloadManga() {
         const successfulUrls: string[] = [];
         const failedUrls: string[] = [];
 
+        // Calcular concorrência ótima dinamicamente
+        const optimalConcurrency = performanceOptimizer.calculateOptimalConcurrency();
+        console.log(`🚀 Processando ${mangaUrls.length} obras com concorrência: ${optimalConcurrency}`);
+        
         await Bluebird.map(mangaUrls, async (mangaUrl, urlIndex) => {
             console.log(`\n${'='.repeat(60)}`);
             console.log(`🚀 Processando obra ${urlIndex + 1}/${mangaUrls.length}: ${mangaUrl}`);
@@ -439,29 +668,35 @@ async function downloadManga() {
                         
                         fs.appendFileSync(reportFile, `Capítulo: ${chapter.number}\n`);
                         
-                        // Sistema de retry para capítulo individual
+                        // Sistema de retry unificado para capítulo individual
                         let chapterSuccess = false;
                         let lastChapterError = null;
                         
-                        for (let chapterAttempt = 1; chapterAttempt <= maxRetries; chapterAttempt++) {
-                            try {
-                                if (chapterAttempt > 1) {
-                                    console.log(`🔄 Tentativa ${chapterAttempt}/${maxRetries} para capítulo: ${chapter.number}`);
-                                    await new Promise(resolve => setTimeout(resolve, 1000 * chapterAttempt));
-                                }
-                                // Obter as páginas do capítulo com timeout de segurança
-                                console.log(`⏱️ Obtendo páginas (timeout: ${TimeoutManager.getInstance().getTimeout('request')/1000}s)...`);
+                        try {
+                            await retryStrategy.executeWithRetry(async () => {
+                                // Obter as páginas do capítulo com timeout adaptativo
+                                const timeoutManager = TimeoutManager.getInstance();
+                                const context = timeoutManager.getTimeoutContext(`chapter_${chapter.number}`);
+                                const timeout = timeoutManager.getAdaptiveTimeout('request', context);
+                                
+                                console.log(`⏱️ Obtendo páginas (timeout: ${timeout/1000}s)...`);
+                                
+                                const startTime = Date.now();
                                 const pages = await Promise.race([
                                     provider.getPages(chapter),
                                     new Promise((_, reject) => 
-                                        setTimeout(() => reject(new Error('Timeout na obtenção de páginas')), 
-                                            TimeoutManager.getInstance().getTimeout('request'))
+                                        setTimeout(() => reject(new Error('Timeout na obtenção de páginas')), timeout)
                                     )
                                 ]);
+                                
+                                const responseTime = Date.now() - startTime;
+                                timeoutManager.recordResponseTime(`chapter_${chapter.number}`, responseTime);
+                                performanceOptimizer.recordOperation(true, responseTime);
+                                
                                 console.log(`Total de Páginas: ${pages.pages.length}`);
 
                                 if (pages.pages.length === 0) {
-                                    throw new Error(`Capítulo ${chapter.number} retornou 0 páginas`);
+                                    throw new Error(`Capítulo ${chapter.number} retornou 0 páginas (bypass Cloudflare incompleto)`);
                                 }
                     
                                 await Bluebird.map(pages.pages, async (pageUrl, pageIndex) => {
@@ -483,7 +718,7 @@ async function downloadManga() {
                                     await downloadImage(pageUrl, imagePath);
                                 }, { concurrency: 5 });
                         
-                                console.log(`✅ Capítulo ${chapter.number} baixado com sucesso na tentativa ${chapterAttempt}`);
+                                console.log(`✅ Capítulo ${chapter.number} baixado com sucesso`);
                                 fs.appendFileSync(reportFile, `Capítulo ${chapter.number} baixado com sucesso.\n`);
                                 
                                 // Salvar log individual do capítulo
@@ -491,24 +726,13 @@ async function downloadManga() {
                                 chapterLogger.saveChapterSuccess(manga.name, workId, chapter.number, chapter.id[1], pages.pages.length, downloadPath);
                                 
                                 chapterSuccess = true;
-                                break;
-                                
-                            } catch (error) {
-                                lastChapterError = error;
-                                console.error(`❌ Tentativa ${chapterAttempt}/${maxRetries} falhou para capítulo ${chapter.number}: ${error.message}`);
-                                fs.appendFileSync(reportFile, `ERRO tentativa ${chapterAttempt}: ${error.message}\n`);
-                                
-                                // Para erros de proteção anti-bot, esperar mais tempo antes da próxima tentativa
-                                if (error.message.includes('anti-bot') || error.message.includes('ofuscado')) {
-                                    const extraDelay = 3000 * chapterAttempt; // 3s, 6s, 9s extra
-                                    console.log(`🛡️ Proteção anti-bot detectada - aguardando ${extraDelay/1000}s extra...`);
-                                    await new Promise(resolve => setTimeout(resolve, extraDelay));
-                                }
-                                
-                                if (chapterAttempt === maxRetries) {
-                                    console.error(`💀 Todas as ${maxRetries} tentativas falharam para capítulo: ${chapter.number}`);
-                                }
-                            }
+                                return true;
+                            }, `capítulo ${chapter.number}`);
+                            
+                        } catch (error) {
+                            lastChapterError = error;
+                            const responseTime = Date.now() - Date.now(); // Placeholder
+                            performanceOptimizer.recordOperation(false, responseTime);
                         }
                         
                         // Se capítulo falhou após 3 tentativas, salvar logs
@@ -536,7 +760,7 @@ async function downloadManga() {
                             
                             fs.appendFileSync(reportFile, `FALHA DEFINITIVA: Capítulo ${chapter.number} - ${lastChapterError?.message}\n`);
                         }
-                    }, { concurrency: 2 });
+                    }, { concurrency: 1 }); // Reduzido para 1 para evitar sobrecarga simultânea
                     
                     const failureRate = failedChapters / totalChapters;
                     console.log(`\n📊 Estatísticas: ${totalChapters - failedChapters}/${totalChapters} capítulos baixados (${Math.round((1 - failureRate) * 100)}% sucesso)`);
@@ -558,6 +782,12 @@ async function downloadManga() {
                             const workMatch = mangaUrl.match(/\/obra\/(\d+)/);
                             if (!workMatch) return false;
                             const workId = workMatch[1];
+                            
+                            // Pular URLs já marcadas como esgotadas
+                            if (url.includes('TODAS_TENTATIVAS_ESGOTADAS')) {
+                                console.log(`⏭️ Pulando URL já esgotada: ${url.split(' #')[0]}`);
+                                return false;
+                            }
                             
                             // Verificar se a URL de falha é desta obra
                             return url.includes(`sussytoons.wtf`) && 
@@ -592,7 +822,10 @@ async function downloadManga() {
                                         
                                         // Encontrar o capítulo na lista
                                         const chapterToReprocess = selectedChapters.find(ch => ch.id[1] === chapterId);
-                                        if (!chapterToReprocess) throw new Error('Capítulo não encontrado na lista');
+                                        if (!chapterToReprocess) {
+                                            console.log(`⚠️ Capítulo ${chapterId} não encontrado na lista atual - pode ter sido removido`);
+                                            throw new Error('Capítulo não encontrado na lista');
+                                        }
                                         
                                         // Verificar se já foi baixado durante reprocessamento (PRIORIDADE 1: LOGS)
                                         if (chapterLogger.isChapterDownloaded(manga.name, chapterToReprocess.number)) {
@@ -667,7 +900,10 @@ async function downloadManga() {
                             const remainingFails = currentFails.filter(url => !reprocessedSuccesses.includes(url));
                             
                             // Marcar falhas finais com flag especial
-                            const markedFinalFails = finalFails.map(url => `${url} # TODAS_TENTATIVAS_ESGOTADAS`);
+                            const markedFinalFails = finalFails.map(url => {
+                                const cleanUrl = url.split(' #')[0];
+                                return `${cleanUrl} # TODAS_TENTATIVAS_ESGOTADAS`;
+                            });
                             const updatedFails = [...remainingFails.filter(url => !finalFails.includes(url.split(' #')[0])), ...markedFinalFails];
                             
                             if (updatedFails.length === 0) {
@@ -700,7 +936,7 @@ async function downloadManga() {
                 fs.appendFileSync(reportFile, `ERRO CRÍTICO na obra: ${error.message}\n\n`);
                 failedUrls.push(mangaUrl);
             }
-        }, { concurrency: 1 });
+        }, { concurrency: optimalConcurrency });
         
         console.log('\n📊 Resultado Final:');
         console.log(`✅ Sucessos: ${successfulUrls.length}`);
