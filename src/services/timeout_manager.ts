@@ -6,10 +6,10 @@ export class TimeoutManager {
     
     // Timeouts base em milissegundos
     private readonly DEFAULT_TIMEOUTS = {
-        axios: 15000,        // 15s
+        axios: 45000,        // 45s (aumentado de 15s para dar tempo ao bypass)
         proxy: 600000,       // 10min
-        download: 30000,     // 30s
-        request: 15000       // 15s
+        download: 60000,     // 60s (aumentado de 30s)
+        request: 45000       // 45s (aumentado de 15s para dar tempo ao bypass)
     };
     
     private constructor() {

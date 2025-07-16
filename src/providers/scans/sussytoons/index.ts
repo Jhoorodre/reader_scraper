@@ -45,14 +45,29 @@ export class NewSussyToonsProvider  {
      * Verifica se a resposta contém JavaScript ofuscado (proteção anti-bot)
      */
     private isProtectedResponse(htmlContent: string): boolean {
-        // Detectar padrões comuns de proteção anti-bot
+        // Verifica se o conteúdo é muito pequeno (provável erro/proteção)
+        if (htmlContent.length < 1000) {
+            return true;
+        }
+        
+        // Verifica se contém apenas JavaScript sem conteúdo HTML útil
+        const hasUsefulContent = htmlContent.includes('chakra-image') || 
+                                htmlContent.includes('img') || 
+                                htmlContent.includes('chapter') ||
+                                htmlContent.includes('manga') ||
+                                htmlContent.includes('image');
+        
+        if (!hasUsefulContent) {
+            return true;
+        }
+        
+        // Detectar padrões específicos de proteção anti-bot apenas se não há conteúdo útil
         const protectionPatterns = [
-            /^\s*\{"use strict"/,  // JavaScript ofuscado
-            /const\s+[a-z]=[a-z]=>/,  // Funções arrow ofuscadas
-            /return\s+JSON\.parse\(/,  // Parse JSON obfuscado
-            /\.split\(''\)\.map\(/,   // Mapeamento de strings
-            /challenge/i,             // Cloudflare challenge
-            /turnstile/i             // Cloudflare Turnstile
+            /just\s+a\s+moment/i,         // Cloudflare "Just a moment"
+            /checking.*browser/i,         // Mensagens de verificação
+            /please.*wait/i,              // Mensagens de espera
+            /enable.*javascript/i,        // Avisos sobre JavaScript
+            /ray\s+id/i                   // Cloudflare Ray ID
         ];
         
         return protectionPatterns.some(pattern => pattern.test(htmlContent));
@@ -108,7 +123,40 @@ export class NewSussyToonsProvider  {
           
           // Verificar se o HTML contém proteção anti-bot
           if (this.isProtectedResponse(data.html)) {
-            throw new Error('Página protegida por anti-bot (JavaScript ofuscado detectado)');
+            logger.info('Proteção anti-bot detectada, aguardando bypass...');
+            
+            // Aguarda mais tempo para o bypass funcionar
+            await this.delay(5000);
+            
+            // Tenta novamente
+            const retryResponse = await fetch(apiUrl);
+            if (!retryResponse.ok) {
+              throw new Error(`Erro HTTP no retry: ${retryResponse.status}`);
+            }
+            
+            const retryData = await retryResponse.json();
+            
+            // Se ainda tiver proteção após o delay, aguarda mais um pouco
+            if (this.isProtectedResponse(retryData.html)) {
+              logger.info('Ainda protegido, aguardando mais tempo...');
+              await this.delay(10000);
+              
+              // Terceira tentativa
+              const finalResponse = await fetch(apiUrl);
+              if (!finalResponse.ok) {
+                throw new Error(`Erro HTTP na tentativa final: ${finalResponse.status}`);
+              }
+              
+              const finalData = await finalResponse.json();
+              
+              if (this.isProtectedResponse(finalData.html)) {
+                throw new Error('Página protegida por anti-bot (JavaScript ofuscado detectado)');
+              }
+              
+              return finalData.html;
+            }
+            
+            return retryData.html;
           }
       
           // Retorna o conteúdo HTML obtido da API
@@ -117,6 +165,10 @@ export class NewSussyToonsProvider  {
           console.error("Erro ao consumir a API:", error);
           throw error;
         }
+      }
+      
+      private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
       }
 
     public async getPages(ch: Chapter): Promise<Pages> {

@@ -8,7 +8,12 @@ import json
 import os
 import subprocess
 import platform
+import sys
 from flaresolverr_client import FlareSolverrClient
+
+# Add test directory to path for cf_bypass import
+sys.path.append(os.path.join(os.path.dirname(__file__), 'test'))
+from cf_bypass import CFBypass
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -490,191 +495,78 @@ async def handle_turnstile_and_terms(page, url):
     # Aguardar carregamento final
     await asyncio.sleep(8)
 
-async def handle_legacy_turnstile_challenge(page):
-    """Handle Cloudflare Turnstile challenge specifically (versão original para fallback)"""
-    logger.info("Attempting to handle Turnstile challenge (legacy)...")
-    
+# Enhanced Turnstile challenge handler using CFBypass
+async def handle_turnstile_challenge(page):
+    """Handle Turnstile challenge using CFBypass"""
     try:
-        # Wait for turnstile elements to load
-        await asyncio.sleep(3)
+        logger.info("Starting enhanced Turnstile challenge handling with CFBypass")
         
-        # Enhanced Turnstile detection and interaction with checkbox focus
-        turnstile_handled = await page.evaluate("""
+        # Create CFBypass instance
+        cf_bypass = CFBypass(page, debug=True)
+        
+        # Run the bypass
+        success = await cf_bypass.bypass(
+            max_retries=3,
+            interval_between_retries=2,
+            reload_page_after_n_retries=2
+        )
+        
+        if success:
+            logger.info("CFBypass successfully handled Turnstile challenge")
+            return True
+        else:
+            logger.warning("CFBypass failed to handle Turnstile challenge")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error in enhanced Turnstile handling: {e}")
+        return False
+
+# Legacy Turnstile challenge handler (fallback)
+async def handle_legacy_turnstile_challenge(page):
+    """Legacy Turnstile challenge handler as fallback"""
+    try:
+        logger.info("Starting legacy Turnstile challenge handling")
+        
+        # Wait for Turnstile to load
+        await asyncio.sleep(2)
+        
+        # Try to click Turnstile elements
+        turnstile_clicked = await page.evaluate("""
             (() => {
-                console.log('[Turnstile] Starting enhanced challenge detection...');
-                
-                // Function to simulate human-like click with proper events
-                function simulateHumanClick(element) {
-                    const rect = element.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    
-                    // Sequence of events that mimic human interaction
-                    const events = [
-                        new MouseEvent('mouseenter', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mouseover', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mousemove', { clientX: centerX - 1, clientY: centerY - 1, bubbles: true }),
-                        new MouseEvent('mousemove', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mousedown', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 }),
-                        new MouseEvent('focus', { bubbles: true }),
-                        new MouseEvent('mouseup', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 }),
-                        new MouseEvent('click', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 })
-                    ];
-                    
-                    // Dispatch events with small delays
-                    events.forEach((event, index) => {
-                        setTimeout(() => element.dispatchEvent(event), index * 50);
-                    });
-                }
-                
-                // Strategy 1: Look for Turnstile checkbox specifically
-                const checkboxSelectors = [
-                    'iframe[src*="challenges.cloudflare.com"] input[type="checkbox"]',
-                    'iframe[src*="turnstile"] input[type="checkbox"]',
-                    '.cf-turnstile input[type="checkbox"]',
-                    '[data-sitekey] input[type="checkbox"]',
-                    'input[type="checkbox"][data-cf]'
-                ];
-                
-                for (const selector of checkboxSelectors) {
-                    const checkboxes = document.querySelectorAll(selector);
-                    if (checkboxes.length > 0) {
-                        console.log(`[Turnstile] Found checkbox via: ${selector}`);
-                        for (const checkbox of checkboxes) {
-                            if (!checkbox.checked) {
-                                console.log('[Turnstile] Clicking unchecked checkbox');
-                                checkbox.focus();
-                                simulateHumanClick(checkbox);
-                                return true;
-                            }
-                        }
-                    }
-                }
-                
-                // Strategy 2: Look for Turnstile iframes and try to access their content
-                const iframes = document.querySelectorAll('iframe[src*="challenges.cloudflare.com"], iframe[src*="turnstile"]');
-                console.log(`[Turnstile] Found ${iframes.length} potential turnstile iframes`);
-                
-                for (const iframe of iframes) {
-                    try {
-                        console.log('[Turnstile] Attempting to interact with iframe...');
-                        
-                        // Scroll iframe into view
-                        iframe.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Wait a bit for scroll
-                        setTimeout(() => {
-                            simulateHumanClick(iframe);
-                        }, 200);
-                        
-                        // Try to access iframe content if possible
-                        try {
-                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            if (iframeDoc) {
-                                const iframeCheckbox = iframeDoc.querySelector('input[type="checkbox"]');
-                                if (iframeCheckbox && !iframeCheckbox.checked) {
-                                    console.log('[Turnstile] Found checkbox inside iframe');
-                                    iframeCheckbox.focus();
-                                    simulateHumanClick(iframeCheckbox);
-                                    return true;
-                                }
-                            }
-                        } catch (e) {
-                            console.log('[Turnstile] Cannot access iframe content (CORS):', e.message);
-                        }
-                        
-                        return true;
-                    } catch (e) {
-                        console.log('[Turnstile] Error with iframe:', e);
-                    }
-                }
-                
-                // Strategy 3: Look for Turnstile containers
                 const turnstileSelectors = [
+                    'iframe[src*="challenges.cloudflare.com"]',
+                    'iframe[src*="turnstile"]',
                     '.cf-turnstile',
                     '[data-sitekey]',
-                    '.cloudflare-turnstile',
-                    'div[data-callback]',
-                    '#turnstile-wrapper',
-                    '.turnstile-container'
+                    'input[type="checkbox"]'
                 ];
                 
                 for (const selector of turnstileSelectors) {
-                    const elements = document.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        console.log(`[Turnstile] Found turnstile container: ${selector}`);
-                        
-                        for (const element of elements) {
-                            // Scroll into view
-                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            
-                            // Look for clickable elements
-                            const clickables = element.querySelectorAll('input[type="checkbox"], button, [role="button"], div[tabindex], span[tabindex]');
-                            for (const clickable of clickables) {
-                                try {
-                                    console.log('[Turnstile] Clicking turnstile element');
-                                    clickable.focus();
-                                    simulateHumanClick(clickable);
-                                    return true;
-                                } catch (e) {
-                                    console.log('[Turnstile] Click failed:', e);
-                                }
-                            }
-                            
-                            // If no specific clickables, try the container itself
-                            try {
-                                console.log('[Turnstile] Clicking container itself');
-                                simulateHumanClick(element);
-                                return true;
-                            } catch (e) {
-                                console.log('[Turnstile] Container click failed:', e);
-                            }
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        try {
+                            element.click();
+                            return true;
+                        } catch (e) {
+                            console.log('Click failed for', selector, e);
                         }
                     }
                 }
-                
-                // Strategy 4: Generic challenge elements
-                const challengeSelectors = [
-                    '.challenge-form input[type="checkbox"]',
-                    '.cf-challenge input[type="checkbox"]',
-                    '#challenge-stage input[type="checkbox"]',
-                    '.cf-wrapper input[type="checkbox"]',
-                    '.cf-wrapper button',
-                    'button[data-action*="challenge"]'
-                ];
-                
-                for (const selector of challengeSelectors) {
-                    const elements = document.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        console.log(`[Turnstile] Found challenge element: ${selector}`);
-                        for (const element of elements) {
-                            try {
-                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                element.focus();
-                                simulateHumanClick(element);
-                                return true;
-                            } catch (e) {
-                                console.log('[Turnstile] Challenge element click failed:', e);
-                            }
-                        }
-                    }
-                }
-                
-                console.log('[Turnstile] No turnstile elements found or all interactions failed');
                 return false;
             })()
         """)
         
-        if turnstile_handled:
-            logger.info("Turnstile interaction completed, waiting for resolution...")
-            await asyncio.sleep(12)  # Aguardar resolução (aumentado de 5 para 12)
+        if turnstile_clicked:
+            logger.info("Turnstile element clicked, waiting for resolution...")
+            await asyncio.sleep(3)
             return True
         else:
-            logger.info("No Turnstile elements found or interaction failed")
+            logger.info("No Turnstile elements found to click")
             return False
             
     except Exception as e:
-        logger.error(f"Error handling Turnstile: {e}")
+        logger.error(f"Error in legacy Turnstile handling: {e}")
         return False
 
 # Function to wait for Cloudflare
@@ -847,16 +739,16 @@ async def scraper(url, max_retries=3):
                 driver = None
             else:
                 # Try FlareSolverr as fallback if primary method fails completely
-                logger.info("Primary method failed completely, trying FlareSolverr fallback...")
+                logger.info("Primary method failed completamente, tentando fallback do FlareSolverr...")
                 try:
                     fallback_result = await try_flaresolverr_fallback(url)
                     if fallback_result:
-                        logger.info("FlareSolverr fallback successful!")
+                        logger.info("Fallback do FlareSolverr bem-sucedido!")
                         return fallback_result
                     else:
-                        logger.error("FlareSolverr fallback also failed")
+                        logger.error("Fallback do FlareSolverr também falhou")
                 except Exception as fallback_error:
-                    logger.error(f"FlareSolverr fallback error: {fallback_error}")
+                    logger.error(f"Erro no fallback do FlareSolverr: {fallback_error}")
                 raise
 
 # FlareSolverr fallback function
