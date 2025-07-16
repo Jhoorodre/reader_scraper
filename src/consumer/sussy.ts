@@ -21,7 +21,7 @@ class UnifiedRetryStrategy {
     }
     
     async executeWithRetry<T>(
-        operation: () => Promise<T>,
+        operation: (attempt: number) => Promise<T>,
         operationName: string,
         onRetry?: (attempt: number, error: Error) => void
     ): Promise<T> {
@@ -36,7 +36,7 @@ class UnifiedRetryStrategy {
                     await this.delay(delay);
                 }
                 
-                const result = await operation();
+                const result = await operation(attempt);
                 
                 if (attempt > 1) {
                     console.log(`✅ ${operationName} bem-sucedido na tentativa ${attempt}`);
@@ -299,7 +299,7 @@ async function executeAutoRentry(): Promise<void> {
                     }
                     
                     // Tentar baixar novamente
-                    const pages = await provider.getPages(chapterToReprocess);
+                    const pages = await provider.getPages(chapterToReprocess, 1);
                     console.log(`📄 Total de Páginas: ${pages.pages.length}`);
                     
                     if (pages.pages.length === 0) {
@@ -685,7 +685,7 @@ async function downloadManga() {
                         let lastChapterError = null;
                         
                         try {
-                            await retryStrategy.executeWithRetry(async () => {
+                            await retryStrategy.executeWithRetry(async (attempt) => {
                                 // Obter as páginas do capítulo com timeout centralizado
                                 const timeoutManager = TimeoutManager.getInstance();
                                 const timeout = timeoutManager.getTimeoutFor('chapter_processing');
@@ -695,7 +695,7 @@ async function downloadManga() {
                                 
                                 const startTime = Date.now();
                                 const pages = await Promise.race([
-                                    provider.getPages(chapter),
+                                    provider.getPages(chapter, attempt),
                                     new Promise((_, reject) => 
                                         setTimeout(() => reject(new Error('Timeout na obtenção de páginas')), timeout)
                                     )
@@ -861,7 +861,7 @@ async function downloadManga() {
                                         }
                                         
                                         // Tentar baixar novamente
-                                        const pages = await provider.getPages(chapterToReprocess);
+                                        const pages = await provider.getPages(chapterToReprocess, 1);
                                         console.log(`Total de Páginas: ${pages.pages.length}`);
                                         
                                         if (pages.pages.length === 0) {

@@ -325,32 +325,33 @@ export class NewSussyToonsProvider  {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
-    public async getPages(ch: Chapter): Promise<Pages> {
+    public async getPages(ch: Chapter, attemptNumber: number = 1): Promise<Pages> {
         try {
             let list: string[] = [];
-            let attempts = 0;
-            const maxAttempts = 3;
             
-            while (attempts < maxAttempts) {
-                attempts++;
+            const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
+            const dom = new JSDOM(html);
+            //@ts-ignore
+            const images = [...dom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+            
+            if (images && images.length > 0) {
+                list.push(...images);
+            } else {
+                console.log(`⚠️ Tentativa ${attemptNumber}/3: 0 páginas encontradas, aguardando bypass Cloudflare...`);
                 
-                const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attempts);
-                const dom = new JSDOM(html);
+                // Aguarda mais tempo para o bypass Cloudflare processar completamente
+                const delay = 10000 * attemptNumber; // 10s, 20s, 30s
+                console.log(`⏳ Aguardando ${delay/1000}s para bypass Cloudflare completar...`);
+                await this.delay(delay);
+                
+                // Tentar novamente após delay
+                const retryHtml = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
+                const retryDom = new JSDOM(retryHtml);
                 //@ts-ignore
-                const images = [...dom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+                const retryImages = [...retryDom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
                 
-                if (images && images.length > 0) {
-                    list.push(...images);
-                    break;
-                } else {
-                    console.log(`⚠️ Tentativa ${attempts}/${maxAttempts}: 0 páginas encontradas, aguardando bypass Cloudflare...`);
-                    
-                    if (attempts < maxAttempts) {
-                        // Aguarda mais tempo para o bypass Cloudflare processar completamente
-                        const delay = 10000 * attempts; // 10s, 20s, 30s
-                        console.log(`⏳ Aguardando ${delay/1000}s para bypass Cloudflare completar...`);
-                        await this.delay(delay);
-                    }
+                if (retryImages && retryImages.length > 0) {
+                    list.push(...retryImages);
                 }
             }
 
