@@ -25,4 +25,32 @@ services:
     cap_add:
       - SYS_ADMIN  # Necessário para Chrome
     security_opt:
+=======
+version: '3.8'
+
+services:
+  reader-scraper:
+    build:
+      context: ..
+      dockerfile: docker-xvfb/Dockerfile
+    container_name: reader-scraper-xvfb
+    ports:
+      - "3333:3333"  # Proxy Python
+    volumes:
+      - ../manga:/app/manga  # Pasta de downloads
+      - ../logs:/app/logs    # Logs
+    environment:
+      - DISPLAY=:99
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+      - SCREEN_DEPTH=24
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    
+    # Configurações de segurança
+    cap_add:
+      - SYS_ADMIN  # Necessário para Chrome
+    security_opt:
       - seccomp:unconfined

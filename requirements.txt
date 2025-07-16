@@ -2,3 +2,4 @@ Flask
 nodriver
 undetected-chromedriver
 bs4
+requests
