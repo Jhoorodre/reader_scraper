@@ -5,3 +5,7 @@ reader_scraper.code-workspace.json
 node_modules
 dist
 manga
+_pycache
+__pycache__
+.claude
+.venv
