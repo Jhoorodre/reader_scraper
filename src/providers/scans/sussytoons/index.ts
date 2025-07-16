@@ -2,6 +2,8 @@ import { JSDOM } from 'jsdom';
 import { CustomAxios } from '../../../services/axios';
 import { Chapter, Manga, Pages } from  '../../../providers/base/entities'
 import logger from '../../../utils/logger';
+import { TimeoutManager } from '../../../services/timeout_manager';
+
 export class NewSussyToonsProvider  {
     name = 'New Sussy Toons';
     lang = 'pt_Br';
@@ -20,7 +22,40 @@ export class NewSussyToonsProvider  {
     private http: CustomAxios;
 
     constructor() {
-        this.http = new CustomAxios(false); // Habilita o uso de proxies
+        this.http = new CustomAxios(false); // Desabilita proxies externos - usa apenas proxy Python local
+    }
+    
+    /**
+     * Aplica timeouts progressivos baseado no ciclo atual
+     */
+    public applyProgressiveTimeouts(): void {
+        const timeoutManager = TimeoutManager.getInstance();
+        const axiosTimeout = timeoutManager.getTimeout('axios');
+        this.http.updateTimeout(axiosTimeout);
+    }
+    
+    /**
+     * Restaura timeouts para valores padrão
+     */
+    public resetTimeouts(): void {
+        this.http.resetTimeout();
+    }
+    
+    /**
+     * Verifica se a resposta contém JavaScript ofuscado (proteção anti-bot)
+     */
+    private isProtectedResponse(htmlContent: string): boolean {
+        // Detectar padrões comuns de proteção anti-bot
+        const protectionPatterns = [
+            /^\s*\{"use strict"/,  // JavaScript ofuscado
+            /const\s+[a-z]=[a-z]=>/,  // Funções arrow ofuscadas
+            /return\s+JSON\.parse\(/,  // Parse JSON obfuscado
+            /\.split\(''\)\.map\(/,   // Mapeamento de strings
+            /challenge/i,             // Cloudflare challenge
+            /turnstile/i             // Cloudflare Turnstile
+        ];
+        
+        return protectionPatterns.some(pattern => pattern.test(htmlContent));
     }
 
     async getManga(link: string): Promise<Manga> {
@@ -70,6 +105,11 @@ export class NewSussyToonsProvider  {
       
           // Converte a resposta para JSON
           const data = await response.json();
+          
+          // Verificar se o HTML contém proteção anti-bot
+          if (this.isProtectedResponse(data.html)) {
+            throw new Error('Página protegida por anti-bot (JavaScript ofuscado detectado)');
+          }
       
           // Retorna o conteúdo HTML obtido da API
           return data.html;
@@ -104,5 +144,4 @@ export class NewSussyToonsProvider  {
             throw error;
         }
     }
-    
 }

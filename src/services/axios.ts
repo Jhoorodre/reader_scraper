@@ -25,8 +25,10 @@ export class CustomAxios {
 
     private axiosConfig: AxiosRequestConfig = {
         maxRedirects: 5,
-        timeout: 1000 * 15,
+        timeout: 1000 * 15, // Timeout padrão: 15 segundos
     };
+    
+    private defaultTimeout = 1000 * 15; // Backup do timeout original
 
     private retryConfig: RetryConfig = {
         retries: 10,
@@ -128,5 +130,28 @@ export class CustomAxios {
      */
     public getInstance(): AxiosInstance {
         return this.instance;
+    }
+    
+    /**
+     * Atualiza o timeout da instância dinamicamente
+     */
+    public updateTimeout(newTimeoutMs: number): void {
+        this.instance.defaults.timeout = newTimeoutMs;
+        console.log(`🕐 Timeout do axios atualizado para: ${newTimeoutMs/1000}s`);
+    }
+    
+    /**
+     * Restaura o timeout para o valor padrão
+     */
+    public resetTimeout(): void {
+        this.instance.defaults.timeout = this.defaultTimeout;
+        console.log(`🔄 Timeout do axios restaurado para o padrão: ${this.defaultTimeout/1000}s`);
+    }
+    
+    /**
+     * Obtém o timeout atual
+     */
+    public getCurrentTimeout(): number {
+        return this.instance.defaults.timeout || this.defaultTimeout;
     }
 }

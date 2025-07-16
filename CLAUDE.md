@@ -2,123 +2,197 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Common Commands
+## Pré-requisitos
+- Python 3.x
+- Node.js (22) e npm/yarn
+- Chrome (para o undetected-chromedriver)
 
-### Development Setup
+## Configuração e Execução
+
+### 1. Configuração do Proxy (Python)
 ```bash
-# Install Python dependencies
+# Instalar dependências Python
 pip install -r requirements.txt
 
-# Install Node.js dependencies
-npm install
-# or
-yarn install
-
-# Setup environment
-cp .env.example .env  # Configure proxy settings and other environment variables
+# Iniciar o servidor proxy (porta 3333)
+python app.py
 ```
 
-### Running the System
+### 2. Configuração do Downloader (TypeScript)
 ```bash
-# Start proxy server (Python) - Terminal 1
-python3 app.py
+# Instalar dependências Node.js
+npm install  # ou yarn install
 
-# Run downloader (TypeScript) - Terminal 2
+# Executar o downloader em diferentes modos:
+
+# Modo normal (uma obra)
 npx ts-node --transpileOnly src/consumer/sussy.ts
+
+# Modo batch (múltiplas obras do arquivo obra_urls.txt)
+npx ts-node --transpileOnly src/consumer/sussy.ts urls
+
+# Modo rentry (reprocessar falhas)
+npx ts-node --transpileOnly src/consumer/sussy.ts rentry
+
+# Outros providers
+npx ts-node --transpileOnly src/consumer/seita.ts
+npx ts-node --transpileOnly src/consumer/generic_wp.ts
 ```
 
-### Testing
+## Comandos de Desenvolvimento
+
+### Testes
 ```bash
-# Run TypeScript tests
-npm test
-# or
+# Executar todos os testes
 npx jest
 
-# Run specific test file
+# Executar teste específico
 npx jest --testPathPattern=provider_repository.test.ts
+npx jest --testPathPattern=base.test.ts
 ```
 
-### Development
+### Scripts NPM
 ```bash
-# Development mode with pretty logging
+# Modo desenvolvimento com logging formatado
 npm run dev
 
-# Production mode
+# Modo produção
 npm run prod
 
-# Debug mode
+# Modo debug com inspector
 npm run debug
 
-# Download from MangaDex
+# Download específico do MangaDex
 npm run dex
 ```
 
 ### Docker
 ```bash
-# Build and run with Docker
+# Executar com Docker
 docker-compose up --build
 ```
 
-## Architecture Overview
+## Arquitetura
 
-This is a manga scraper system with a dual-architecture approach:
+Sistema dual **Python/TypeScript** com duas partes principais que se comunicam via API:
 
-### Core Components
+### Proxy Service (Python - app.py)
+- **Porta**: 3333 (Flask server)
+- **Tecnologia**: `nodriver` + `undetected-chromedriver`
+- **Função**: Bypass de proteções Cloudflare/Turnstile
+- **Endpoint**: `/scrape?url=<encoded_url>`
+- **Recursos**:
+  - Seleção de modo do browser (Normal/Minimized/Headless)
+  - Resolução automática de challenges Turnstile
+  - Fallback para FlareSolverr
+  - Gerenciamento de sessões e cookies
+  - Minimização automática de janelas Chrome
 
-1. **Provider System** (`src/providers/`)
-   - Abstract base provider (`base/base.ts`) implementing repository pattern
-   - Specific provider implementations (`scans/sussytoons/`, `scans/seitacelestial/`)
-   - Generic providers for common manga site types (`generic/madara.ts`)
+### Downloader (TypeScript)
+Sistema orientado a **Provider Pattern** com as seguintes camadas:
 
-2. **Proxy Service** (`app.py`)
-   - Python Flask server running on port 3333
-   - Uses `nodriver` (undetected Chrome driver) for anti-bot bypassing
-   - Provides `/scrape` endpoint for HTML content retrieval
-   - Handles Cloudflare protection and cookie management
+#### Consumer Layer (`src/consumer/`)
+- **sussy.ts**: Consumer principal com funcionalidades avançadas
+  - Modos: Single, Batch, Rentry
+  - Sistema de retry com 3 tentativas por capítulo
+  - Logging individual por capítulo
+  - Detecção inteligente de capítulos novos
+  - Recovery automático multi-ciclo (até 10 ciclos)
+  - Timeouts progressivos por ciclo
+- **seita.ts**: Consumer para Seita Celestial
+- **generic_wp.ts**: Consumer genérico para sites WordPress
 
-3. **Download System** (`src/download/`)
-   - Image download functionality with proxy support
-   - Concurrent downloading with rate limiting
-   - Error handling and retry mechanisms
+#### Provider Layer (`src/providers/`)
+**Base Classes** (`src/providers/base/`):
+- `base.ts`: Classe abstrata definindo interface comum
+- `entities.ts`: Estruturas de dados (Manga, Chapter, Pages)
+- `provider_repository.ts`: Contrato repository
+- `download.ts`: Caso de uso de download
 
-4. **Consumer Scripts** (`src/consumer/`)
-   - Main download orchestrators (sussy.ts, seita.ts, generic_wp.ts)
-   - Interactive CLI for manga selection and download options
-   - Batch processing with concurrency controls
+**Implementações Concretas** (`src/providers/scans/`):
+- `sussytoons/index.ts`: Implementação SussyToons
+- `seitacelestial/index.ts`: Implementação Seita Celestial
 
-### Key Services
+#### Services Layer (`src/services/`)
+- **axios.ts**: Cliente HTTP customizado
+  - Rate limiting e retry automático (10 tentativas)
+  - Integração com proxy manager
+  - Headers anti-detecção
+  - Timeout management progressivo
+- **proxy_manager.ts**: Gerenciamento de proxies
+  - Cache LRU para listas de proxy
+  - Rotação automática e banimento de proxies falhos
+  - Retry com backoff exponencial
+- **timeout_manager.ts**: Singleton para timeouts progressivos
+  - Escalação de 50% por ciclo de retry
+  - Coordenação global de timeouts (axios, proxy, download, request)
 
-- **ProxyManager** (`src/services/proxy_manager.ts`): Manages proxy rotation with LRU caching
-- **Axios Service** (`src/services/axios.ts`): HTTP client configuration
-- **Logger** (`src/utils/logger.ts`): Centralized logging utility
-- **Folder Utils** (`src/utils/folder.ts`): Directory management
+#### Utils Layer (`src/utils/`)
+- **chapter_logger.ts**: Sistema de logging avançado
+  - Logs individuais por capítulo organizados por obra
+  - Separação sucesso/falha (logs/success/, logs/failed/)
+  - Detecção de duplicatas baseada em logs
+  - Estatísticas por obra e migração automática de logs antigos
+- **logger.ts**: Logger estruturado com Pino
+- **folder.ts**: Utilitários de sistema de arquivos
+- **prompt.ts**: Utilities de entrada do usuário
 
-### Data Flow
+## Sistema de Retry e Recovery
 
-1. Consumer script prompts user for manga URL
-2. Provider fetches manga metadata and chapter list
-3. For each chapter, provider gets page URLs
-4. Downloads route through Python proxy service when needed
-5. Images saved to `manga/[sanitized-name]/[chapter]/[page].jpg`
+### Estratégia Multi-Camada
+1. **Retry por capítulo**: 3 tentativas com backoff exponencial
+2. **Reprocessamento por obra**: Segunda fase para falhas
+3. **Recovery cíclico**: Até 10 ciclos automáticos de rentry
+4. **Timeouts progressivos**: Aumento de 50% por ciclo (15s → 22.5s → 30s...)
 
-### Testing Structure
+### Detecção Inteligente
+- **Capítulos novos**: Comparação com logs para detectar novos vs já baixados
+- **Proteção anti-bot**: Detecção de JavaScript ofuscado e challenges
+- **Validação de capítulos**: Detecção de 0 páginas e retry automático
+- **Logging de falhas**: Persistência em `url_fails.txt` para reprocessamento
 
-- Unit tests in `src/__tests__/` mirror the source structure
-- Tests cover providers, services, and core functionality
-- Uses Jest with TypeScript configuration
+## Organização de Arquivos
 
-## Important Notes
+### Estrutura de Download
+```
+manga/[nome-sanitizado]/[numero-capitulo]/[pagina].jpg
+```
 
-- The system uses both TypeScript (main logic) and Python (proxy service)
-- Proxy service must be running before starting any download consumers
-- Downloads are organized by manga name and chapter number
-- The system includes built-in rate limiting and retry mechanisms
-- All manga names are sanitized for filesystem compatibility
+### Estrutura de Logs
+```
+logs/
+├── success/[obra].json    # Sucessos por obra
+├── failed/[obra].json     # Falhas por obra
+└── ...
+```
 
-## Environment Variables
+### Arquivos de Configuração
+- `obra_urls.txt`: URLs de obras para modo batch
+- `url_fails.txt`: URLs de falhas para reprocessamento
+- `.env`: Configurações de ambiente (veja .env.example)
 
-Key environment variables (see .env.example when available):
-- `PROXY_URL`: Proxy service endpoint for fetching proxy lists
-- Proxy authentication credentials
-- Chrome/Puppeteer configuration
-- Logging and concurrency settings
+## Funcionalidades Avançadas
+
+### Download Concorrente
+- 5 downloads simultâneos por capítulo
+- Rate limiting configurável
+- Controle de concorrência com Bluebird
+
+### Anti-Bot Handling
+- Detecção automática de proteções Cloudflare
+- Resolução de Turnstile challenges
+- Aceitação automática de Terms of Service
+- Fallback para múltiplas estratégias
+
+### Sistema de Logs
+- Logging estruturado JSON com Pino
+- Logs por capítulo individual
+- Estatísticas de progresso por obra
+- Recovery baseado em estado persistido
+
+## Observações Importantes
+- **ALWAYS** start Python proxy (`python app.py`) before TypeScript consumers
+- Proxy deve estar na porta 3333 antes de executar downloaders
+- Sistema usa logs para evitar re-downloads desnecessários
+- Suporte a Docker para deployment
+- Arquivos de log servem como estado de aplicação

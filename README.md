@@ -15,7 +15,7 @@ Sistema de download e verificação de capítulos de mangá.
 pip install -r requirements.txt
 
 # Iniciar o servidor proxy
-python3 app.py
+python app.py
 ```
 
 ### 2. Configuração do Downloader (TypeScript)
@@ -26,7 +26,15 @@ npm install
 yarn install
 
 # Executar o downloader
-npx ts-node --transpileOnly src/consumer/sussy.ts
+
+  # Modo normal (uma obra)
+  npx ts-node --transpileOnly src/consumer/sussy.ts
+
+  # Modo batch (múltiplas obras)
+  npx ts-node --transpileOnly src/consumer/sussy.ts urls
+
+  # Modo rentry (reprocessar falhas)
+  npx ts-node --transpileOnly src/consumer/sussy.ts rentry
 ```
 
 ## Funcionalidades
