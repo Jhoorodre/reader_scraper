@@ -13,7 +13,7 @@ class UnifiedRetryStrategy {
     private maxDelay: number;
     private backoffMultiplier: number;
     
-    constructor(maxRetries = 3, baseDelay = 2000, maxDelay = 30000, backoffMultiplier = 1.5) {
+    constructor(maxRetries = 5, baseDelay = 2000, maxDelay = 30000, backoffMultiplier = 1.5) {
         this.maxRetries = maxRetries;
         this.baseDelay = baseDelay; // Aumentado para 2s
         this.maxDelay = maxDelay;
@@ -275,9 +275,9 @@ async function executeAutoRentry(): Promise<void> {
             
             let reprocessSuccess = false;
             let lastError = null;
-            const maxRetries = 3;
+            const maxRetries = 5;
             
-            // 3 novas tentativas para cada capítulo
+            // 5 novas tentativas para cada capítulo
             for (let attempt = 1; attempt <= maxRetries; attempt++) {
                 try {
                     if (attempt > 1) {
@@ -526,7 +526,7 @@ async function downloadManga() {
     const args = process.argv.slice(2);
     const isBatchMode = args.includes('urls');
     const isRetryMode = args.includes('rentry');
-    const maxRetries = 3;
+    const maxRetries = 5;
     const chapterLogger = new ChapterLogger();
     const retryStrategy = new UnifiedRetryStrategy(maxRetries);
     const performanceOptimizer = new PerformanceOptimizer();
@@ -614,7 +614,8 @@ async function downloadManga() {
                 let selectedChapters = [];
                 
                 if (isBatchMode || isRetryMode) {
-                    console.log('\n🔍 Detectando capítulos novos baseado nos logs...');
+                    console.log('\n🔒 PRIORIDADE MÁXIMA: Verificando logs de sucesso primeiro...');
+                    console.log('🔍 Detectando capítulos novos baseado nos logs...');
                     selectedChapters = chapterLogger.detectNewChapters(manga.name, chapters);
                     
                     if (selectedChapters.length === 0) {

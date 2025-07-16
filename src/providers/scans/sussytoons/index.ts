@@ -337,10 +337,10 @@ export class NewSussyToonsProvider  {
             if (images && images.length > 0) {
                 list.push(...images);
             } else {
-                console.log(`⚠️ Tentativa ${attemptNumber}/3: 0 páginas encontradas, aguardando bypass Cloudflare...`);
+                console.log(`⚠️ Tentativa ${attemptNumber}/5: 0 páginas encontradas, aguardando bypass Cloudflare...`);
                 
                 // Aguarda mais tempo para o bypass Cloudflare processar completamente
-                const delay = 10000 * attemptNumber; // 10s, 20s, 30s
+                const delay = 10000 * attemptNumber; // 10s, 20s, 30s, 40s, 50s
                 console.log(`⏳ Aguardando ${delay/1000}s para bypass Cloudflare completar...`);
                 await this.delay(delay);
                 
