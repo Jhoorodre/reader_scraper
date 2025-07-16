@@ -144,9 +144,14 @@ export class CustomAxios {
      * Aplica timeouts centralizados do TimeoutManager
      */
     public applyCentralizedTimeouts(): void {
-        const timeoutManager = TimeoutManager.getInstance();
-        const centralizedTimeout = timeoutManager.getTimeoutFor('axios_request');
-        this.updateTimeout(centralizedTimeout);
+        try {
+            const { TimeoutManager } = require('./timeout_manager');
+            const timeoutManager = TimeoutManager.getInstance();
+            const centralizedTimeout = timeoutManager.getTimeoutFor('axios_request');
+            this.updateTimeout(centralizedTimeout);
+        } catch (error) {
+            console.warn('⚠️ Erro ao aplicar timeouts centralizados:', error.message);
+        }
     }
     
     /**

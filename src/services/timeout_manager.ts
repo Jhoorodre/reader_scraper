@@ -34,10 +34,10 @@ export class TimeoutManager {
     
     // Timeouts base em milissegundos - valores mais conservadores
     private readonly DEFAULT_TIMEOUTS = {
-        axios: 30000,        // 30s (reduzido de 45s)
+        axios: 35000,        // 35s
         proxy: 600000,       // 10min
-        download: 45000,     // 45s (reduzido de 60s)
-        request: 30000       // 30s (reduzido de 45s)
+        download: 35000,     // 35s
+        request: 35000       // 35s
     };
     
     private constructor() {
@@ -118,9 +118,9 @@ export class TimeoutManager {
     /**
      * Calcula timeout progressivo baseado no ciclo
      * Ciclo 1: timeout padrão
-     * Ciclo 2: +50% 
-     * Ciclo 3: +100%
-     * Ciclo 4: +150%
+     * Ciclo 2: +20% 
+     * Ciclo 3: +40%
+     * Ciclo 4: +60%
      * etc...
      */
     private calculateProgressiveTimeout(baseTimeout: number, cycle: number): number {
@@ -128,8 +128,8 @@ export class TimeoutManager {
             return baseTimeout; // Primeiro ciclo sempre usa timeout padrão
         }
         
-        // Incremento de 50% a cada ciclo adicional
-        const multiplier = 1 + ((cycle - 1) * 0.5);
+        // Incremento de 20% a cada ciclo adicional
+        const multiplier = 1 + ((cycle - 1) * 0.2);
         return Math.round(baseTimeout * multiplier);
     }
     
@@ -175,7 +175,7 @@ export class TimeoutManager {
      */
     public getIncreasePercentage(): number {
         if (this.currentCycle <= 1) return 0;
-        return (this.currentCycle - 1) * 50; // 50% por ciclo adicional
+        return (this.currentCycle - 1) * 20; // 20% por ciclo adicional
     }
 
     /**
@@ -332,7 +332,11 @@ export class TimeoutManager {
         };
         
         const timeoutType = operationMap[operation] || 'request';
-        return this.getAdaptiveTimeout(timeoutType, context);
+        const finalTimeout = this.getAdaptiveTimeout(timeoutType, context);
+        
+        // console.log(`⏱️ Timeout para '${operation}' (${timeoutType}): ${finalTimeout/1000}s (Ciclo ${this.currentCycle})`);
+        
+        return finalTimeout;
     }
     
     /**
@@ -345,9 +349,13 @@ export class TimeoutManager {
         this.applyProgressiveTimeoutsToAll();
         
         // Log para debug
-        console.log(`📋 Estado atual dos timeouts:`);
+        console.log(`📋 Estado atual dos timeouts (Ciclo ${this.currentCycle}):`);
         Object.entries(this.baseTimeouts).forEach(([type, timeout]) => {
             console.log(`   ${type}: ${timeout/1000}s`);
         });
+        
+        // Testar um timeout específico
+        // const testTimeout = this.getTimeoutFor('test');
+        // console.log(`🧪 Teste timeout: ${testTimeout/1000}s`);
     }
 }

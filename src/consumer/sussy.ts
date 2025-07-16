@@ -485,6 +485,9 @@ async function executeCyclicRecovery(): Promise<void> {
     // Restaurar timeouts para valores padrão após completar ciclos
     const timeoutManager = TimeoutManager.getInstance();
     timeoutManager.resetToDefaults();
+    
+    // Criar nova instância do provider para reset
+    const provider = new NewSussyToonsProvider();
     provider.resetTimeouts();
     
     console.log('='.repeat(90));
@@ -532,6 +535,12 @@ async function downloadManga() {
     console.log('📂 Escaneando pasta manga e atualizando logs...');
     chapterLogger.initializeLogsFromManga('manga');
     console.log('✅ Logs atualizados com base na pasta manga\n');
+    
+    // Inicializar timeouts centralizados para ciclo 1
+    const timeoutManager = TimeoutManager.getInstance();
+    timeoutManager.setCycle(1);
+    timeoutManager.forceUpdateAllComponents();
+    console.log('📊 Timeouts centralizados inicializados para Ciclo 1');
 
     try {
         let mangaUrls: string[] = [];
@@ -570,6 +579,9 @@ async function downloadManga() {
             console.log(`${'='.repeat(60)}`);
             
             try {
+                // Garantir que provider use timeouts centralizados
+                provider.applyProgressiveTimeouts();
+                
                 const manga = await provider.getManga(mangaUrl);
                 console.log('\n=== Informações do Manga ===');
                 console.log('Título:', manga.name);
@@ -674,12 +686,12 @@ async function downloadManga() {
                         
                         try {
                             await retryStrategy.executeWithRetry(async () => {
-                                // Obter as páginas do capítulo com timeout adaptativo
+                                // Obter as páginas do capítulo com timeout centralizado
                                 const timeoutManager = TimeoutManager.getInstance();
-                                const context = timeoutManager.getTimeoutContext(`chapter_${chapter.number}`);
-                                const timeout = timeoutManager.getAdaptiveTimeout('request', context);
+                                const timeout = timeoutManager.getTimeoutFor('chapter_processing');
                                 
                                 console.log(`⏱️ Obtendo páginas (timeout: ${timeout/1000}s)...`);
+                                // console.log(`🔍 Debug - Ciclo atual: ${timeoutManager.getTimeoutInfo().cycle}, Timeout base: ${timeoutManager.getTimeout('request')/1000}s`);
                                 
                                 const startTime = Date.now();
                                 const pages = await Promise.race([

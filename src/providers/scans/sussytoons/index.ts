@@ -24,8 +24,11 @@ class AntiBotCircuitBreaker {
                 console.log(`🚫 Circuit breaker ativo - aguardando ${waitTime/1000}s`);
                 await this.delay(waitTime);
             }
-            // Não resetar automaticamente, apenas reduzir threshold
+            // Após o cooldown, tentar reduzir failures gradualmente
             this.failures = Math.max(0, this.failures - 1);
+            if (this.failures === 0) {
+                console.log('🔄 Circuit breaker resetado após cooldown');
+            }
         }
         
         try {
@@ -75,9 +78,11 @@ class AntiBotCircuitBreaker {
     }
     
     private reset(): void {
+        if (this.failures > 0) {
+            console.log('🔄 Circuit breaker resetado');
+        }
         this.failures = 0;
         this.lastFailure = 0;
-        console.log('🔄 Circuit breaker resetado');
     }
     
     private delay(ms: number): Promise<void> {
@@ -123,7 +128,7 @@ export class NewSussyToonsProvider  {
         const timeoutManager = TimeoutManager.getInstance();
         const axiosTimeout = timeoutManager.getTimeoutFor('provider_operation');
         this.http.updateTimeout(axiosTimeout);
-        this.http.applyCentralizedTimeouts();
+        // this.http.applyCentralizedTimeouts(); // Removido para evitar erro de referência
         
         console.log(`🕐 Provider timeouts atualizados: ${axiosTimeout/1000}s`);
     }
@@ -208,24 +213,28 @@ export class NewSussyToonsProvider  {
         }
     }
 
-    private async getPagesWithPuppeteer(url: string): Promise<string> {
+    private async getPagesWithPuppeteer(url: string, attemptNumber: number = 1): Promise<string> {
         return await this.antiBotBreaker.executeWithBreaker(async () => {
             // Monta a URL da API, codificando a URL de destino
             logger.info(`calling url: ${url}`);
             const apiUrl = `http://localhost:3333/scrape?url=${encodeURIComponent(url)}`;
             
             const timeoutManager = TimeoutManager.getInstance();
-            const context = timeoutManager.getTimeoutContext('scrape');
-            const timeout = timeoutManager.getAdaptiveTimeout('request', context);
+            const baseTimeout = timeoutManager.getTimeoutFor('bypass_cloudflare');
+            
+            // Calcular timeout progressivo: 35s, 42s, 50.4s (20% de aumento por tentativa)
+            const progressiveTimeout = baseTimeout * Math.pow(1.2, attemptNumber - 1);
             
             const startTime = Date.now();
             
+            console.log(`📡 Bypass Cloudflare (tentativa ${attemptNumber}, timeout: ${progressiveTimeout/1000}s)...`);
+            
             try {
-                // Realiza a requisição à API utilizando fetch com timeout adaptativo
+                // Realiza a requisição à API utilizando fetch com timeout progressivo
                 const response = await Promise.race([
                     fetch(apiUrl),
                     new Promise<never>((_, reject) => 
-                        setTimeout(() => reject(new Error('Timeout na requisição')), timeout)
+                        setTimeout(() => reject(new Error('Timeout na requisição')), progressiveTimeout)
                     )
                 ]);
                 
@@ -252,7 +261,7 @@ export class NewSussyToonsProvider  {
                     const retryResponse = await Promise.race([
                         fetch(apiUrl),
                         new Promise<never>((_, reject) => 
-                            setTimeout(() => reject(new Error('Timeout no retry')), timeout * 1.5)
+                            setTimeout(() => reject(new Error('Timeout no retry')), progressiveTimeout * 1.5)
                         )
                     ]);
                     
@@ -271,7 +280,7 @@ export class NewSussyToonsProvider  {
                         const finalResponse = await Promise.race([
                             fetch(apiUrl),
                             new Promise<never>((_, reject) => 
-                                setTimeout(() => reject(new Error('Timeout na tentativa final')), timeout * 2)
+                                setTimeout(() => reject(new Error('Timeout na tentativa final')), progressiveTimeout * 2)
                             )
                         ]);
                         
@@ -325,7 +334,7 @@ export class NewSussyToonsProvider  {
             while (attempts < maxAttempts) {
                 attempts++;
                 
-                const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`);
+                const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attempts);
                 const dom = new JSDOM(html);
                 //@ts-ignore
                 const images = [...dom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
