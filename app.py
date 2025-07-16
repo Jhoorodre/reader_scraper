@@ -25,6 +25,17 @@ app = Flask(__name__)
 driver = None
 browser_mode_selected = None
 
+# Global variables for chapter session tracking
+last_chapter_url = None
+chapter_session_count = 0
+MAX_CHAPTER_SESSION = 3  # Reset driver after 3 chapters
+
+# Concurrency control simples
+import threading
+request_lock = threading.Lock()
+active_requests = {}  # Track active requests by URL
+max_concurrent_requests = 1  # Process one request at a time for stability
+
 # Função para minimizar janela do Chrome automaticamente
 async def minimize_chrome_window():
     """Minimiza todas as janelas do Chrome automaticamente"""
@@ -652,13 +663,106 @@ async def wait_for_cloudflare(page, max_wait=60):
     logger.warning(f"Cloudflare wait timeout after {max_wait} seconds")
     return not cf_detected
 
-# Async scraper function with FlareSolverr fallback
+# Function to detect chapter changes and manage session - AGRESSIVE RESET
+def should_reset_driver_for_chapter(url):
+    """Reset driver for every new chapter to ensure clean state."""
+    global last_chapter_url
+    
+    # Only apply to chapter URLs
+    if '/capitulo/' not in url:
+        return False, "Not a chapter URL"
+        
+    # Use the full URL as the chapter identifier for simplicity and robustness
+    current_chapter_url = url
+    
+    if last_chapter_url is None:
+        # First chapter request - reset for clean start
+        last_chapter_url = current_chapter_url
+        return True, "First chapter request - clean start"
+    
+    if current_chapter_url != last_chapter_url:
+        logger.info(f"New chapter detected. Old: {last_chapter_url}, New: {current_chapter_url}")
+        last_chapter_url = current_chapter_url
+        return True, f"New chapter detected: {current_chapter_url}"
+    
+    # IMPORTANTE: Sempre resetar mesmo para o mesmo capítulo (rentry)
+    # Isso garante que cada tentativa tenha um browser limpo
+    return True, "Same chapter URL - resetting for clean retry"
+
+# Function to clear browser cache and cookies
+async def clear_browser_session(page):
+    """Clear browser cache, cookies, and localStorage for clean session"""
+    try:
+        logger.info("🧹 Cleaning browser session...")
+        
+        # Clear localStorage and sessionStorage
+        await page.evaluate("""
+            (() => {
+                try {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    console.log('Storage cleared');
+                } catch (e) {
+                    console.log('Error clearing storage:', e);
+                }
+            })()
+        """)
+        
+        # Clear cookies via JavaScript
+        await page.evaluate("""
+            (() => {
+                try {
+                    document.cookie.split(";").forEach(c => {
+                        const eqPos = c.indexOf("=");
+                        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+                        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                    });
+                    console.log('Cookies cleared via JavaScript');
+                } catch (e) {
+                    console.log('Error clearing cookies:', e);
+                }
+            })()
+        """)
+        
+        # Clear browser cache if supported
+        try:
+            await page.evaluate("""
+                (() => {
+                    if ('caches' in window) {
+                        caches.keys().then(names => {
+                            names.forEach(name => {
+                                caches.delete(name);
+                            });
+                        });
+                        console.log('Cache cleared');
+                    }
+                })()
+            """)
+        except:
+            pass
+        
+        logger.info("✅ Browser session cleaned")
+        await asyncio.sleep(1)  # Small delay for cleanup to complete
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error cleaning browser session: {e}")
+        # Not critical, continue anyway
+
+# Async scraper function with FlareSolverr fallback and chapter session management
 async def scraper(url, max_retries=3):
     global driver
     retry_count = 0
     
     while retry_count < max_retries:
         try:
+            # Check if we need to reset the driver for a new chapter
+            should_reset, reset_reason = should_reset_driver_for_chapter(url)
+            if should_reset:
+                logger.info(f"🔄 Resetting driver: {reset_reason}")
+                if driver:
+                    await driver.stop()
+                driver = None
+            
             # Ensure that the driver is started
             await start_driver()
 
@@ -666,29 +770,203 @@ async def scraper(url, max_retries=3):
             logger.info(f"Navigating to: {url}")
             page = await driver.get(url)
             
-            # Lidar com termos e Turnstile usando abordagem simplificada
-            await handle_turnstile_and_terms(page, url)
+            # Clear session for new chapters (if not reset driver) - LESS FREQUENT
+            if not should_reset and '/capitulo/' in url and chapter_session_count % 5 == 0:
+                await clear_browser_session(page)
             
-            # Try to scroll to trigger lazy loading
+            # First, handle the SussyToons specific terms modal
+            await handle_sussytoons_terms(page)
+
+            # Wait for Cloudflare and handle challenges
+            logger.info("🛡️ Waiting for Cloudflare and handling challenges...")
+            await wait_for_cloudflare(page, max_wait=90)
+            
+            # ===== DELAY CRÍTICO: Aguardar página carregar completamente =====
+            logger.info("⏳ Aguardando página carregar completamente após bypass...")
+            await asyncio.sleep(2)  # Reduced delay for synchronization
+            
+            # Verificar se a página carregou o conteúdo (com tratamento de erro)
             try:
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                await asyncio.sleep(1)
-                await page.evaluate("window.scrollTo(0, 0)")
-                logger.info("Scrolled page to trigger content loading")
-            except:
-                pass
+                content_loaded = await page.evaluate("""
+                    (() => {
+                        try {
+                            const images = document.querySelectorAll('img');
+                            const bodyContent = document.body ? document.body.innerHTML.length : 0;
+                            return {
+                                imageCount: images.length,
+                                bodyLength: bodyContent,
+                                hasContent: bodyContent > 5000
+                            };
+                        } catch (e) {
+                            console.log('Erro na verificação de conteúdo:', e);
+                            return {
+                                imageCount: 0,
+                                bodyLength: 0,
+                                hasContent: false
+                            };
+                        }
+                    })()
+                """)
+                
+                # Verificar se content_loaded é válido
+                if content_loaded and isinstance(content_loaded, dict):
+                    logger.info(f"📊 Conteúdo carregado: {content_loaded.get('imageCount', 0)} imagens, {content_loaded.get('bodyLength', 0)} chars")
+                    
+                    # Se não carregou, aguardar mais
+                    if not content_loaded.get('hasContent', False):
+                        logger.info("⏳ Conteúdo insuficiente, aguardando mais 5s...")
+                        await asyncio.sleep(5)
+                else:
+                    logger.warning("⚠️ content_loaded é None ou inválido, continuando com valores padrão")
+                    content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
+                    logger.info("⏳ Aguardando 5s por precaução...")
+                    await asyncio.sleep(5)
+            
+            except Exception as e:
+                logger.error(f"🔴 Erro na verificação de conteúdo: {e}")
+                content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
+                logger.info("⏳ Aguardando 5s após erro...")
+                await asyncio.sleep(5)
+            
+            # Scroll inteligente inspirado no TypeScript
+            try:
+                logger.info("📜 Iniciando scroll inteligente para carregamento lazy...")
+                
+                # Primeira verificação: quantas imagens já temos?
+                initial_images = await page.evaluate("""
+                    () => {
+                        const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                        return images.length;
+                    }
+                """)
+                
+                logger.info(f"🖼️ Imagens iniciais detectadas: {initial_images}")
+                
+                # Se já temos imagens, scroll suave
+                if initial_images and initial_images > 0:
+                    logger.info("✅ Imagens já carregadas, fazendo scroll suave...")
+                    # Scroll suave para baixo
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: document.body.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(2)  # Tempo para smooth scroll
+                    
+                    # Scroll suave para cima
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(1)  # Tempo para estabilizar
+                    
+                else:
+                    logger.info("⚠️ Nenhuma imagem inicial, fazendo scroll progressivo...")
+                    # Scroll progressivo para forçar carregamento
+                    
+                    # Primeiro: scroll por etapas
+                    steps = 5
+                    for i in range(steps):
+                        scroll_position = (i + 1) * (100 / steps)
+                        await page.evaluate(f"""
+                            () => {{
+                                const maxScroll = document.body.scrollHeight;
+                                const targetScroll = maxScroll * {scroll_position / 100};
+                                window.scrollTo(0, targetScroll);
+                            }}
+                        """)
+                        await asyncio.sleep(0.5)  # Pausa pequena entre etapas
+                        
+                        # Verificar se carregou imagens
+                        current_images = await page.evaluate("""
+                            () => {
+                                const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                                return images.length;
+                            }
+                        """)
+                        
+                        if current_images > 0:
+                            logger.info(f"🖼️ {current_images} imagens carregadas na etapa {i+1}")
+                            break
+                    
+                    # Volta ao topo suavemente
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(1)
+                
+                # Verificação final
+                final_images = await page.evaluate("""
+                    () => {
+                        const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                        return images.length;
+                    }
+                """)
+                
+                logger.info(f"✅ Scroll concluído. Imagens finais: {final_images}")
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Erro no scroll inteligente: {e}")
+                # Fallback para scroll simples
+                try:
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    await asyncio.sleep(2)
+                    await page.evaluate("window.scrollTo(0, 0)")
+                    await asyncio.sleep(1)
+                    logger.info("✅ Fallback scroll simples executado")
+                except:
+                    logger.error("🔴 Falha completa no scroll")
+                    pass
             
             # Wait for specific content if on chapter page
             if '/capitulo/' in url:
                 logger.info("Chapter page detected, waiting for images...")
                 try:
-                    # Wait for at least one image to load
-                    await page.wait_for('img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]', timeout=20)  # Timeout aumentado de 10 para 20
+                    # Wait for at least one image to load (inspirado no app.py)
+                    await page.wait_for('img[src*=".jpg"], img[src*=".png"], img[src*=".webp"], img.chakra-image', timeout=20)
                     logger.info("Images detected on page")
+                    
+                    # Aguardar um pouco mais para garantir que todas as imagens carregaram
+                    await asyncio.sleep(2)
+                    
+                    # Verificar quantas imagens temos agora
+                    image_count = await page.evaluate("""
+                        () => {
+                            const images = document.querySelectorAll('img.chakra-image.css-8atqhb, img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]');
+                            return images.length;
+                        }
+                    """)
+                    
+                    logger.info(f"📸 Total de imagens detectadas: {image_count}")
+                    
                 except:
                     logger.warning("Timeout waiting for images")
                     # Aguardar mais um pouco mesmo se não encontrar imagens
                     await asyncio.sleep(5)
+                    
+                    # Fazer uma verificação final
+                    try:
+                        final_count = await page.evaluate("""
+                            () => {
+                                const images = document.querySelectorAll('img.chakra-image.css-8atqhb, img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]');
+                                return images.length;
+                            }
+                        """)
+                        logger.info(f"🔍 Verificação final: {final_count} imagens encontradas")
+                    except:
+                        logger.warning("Erro na verificação final de imagens")
             
             # Get the full-page HTML    
             html_content = await page.get_content()
@@ -710,15 +988,16 @@ async def scraper(url, max_retries=3):
             except:
                 pass
             
+            # Don't reset driver after successful request anymore - let chapter management handle it
             # Reset driver after successful request to avoid session issues
-            try:
-                if driver:
-                    await driver.stop()
-                    driver = None
-                    logger.info("Driver reset after successful request")
-            except Exception as reset_error:
-                logger.debug(f"Error resetting driver: {reset_error}")
-                driver = None
+            # try:
+            #     if driver:
+            #         await driver.stop()
+            #         driver = None
+            #         logger.info("Driver reset after successful request")
+            # except Exception as reset_error:
+            #     logger.debug(f"Error resetting driver: {reset_error}")
+            #     driver = None
             
             return html_content
             
@@ -807,8 +1086,31 @@ def scrape():
     if not url:
         return jsonify({"error": "URL is required"}), 400
 
+    # Concurrency control to ensure one request at a time
+    with request_lock:
+        # Check if this URL is already being processed
+        if url in active_requests:
+            return jsonify({
+                "error": "Request already in progress",
+                "details": f"URL {url} is being processed",
+                "url": url,
+                "success": False
+            }), 429
+        
+        # Check concurrent request limit
+        if len(active_requests) >= max_concurrent_requests:
+            return jsonify({
+                "error": "Too many concurrent requests",
+                "details": f"Maximum {max_concurrent_requests} concurrent requests allowed",
+                "url": url,
+                "success": False
+            }), 429
+        
+        # Mark this URL as active
+        active_requests[url] = True
+
     try:
-        logger.info(f"Scraping URL: {url}")
+        logger.info(f"Scraping URL: {url} (Active: {len(active_requests)})")
         html_content = run_async(scraper, url)
         
         if html_content:
@@ -829,6 +1131,11 @@ def scrape():
             "url": url,
             "success": False
         }), 500
+    finally:
+        # Always remove from active requests
+        with request_lock:
+            if url in active_requests:
+                del active_requests[url]
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -859,6 +1166,51 @@ def reset_browser_mode():
         return jsonify({"status": "Browser mode selection reset - will prompt again on next driver start"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@app.route('/session-status', methods=['GET'])
+def session_status():
+    """Get current session status"""
+    global last_chapter_url, chapter_session_count, MAX_CHAPTER_SESSION
+    return jsonify({
+        "last_chapter_url": last_chapter_url,
+        "chapter_session_count": chapter_session_count,
+        "max_chapter_session": MAX_CHAPTER_SESSION,
+        "driver_active": driver is not None
+    })
+
+@app.route('/reset-session', methods=['POST'])
+def reset_session():
+    """Reset chapter session tracking"""
+    global last_chapter_url, chapter_session_count
+    try:
+        last_chapter_url = None
+        chapter_session_count = 0
+        return jsonify({"status": "Chapter session tracking reset"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/force-reset', methods=['POST'])
+def force_reset_driver():
+    """Force reset the driver for retry attempts"""
+    global driver, last_chapter_url
+    try:
+        logger.info("🔄 Force resetting driver for retry...")
+        if driver:
+            run_async(driver.stop)
+        driver = None
+        last_chapter_url = None  # Reset chapter tracking
+        
+        return jsonify({
+            "status": "Driver force reset successfully",
+            "message": "Browser instance restarted for clean retry",
+            "success": True
+        })
+    except Exception as e:
+        logger.error(f"Error force resetting driver: {str(e)}")
+        return jsonify({
+            "error": f"Failed to force reset driver: {str(e)}",
+            "success": False
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=3333)

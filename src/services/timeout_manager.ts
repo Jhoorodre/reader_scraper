@@ -4,6 +4,7 @@ export enum ErrorType {
     ANTI_BOT = 'anti_bot',
     TIMEOUT = 'timeout',
     PROXY = 'proxy',
+    RATE_LIMIT = 'rate_limit',
     UNKNOWN = 'unknown'
 }
 
@@ -26,19 +27,26 @@ export class TimeoutManager {
     // Multiplicadores adaptativos baseados em contexto
     private readonly ADAPTIVE_MULTIPLIERS = {
         [ErrorType.ANTI_BOT]: 2.5,
+        [ErrorType.RATE_LIMIT]: 3.0,
         [ErrorType.PROXY]: 1.8,
         [ErrorType.NETWORK]: 1.5,
         [ErrorType.TIMEOUT]: 1.3,
         [ErrorType.UNKNOWN]: 1.0
     };
     
-    // Timeouts base em milissegundos - valores mais conservadores
+    // Timeouts base em milissegundos - valores mais eficientes
     private readonly DEFAULT_TIMEOUTS = {
-        axios: 45000,        // 45s (aumentado para bypass Cloudflare)
-        proxy: 600000,       // 10min
-        download: 45000,     // 45s
-        request: 45000       // 45s (aumentado para bypass Cloudflare)
+        axios: 45000,        // 45s (reduzido para ser mais eficiente)
+        proxy: 300000,       // 5min (reduzido)
+        download: 30000,     // 30s (reduzido)
+        request: 45000       // 45s (reduzido)
     };
+    
+    // Rate limiting específico para erro 429
+    private rateLimitHistory: Map<string, number[]> = new Map();
+    private readonly MAX_RATE_LIMIT_DELAYS = 3;
+    private readonly RATE_LIMIT_BASE_DELAY = 15000; // 15s base (reduzido)
+    private readonly RATE_LIMIT_MULTIPLIER = 1.5; // Reduzido multiplicador
     
     private constructor() {
         this.resetToDefaults();
@@ -212,6 +220,60 @@ export class TimeoutManager {
         }
     }
 
+    /**
+     * Registra um erro de rate limit (429) e calcula delay necessário
+     */
+    public recordRateLimit(operation: string): number {
+        const now = Date.now();
+        const history = this.rateLimitHistory.get(operation) || [];
+        
+        // Manter apenas os últimos 3 rate limits
+        history.push(now);
+        if (history.length > this.MAX_RATE_LIMIT_DELAYS) {
+            history.shift();
+        }
+        
+        this.rateLimitHistory.set(operation, history);
+        
+        // Calcular delay baseado na frequência de rate limits
+        const recentRateLimits = history.filter(time => now - time < 180000); // 3min
+        const delayMultiplier = Math.min(recentRateLimits.length, 3);
+        
+        const delay = this.RATE_LIMIT_BASE_DELAY * Math.pow(this.RATE_LIMIT_MULTIPLIER, delayMultiplier - 1);
+        
+        console.log(`⏳ Rate limit detectado (${recentRateLimits.length}/3) - aguardando ${delay/1000}s`);
+        
+        return delay;
+    }
+    
+    /**
+     * Verifica se devemos fazer uma pausa preventiva baseada no histórico
+     */
+    public shouldPreventiveDelay(operation: string): number {
+        const history = this.rateLimitHistory.get(operation) || [];
+        const now = Date.now();
+        
+        // Se tivemos rate limits recentes, fazer uma pausa preventiva
+        const recentRateLimits = history.filter(time => now - time < 120000); // 2min
+        
+        if (recentRateLimits.length >= 2) {
+            return 10000; // 10s de pausa preventiva (reduzido)
+        }
+        
+        if (recentRateLimits.length >= 1) {
+            return 5000; // 5s de pausa preventiva mínima
+        }
+        
+        return 0;
+    }
+    
+    /**
+     * Limpa histórico de rate limits para uma operação
+     */
+    public clearRateLimitHistory(operation: string): void {
+        this.rateLimitHistory.delete(operation);
+    }
+    
     /**
      * Obtém contexto de timeout para uma operação
      */

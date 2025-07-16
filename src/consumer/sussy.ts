@@ -32,8 +32,11 @@ class UnifiedRetryStrategy {
             try {
                 if (attempt > 1) {
                     const delay = this.calculateDelay(attempt);
-                    console.log(`🔄 Tentativa ${attempt}/${this.maxRetries} para ${operationName} - aguardando ${delay/1000}s...`);
-                    await this.delay(delay);
+                    // Adicionar 5s extra para fechar/reabrir Chrome
+                    const chromeRestartDelay = 5000;
+                    const totalDelay = delay + chromeRestartDelay;
+                    console.log(`🔄 Tentativa ${attempt}/${this.maxRetries} para ${operationName} - aguardando ${delay/1000}s + ${chromeRestartDelay/1000}s para Chrome reiniciar...`);
+                    await this.delay(totalDelay);
                 }
                 
                 const result = await operation(attempt);
@@ -63,6 +66,13 @@ class UnifiedRetryStrategy {
                     await this.delay(extraDelay);
                 }
                 
+                // Delay extra para rate limiting (429)
+                if (errorType === ErrorType.RATE_LIMIT) {
+                    const rateLimitDelay = timeoutManager.recordRateLimit(operationName);
+                    console.log(`🚦 Rate limit detectado - aguardando ${rateLimitDelay/1000}s...`);
+                    await this.delay(rateLimitDelay);
+                }
+                
                 if (attempt === this.maxRetries) {
                     console.error(`💀 Todas as ${this.maxRetries} tentativas falharam para ${operationName}`);
                     throw lastError;
@@ -83,6 +93,9 @@ class UnifiedRetryStrategy {
         
         if (message.includes('anti-bot') || message.includes('ofuscado') || message.includes('cloudflare')) {
             return ErrorType.ANTI_BOT;
+        }
+        if (message.includes('429') || message.includes('rate limit') || message.includes('too many requests')) {
+            return ErrorType.RATE_LIMIT;
         }
         if (message.includes('timeout') || message.includes('timed out')) {
             return ErrorType.TIMEOUT;
@@ -273,6 +286,12 @@ async function executeAutoRentry(): Promise<void> {
         for (const failedChapter of failedChapters) {
             console.log(`\n🔄 Reprocessando: ${failedChapter.chapterNumber}`);
             
+            // Delay entre capítulos para evitar sobrecarga (processamento sequencial)
+            if (failedChapters.indexOf(failedChapter) > 0) {
+                console.log(`⏳ Aguardando 3s antes do próximo capítulo...`);
+                await new Promise(resolve => setTimeout(resolve, 3000));
+            }
+            
             let reprocessSuccess = false;
             let lastError = null;
             const maxRetries = 5;
@@ -282,6 +301,10 @@ async function executeAutoRentry(): Promise<void> {
                 try {
                     if (attempt > 1) {
                         console.log(`🔄 Tentativa ${attempt}/${maxRetries} para: ${failedChapter.chapterNumber}`);
+                        
+                        // Força reset do driver para cada tentativa de rentry
+                        await this.forceResetDriver();
+                        
                         await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
                     }
                     
@@ -570,10 +593,10 @@ async function downloadManga() {
         const failedUrls: string[] = [];
 
         // Calcular concorrência ótima dinamicamente
-        const optimalConcurrency = performanceOptimizer.calculateOptimalConcurrency();
+        const optimalConcurrency = 1;
         console.log(`🚀 Processando ${mangaUrls.length} obras com concorrência: ${optimalConcurrency}`);
         
-        await Bluebird.map(mangaUrls, async (mangaUrl, urlIndex) => {
+        for (const [urlIndex, mangaUrl] of mangaUrls.entries()) {
             console.log(`\n${'='.repeat(60)}`);
             console.log(`🚀 Processando obra ${urlIndex + 1}/${mangaUrls.length}: ${mangaUrl}`);
             console.log(`${'='.repeat(60)}`);
@@ -655,8 +678,10 @@ async function downloadManga() {
                 let failedChapters = 0;
                 const totalChapters = selectedChapters.length;
                 
-                await Bluebird.map(selectedChapters, async (chapter) => {
-                        console.log(`\n=== Processando Capítulo: ${chapter.number} ===`);
+                for (const chapter of selectedChapters) {
+                    await (async () => {
+                        console.log(`
+=== Processando Capítulo: ${chapter.number} ===`);
                         
                         // Verificar se o capítulo já foi baixado (PRIORIDADE 1: LOGS)
                         if (chapterLogger.isChapterDownloaded(manga.name, chapter.number)) {
@@ -773,7 +798,8 @@ async function downloadManga() {
                             
                             fs.appendFileSync(reportFile, `FALHA DEFINITIVA: Capítulo ${chapter.number} - ${lastChapterError?.message}\n`);
                         }
-                    }, { concurrency: 1 }); // Reduzido para 1 para evitar sobrecarga simultânea
+                    })();
+                }
                     
                     const failureRate = failedChapters / totalChapters;
                     console.log(`\n📊 Estatísticas: ${totalChapters - failedChapters}/${totalChapters} capítulos baixados (${Math.round((1 - failureRate) * 100)}% sucesso)`);
@@ -949,7 +975,7 @@ async function downloadManga() {
                 fs.appendFileSync(reportFile, `ERRO CRÍTICO na obra: ${error.message}\n\n`);
                 failedUrls.push(mangaUrl);
             }
-        }, { concurrency: optimalConcurrency });
+        }
         
         console.log('\n📊 Resultado Final:');
         console.log(`✅ Sucessos: ${successfulUrls.length}`);
@@ -988,6 +1014,37 @@ async function downloadManga() {
     } catch (error) {
         console.error('Erro durante a execução:', error);
         fs.appendFileSync(reportFile, `Erro durante a execução: ${error.message}\n`);
+    }
+}
+
+/**
+ * Força o reset do driver para tentar novamente com estado limpo
+ */
+async function forceResetDriver(): Promise<void> {
+    try {
+        console.log('🔄 Forçando reset do driver para retry...');
+        const resetUrl = 'http://localhost:3333/force-reset';
+        
+        const response = await fetch(resetUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Reset failed: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Driver reset realizado com sucesso');
+        
+        // Aguardar um pouco para garantir que o driver foi totalmente resetado
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+    } catch (error) {
+        console.error('❌ Erro ao resetar driver:', error);
+        // Continuar mesmo se o reset falhar
     }
 }
 

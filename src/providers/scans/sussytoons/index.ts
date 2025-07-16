@@ -215,6 +215,15 @@ export class NewSussyToonsProvider  {
 
     private async getPagesWithPuppeteer(url: string, attemptNumber: number = 1): Promise<string> {
         return await this.antiBotBreaker.executeWithBreaker(async () => {
+            // Força reset do driver para cada tentativa (especialmente importante para rentry)
+            if (attemptNumber > 1) {
+                try {
+                    await this.forceResetDriver();
+                } catch (error) {
+                    console.log('⚠️ Erro ao resetar driver, continuando sem reset:', error.message);
+                }
+            }
+            
             // Monta a URL da API, codificando a URL de destino
             logger.info(`calling url: ${url}`);
             const apiUrl = `http://localhost:3333/scrape?url=${encodeURIComponent(url)}`;
@@ -222,19 +231,37 @@ export class NewSussyToonsProvider  {
             const timeoutManager = TimeoutManager.getInstance();
             const baseTimeout = timeoutManager.getTimeoutFor('bypass_cloudflare');
             
-            // Calcular timeout progressivo: 35s, 42s, 50.4s (20% de aumento por tentativa)
+            // Calcular timeout progressivo mais eficiente: 45s, 54s, 65s (20% de aumento)
             const progressiveTimeout = baseTimeout * Math.pow(1.2, attemptNumber - 1);
+            
+            // Tempo reduzido para inicialização do Chrome
+            const chromeInitTime = 500; // 0.5s para inicialização
+            
+            // Tempo reduzido para bypass Cloudflare
+            const cloudflareBypassTime = 20000; // 20s para bypass (reduzido)
+            
+            // Adicionar tempo extra apenas na primeira tentativa
+            const finalTimeout = attemptNumber === 1 ? 
+                progressiveTimeout + chromeInitTime + cloudflareBypassTime : // Chrome + Cloudflare extra
+                progressiveTimeout;
             
             const startTime = Date.now();
             
-            console.log(`📡 Bypass Cloudflare (tentativa ${attemptNumber}, timeout: ${progressiveTimeout/1000}s)...`);
+            // Verificar se devemos fazer uma pausa preventiva para evitar rate limiting
+            const preventiveDelay = timeoutManager.shouldPreventiveDelay('scrape');
+            if (preventiveDelay > 0) {
+                console.log(`⏳ Pausa preventiva de ${preventiveDelay/1000}s para evitar rate limiting...`);
+                await this.delay(preventiveDelay);
+            }
+            
+            console.log(`📡 Bypass Cloudflare (tentativa ${attemptNumber}, timeout: ${finalTimeout/1000}s)...`);
             
             try {
                 // Realiza a requisição à API utilizando fetch com timeout progressivo
                 const response = await Promise.race([
                     fetch(apiUrl),
                     new Promise<never>((_, reject) => 
-                        setTimeout(() => reject(new Error('Timeout na requisição')), progressiveTimeout)
+                        setTimeout(() => reject(new Error('Timeout na requisição')), finalTimeout)
                     )
                 ]);
                 
@@ -242,9 +269,21 @@ export class NewSussyToonsProvider  {
                 timeoutManager.recordResponseTime('scrape', responseTime);
                 
                 if (!response.ok) {
-                    const error = new Error(`Erro HTTP: ${response.status}`);
-                    timeoutManager.recordError('scrape', ErrorType.NETWORK);
-                    throw error;
+                    // Tratamento específico para rate limiting (429)
+                    if (response.status === 429) {
+                        const rateLimitDelay = timeoutManager.recordRateLimit('scrape');
+                        timeoutManager.recordError('scrape', ErrorType.RATE_LIMIT);
+                        
+                        // Aguardar o delay calculado para rate limiting
+                        await this.delay(rateLimitDelay);
+                        
+                        const error = new Error(`Erro HTTP: ${response.status}`);
+                        throw error;
+                    } else {
+                        const error = new Error(`Erro HTTP: ${response.status}`);
+                        timeoutManager.recordError('scrape', ErrorType.NETWORK);
+                        throw error;
+                    }
                 }
                 
                 const data = await response.json();
@@ -261,7 +300,7 @@ export class NewSussyToonsProvider  {
                     const retryResponse = await Promise.race([
                         fetch(apiUrl),
                         new Promise<never>((_, reject) => 
-                            setTimeout(() => reject(new Error('Timeout no retry')), progressiveTimeout * 1.5)
+                            setTimeout(() => reject(new Error('Timeout no retry')), finalTimeout * 1.5)
                         )
                     ]);
                     
@@ -280,7 +319,7 @@ export class NewSussyToonsProvider  {
                         const finalResponse = await Promise.race([
                             fetch(apiUrl),
                             new Promise<never>((_, reject) => 
-                                setTimeout(() => reject(new Error('Timeout na tentativa final')), progressiveTimeout * 2)
+                                setTimeout(() => reject(new Error('Timeout na tentativa final')), finalTimeout * 2)
                             )
                         ]);
                         
@@ -312,6 +351,10 @@ export class NewSussyToonsProvider  {
                     timeoutManager.recordError('scrape', ErrorType.TIMEOUT);
                 } else if (error.message.includes('anti-bot')) {
                     timeoutManager.recordError('scrape', ErrorType.ANTI_BOT);
+                } else if (error.message.includes('ECONNREFUSED') || error.message.includes('ECONNRESET')) {
+                    console.error('🚨 Servidor Python (localhost:3333) não está respondendo!');
+                    console.error('🔄 Certifique-se de que o comando "python app.py" está rodando.');
+                    timeoutManager.recordError('scrape', ErrorType.NETWORK);
                 } else {
                     timeoutManager.recordError('scrape', ErrorType.NETWORK);
                 }
@@ -359,6 +402,37 @@ export class NewSussyToonsProvider  {
         } catch (error) {
             logger.error(error);
             throw error;
+        }
+    }
+    
+    /**
+     * Força o reset do driver para tentar novamente com estado limpo
+     */
+    private async forceResetDriver(): Promise<void> {
+        try {
+            console.log('🔄 Forçando reset do driver para retry...');
+            const resetUrl = 'http://localhost:3333/force-reset';
+            
+            const response = await fetch(resetUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Reset failed: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('✅ Driver reset realizado com sucesso');
+            
+            // Aguardar um pouco para garantir que o driver foi totalmente resetado
+            await this.delay(2000);
+            
+        } catch (error) {
+            console.error('❌ Erro ao resetar driver:', error);
+            // Continuar mesmo se o reset falhar
         }
     }
 }
