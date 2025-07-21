@@ -4,498 +4,1400 @@ Relatório de Download - Múltiplas Obras
 === OBRA 1: Arquiteto de Dungeons ===
 
 === OBRA 24: O Cavaleiro em Eterna Regressão ===
-Capítulo: Capítulo 63
-Capítulo: Capítulo 55
-ERRO tentativa 1: fetch failed
-ERRO tentativa 1: fetch failed
-ERRO tentativa 2: fetch failed
-ERRO tentativa 2: fetch failed
-ERRO tentativa 3: fetch failed
-FALHA DEFINITIVA: Capítulo Capítulo 63 - fetch failed
+
+=== OBRA 23: O Jogador ===
+
+=== OBRA 22: Sentido Absoluto da Espada ===
+
+=== OBRA 21: O Cavaleiro Prodígio com Tempo Limitado ===
+
+=== OBRA 20: Provação ===
+Capítulo: Capítulo 124
+Capítulo: Capítulo 120
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 124 baixado com sucesso.
+Capítulo: Capitulo 71
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 120 baixado com sucesso.
+Capítulo: Capitulo 86
+Capítulo Capitulo 86 baixado com sucesso.
+Capítulo: Capitulo 89
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capitulo 89 baixado com sucesso.
+Capítulo: Capitulo 100
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capitulo 71 - Erro HTTP: 429
+Capítulo: Capitulo 104
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 1: Capítulo Capitulo 100 retornou 0 páginas
+Capítulo Capitulo 104 baixado com sucesso.
+Capítulo: Capitulo 106
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capitulo 100 - Erro HTTP: 429
+Capítulo: Capitulo 112
+Capítulo Capitulo 106 baixado com sucesso.
+Capítulo: Capítulo 115
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 115 baixado com sucesso.
+Capítulo Capitulo 112 baixado com sucesso.
+=== FIM DA OBRA 20: Provação ===
+
+
+=== OBRA 19: Logando 10.000 Anos No Futuro ===
+Capítulo: Capítulo 238
+Capítulo: Capítulo 236
+Capítulo Capítulo 238 baixado com sucesso.
+Capítulo: Capítulo 02
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 02 baixado com sucesso.
+Capítulo: Capítulo 05
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 05 baixado com sucesso.
+Capítulo: Capítulo 09
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 236 - Erro HTTP: 429
+Capítulo: Capítulo 10
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 09 baixado com sucesso.
 Capítulo: Capítulo 11
-ERRO tentativa 3: fetch failed
-FALHA DEFINITIVA: Capítulo Capítulo 55 - fetch failed
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 11 baixado com sucesso.
+Capítulo: Capítulo 16
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 10 - Erro HTTP: 429
+Capítulo: Capítulo 19
+Capítulo Capítulo 16 baixado com sucesso.
+Capítulo: Capítulo 22
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 22 baixado com sucesso.
 Capítulo: Capítulo 25
+Capítulo Capítulo 19 baixado com sucesso.
+Capítulo: Capítulo 26
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 26 baixado com sucesso.
+Capítulo: Capítulo 27
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 27 baixado com sucesso.
+Capítulo: Capítulo 28
+Capítulo Capítulo 25 baixado com sucesso.
+Capítulo: Capítulo 29
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 29 baixado com sucesso.
+Capítulo: Capítulo 30
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 30 baixado com sucesso.
+Capítulo: Capítulo 31
+Capítulo Capítulo 28 baixado com sucesso.
+Capítulo: Capítulo 32
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 31 baixado com sucesso.
+Capítulo: Capítulo 33
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 33 baixado com sucesso.
+Capítulo: Capítulo 34
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 34 baixado com sucesso.
+Capítulo: Capítulo 35
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 32 - Erro HTTP: 429
+Capítulo: Capítulo 36
+Capítulo Capítulo 35 baixado com sucesso.
+Capítulo: Capítulo 37
+Capítulo Capítulo 36 baixado com sucesso.
+Capítulo: Capítulo 38
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 37 baixado com sucesso.
+Capítulo: Capítulo 39
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 39 baixado com sucesso.
+Capítulo: Capítulo 40
+Capítulo Capítulo 38 baixado com sucesso.
+Capítulo: Capítulo 41
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 41 baixado com sucesso.
+Capítulo: Capítulo 42
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 42 baixado com sucesso.
+Capítulo: Capítulo 43
+Capítulo Capítulo 40 baixado com sucesso.
+Capítulo: Capítulo 44
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 44 baixado com sucesso.
+Capítulo: Capítulo 45
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 45 baixado com sucesso.
+Capítulo: Capítulo 46
+Capítulo Capítulo 43 baixado com sucesso.
+Capítulo: Capítulo 47
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 47 baixado com sucesso.
+Capítulo: Capítulo 48
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 48 baixado com sucesso.
+Capítulo: Capítulo 49
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 46 - Erro HTTP: 429
+Capítulo: Capítulo 50
+Capítulo Capítulo 49 baixado com sucesso.
+Capítulo: Capítulo 51
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 51 baixado com sucesso.
+Capítulo: Capítulo 52
+Capítulo Capítulo 50 baixado com sucesso.
+Capítulo: Capítulo 53
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 53 baixado com sucesso.
+Capítulo: Capítulo 54
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 52 - Erro HTTP: 429
+Capítulo: Capítulo 55
+Capítulo Capítulo 54 baixado com sucesso.
+Capítulo: Capítulo 56
+Capítulo Capítulo 55 baixado com sucesso.
+Capítulo: Capítulo 57
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 57 baixado com sucesso.
+Capítulo: Capítulo 58
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 58 baixado com sucesso.
+Capítulo: Capítulo 59
+Capítulo Capítulo 56 baixado com sucesso.
+Capítulo: Capítulo 60
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 60 baixado com sucesso.
+Capítulo: Capítulo 61
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 61 baixado com sucesso.
+Capítulo: Capítulo 62
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 59 baixado com sucesso.
+Capítulo: Capítulo 63
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 63 baixado com sucesso.
+Capítulo: Capítulo 64
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 62 - Erro HTTP: 429
+Capítulo: Capítulo 65
+Capítulo Capítulo 64 baixado com sucesso.
+Capítulo: Capítulo 66
+Capítulo Capítulo 65 baixado com sucesso.
+Capítulo: Capítulo 67
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 67 baixado com sucesso.
+Capítulo: Capítulo 68
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 68 baixado com sucesso.
+Capítulo: Capítulo 69
+Capítulo Capítulo 66 baixado com sucesso.
+Capítulo: Capítulo 70
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 70 baixado com sucesso.
+Capítulo: Capítulo 71
+Capítulo Capítulo 69 baixado com sucesso.
+Capítulo: Capítulo 72
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 72 baixado com sucesso.
+Capítulo: Capítulo 73
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 73 baixado com sucesso.
+Capítulo: Capítulo 74
+Capítulo Capítulo 71 baixado com sucesso.
+Capítulo: Capítulo 75
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 75 baixado com sucesso.
+Capítulo: Capítulo 76
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 74 baixado com sucesso.
+Capítulo: Capítulo 77
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 77 baixado com sucesso.
+Capítulo: Capítulo 78
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 78 baixado com sucesso.
+Capítulo: Capítulo 79
+Capítulo Capítulo 76 baixado com sucesso.
+Capítulo: Capítulo 80
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 80 baixado com sucesso.
+Capítulo: Capítulo 81
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 81 baixado com sucesso.
+Capítulo: Capítulo 82
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 79 - Erro HTTP: 429
+Capítulo: Capítulo 83
+Capítulo Capítulo 82 baixado com sucesso.
+Capítulo: Capítulo 84
+Capítulo Capítulo 83 baixado com sucesso.
+Capítulo: Capítulo 85
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 85 baixado com sucesso.
+Capítulo: Capítulo 86
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 86 baixado com sucesso.
+Capítulo: Capítulo 87
+Capítulo Capítulo 84 baixado com sucesso.
+Capítulo: Capítulo 88
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 88 baixado com sucesso.
+Capítulo: Capítulo 89
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 89 baixado com sucesso.
+Capítulo: Capítulo 90
+Capítulo Capítulo 87 baixado com sucesso.
+Capítulo: Capítulo 91
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 91 baixado com sucesso.
+Capítulo: Capítulo 92
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 92 baixado com sucesso.
+Capítulo: Capítulo 93
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 90 - Erro HTTP: 429
+Capítulo: Capítulo 94
+Capítulo Capítulo 93 baixado com sucesso.
+Capítulo: Capítulo 95
+Capítulo Capítulo 94 baixado com sucesso.
+Capítulo: Capítulo 96
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 96 baixado com sucesso.
+Capítulo: Capítulo 97
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 97 baixado com sucesso.
+Capítulo: Capítulo 98
+Capítulo Capítulo 95 baixado com sucesso.
+Capítulo: Capítulo 99
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 99 baixado com sucesso.
+Capítulo: Capítulo 100
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 98 - Erro HTTP: 429
+Capítulo: Capítulo 101
+Capítulo Capítulo 100 baixado com sucesso.
+Capítulo: Capítulo 102
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 102 baixado com sucesso.
+Capítulo: Capítulo 103
+Capítulo Capítulo 101 baixado com sucesso.
+Capítulo: Capítulo 104
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 104 baixado com sucesso.
+Capítulo: Capítulo 105
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 105 baixado com sucesso.
+Capítulo: Capítulo 106
+Capítulo Capítulo 103 baixado com sucesso.
+Capítulo: Capítulo 107
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 107 baixado com sucesso.
+Capítulo: Capítulo 108
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 108 baixado com sucesso.
+Capítulo: Capítulo 109
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 106 baixado com sucesso.
+Capítulo: Capítulo 110
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 110 baixado com sucesso.
+Capítulo: Capítulo 111
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 109 - Erro HTTP: 429
+Capítulo: Capítulo 112
+Capítulo Capítulo 111 baixado com sucesso.
+Capítulo: Capítulo 113
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 113 baixado com sucesso.
+Capítulo: Capítulo 114
+Capítulo Capítulo 112 baixado com sucesso.
+Capítulo: Capítulo 115
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 115 baixado com sucesso.
+Capítulo: Capítulo 116
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 116 baixado com sucesso.
+Capítulo: Capítulo 117
+Capítulo Capítulo 114 baixado com sucesso.
+Capítulo: Capítulo 118
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 118 baixado com sucesso.
+Capítulo: Capítulo 119
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Invalid response body while trying to fetch https://cdn.sussytoons.site/wp-content/uploads/WP-manga/data/manga_6636e0bbbd553/52ae24b0758b033aa863523d66f1b195/002.jpg: aborted
+Capítulo Capítulo 117 baixado com sucesso.
+Capítulo: Capítulo 120
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 120 baixado com sucesso.
+Capítulo: Capítulo 121
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 119 - Erro HTTP: 429
+Capítulo: Capítulo 122
+Capítulo Capítulo 121 baixado com sucesso.
+Capítulo: Capítulo 123
+Capítulo Capítulo 122 baixado com sucesso.
+Capítulo: Capítulo 124
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 124 baixado com sucesso.
+Capítulo: Capítulo 125
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 125 baixado com sucesso.
+Capítulo: Capítulo 126
+Capítulo Capítulo 123 baixado com sucesso.
+Capítulo: Capítulo 127
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 127 baixado com sucesso.
+Capítulo: Capítulo 128
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 128 baixado com sucesso.
+Capítulo: Capítulo 129
+Capítulo Capítulo 126 baixado com sucesso.
+Capítulo: Capítulo 130
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 130 baixado com sucesso.
+Capítulo: Capítulo 131
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 131 baixado com sucesso.
+Capítulo: Capítulo 132
+Capítulo Capítulo 129 baixado com sucesso.
+Capítulo: Capítulo 133
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 133 baixado com sucesso.
+Capítulo: Capítulo 134
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 134 baixado com sucesso.
+Capítulo: Capítulo  135
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 132 - Erro HTTP: 429
+Capítulo: Capítulo 136
+Capítulo Capítulo  135 baixado com sucesso.
+Capítulo: Capítulo 137
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 137 baixado com sucesso.
+Capítulo: Capítulo 138
+Capítulo Capítulo 136 baixado com sucesso.
+Capítulo: Capítulo 139
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 139 baixado com sucesso.
+Capítulo: Capítulo 140
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 140 baixado com sucesso.
+Capítulo: Capítulo 141
+Capítulo Capítulo 138 baixado com sucesso.
+Capítulo: Capítulo 142
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 142 baixado com sucesso.
+Capítulo: Capítulo 143
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 143 baixado com sucesso.
+Capítulo: Capítulo 144
+Capítulo Capítulo 141 baixado com sucesso.
+Capítulo: Capítulo 145
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 145 baixado com sucesso.
+Capítulo: Capítulo 146
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 146 baixado com sucesso.
+Capítulo: Capítulo 147
+Capítulo Capítulo 144 baixado com sucesso.
+Capítulo: Capítulo 148
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 148 baixado com sucesso.
+Capítulo: Capítulo 149
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 149 baixado com sucesso.
+Capítulo: Capítulo 150
+Capítulo Capítulo 147 baixado com sucesso.
+Capítulo: Capítulo 151
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 151 baixado com sucesso.
+Capítulo: Capítulo 152
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 152 baixado com sucesso.
+Capítulo: Capítulo 153
+Capítulo Capítulo 150 baixado com sucesso.
+Capítulo: Capítulo 154
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 154 baixado com sucesso.
+Capítulo: Capítulo 155
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 155 baixado com sucesso.
+Capítulo: Capítulo 156
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 153 baixado com sucesso.
+Capítulo: Capítulo 157
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 157 baixado com sucesso.
+Capítulo: Capítulo 158
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 156 - Erro HTTP: 429
+Capítulo: Capítulo 159
+Capítulo Capítulo 158 baixado com sucesso.
+Capítulo: Capítulo 160
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 160 baixado com sucesso.
+Capítulo: Capítulo 161
+Capítulo Capítulo 159 baixado com sucesso.
+Capítulo: Capítulo 162
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 162 baixado com sucesso.
+Capítulo: Capítulo 163
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 163 baixado com sucesso.
+Capítulo: Capítulo 164
+Capítulo Capítulo 161 baixado com sucesso.
+Capítulo: Capítulo 165
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 165 baixado com sucesso.
+Capítulo: Capítulo 166
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 166 baixado com sucesso.
+Capítulo: Capítulo 167
+Capítulo Capítulo 164 baixado com sucesso.
+Capítulo: Capítulo 168
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 168 baixado com sucesso.
+Capítulo: Capítulo 169
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 169 baixado com sucesso.
+Capítulo: Capítulo 170
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 167 - Erro HTTP: 429
+Capítulo: Capítulo 171
+Capítulo Capítulo 170 baixado com sucesso.
+Capítulo: Capítulo 172
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 172 baixado com sucesso.
+Capítulo: Capítulo 173
+Capítulo Capítulo 171 baixado com sucesso.
+Capítulo: Capítulo 174
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 174 baixado com sucesso.
+Capítulo: Capítulo 175
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 175 baixado com sucesso.
+Capítulo: Capítulo 176
+Capítulo Capítulo 173 baixado com sucesso.
+Capítulo: Capítulo 177
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 177 baixado com sucesso.
+Capítulo: Capítulo 178
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 178 baixado com sucesso.
+Capítulo: Capítulo 179
+Capítulo Capítulo 176 baixado com sucesso.
+Capítulo: Capítulo 180
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 180 baixado com sucesso.
+Capítulo: Capítulo 181
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 181 baixado com sucesso.
+Capítulo: Capítulo 182
+Capítulo Capítulo 179 baixado com sucesso.
+Capítulo: Capítulo 183
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 183 baixado com sucesso.
+Capítulo: Capítulo 184
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 184 baixado com sucesso.
+Capítulo: Capítulo 185
+Capítulo Capítulo 182 baixado com sucesso.
+Capítulo: Capítulo 186
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 186 baixado com sucesso.
+Capítulo: Capítulo 187
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 187 baixado com sucesso.
+Capítulo: Capítulo 188
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 185 - Erro HTTP: 429
+Capítulo: Capítulo 189
+Capítulo Capítulo 188 baixado com sucesso.
+Capítulo: Capítulo 190
+Capítulo Capítulo 189 baixado com sucesso.
+Capítulo: Capítulo 191
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 191 baixado com sucesso.
+Capítulo: Capítulo 192
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 192 baixado com sucesso.
+Capítulo: Capítulo 193
+Capítulo Capítulo 190 baixado com sucesso.
+Capítulo: Capítulo 194.5
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 194.5 baixado com sucesso.
+Capítulo: Capítulo 195
+Capítulo Capítulo 193 baixado com sucesso.
+Capítulo: Capítulo 196
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 196 baixado com sucesso.
+Capítulo: Capítulo 197
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 197 baixado com sucesso.
+Capítulo: Capítulo 198
+Capítulo Capítulo 195 baixado com sucesso.
+Capítulo: Capítulo 199
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 199 baixado com sucesso.
+Capítulo: Capítulo 200
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: request to https://cdn.sussytoons.site/scans/1/obras/378/capitulos/200/001.jpg failed, reason: 
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 198 - Erro HTTP: 429
+Capítulo: Capítulo 201
+Capítulo Capítulo 201 baixado com sucesso.
+Capítulo: Capítulo 202.5
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 202.5 baixado com sucesso.
+Capítulo: Capítulo 203
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 200 - Erro HTTP: 429
+Capítulo: Capítulo 203.5
+Capítulo Capítulo 203 baixado com sucesso.
+Capítulo: Capítulo 204
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 204 baixado com sucesso.
+Capítulo: Capítulo 205
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 205 baixado com sucesso.
+Capítulo: Capítulo 206
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 203.5 - Erro HTTP: 429
+Capítulo: Capítulo 207
+Capítulo Capítulo 206 baixado com sucesso.
+Capítulo: Capítulo 208
+Capítulo Capítulo 207 baixado com sucesso.
+Capítulo: Capítulo 209
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 209 baixado com sucesso.
+Capítulo: Capítulo 210
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 210 baixado com sucesso.
+Capítulo: Capítulo 211
+Capítulo Capítulo 208 baixado com sucesso.
+Capítulo: Capítulo 212
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 212 baixado com sucesso.
+Capítulo: Capítulo 213
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 213 baixado com sucesso.
+Capítulo: Capítulo 214
+Capítulo Capítulo 211 baixado com sucesso.
+Capítulo: Capítulo 215
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 215 baixado com sucesso.
+Capítulo: Capítulo 216
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 216 baixado com sucesso.
+Capítulo: Capítulo 217
+Capítulo Capítulo 214 baixado com sucesso.
+Capítulo: Capítulo 218
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 218 baixado com sucesso.
+Capítulo: Capítulo 219
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 219 baixado com sucesso.
+Capítulo: Capítulo 220
+Capítulo Capítulo 217 baixado com sucesso.
+Capítulo: Capítulo 221
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 221 baixado com sucesso.
+Capítulo: Capítulo 222
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 222 baixado com sucesso.
+Capítulo: Capítulo 223
+Capítulo Capítulo 220 baixado com sucesso.
+Capítulo: Capítulo 224
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 224 baixado com sucesso.
+Capítulo: Capítulo 225
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 225 baixado com sucesso.
+Capítulo: Capítulo 226
+Capítulo Capítulo 223 baixado com sucesso.
+Capítulo: Capítulo 227
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 227 baixado com sucesso.
+Capítulo: Capítulo 228
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 228 baixado com sucesso.
+Capítulo: Capítulo 229
+Capítulo Capítulo 226 baixado com sucesso.
+Capítulo: Capítulo 230
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 230 baixado com sucesso.
+Capítulo: Capítulo 231
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 231 baixado com sucesso.
+Capítulo: Capítulo 232
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 229 - Erro HTTP: 429
+Capítulo: Capítulo 233
+Capítulo Capítulo 233 baixado com sucesso.
+Capítulo: Capítulo 234
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 234 baixado com sucesso.
+Capítulo: Capítulo 235
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 235 baixado com sucesso.
+Capítulo Capítulo 232 baixado com sucesso.
+=== FIM DA OBRA 19: Logando 10.000 Anos No Futuro ===
+
+
+=== OBRA 18: Logando no Murim ===
+Capítulo: Capítulo 231
+Capítulo: Capítulo 230
+Capítulo Capítulo 231 baixado com sucesso.
+Capítulo: Capítulo 01
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 01 baixado com sucesso.
+Capítulo: Capítulo 2
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 2 baixado com sucesso.
+Capítulo: Capítulo 03
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 230 - Erro HTTP: 429
+Capítulo: Capítulo 04
+Capítulo Capítulo 04 baixado com sucesso.
+Capítulo: Capítulo 05
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 05 baixado com sucesso.
+Capítulo: Capítulo 06
+Capítulo Capítulo 03 baixado com sucesso.
+Capítulo: Capítulo 07
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 07 baixado com sucesso.
+Capítulo: Capítulo 08
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 08 baixado com sucesso.
+Capítulo: Capítulo 09
+Capítulo Capítulo 06 baixado com sucesso.
+Capítulo: Capítulo 10
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 10 baixado com sucesso.
+Capítulo: Capítulo 11
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 11 baixado com sucesso.
+Capítulo: Capítulo 12
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 09 baixado com sucesso.
+Capítulo: Capítulo 13
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 13 baixado com sucesso.
+Capítulo: Capítulo 14
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 12 - Erro HTTP: 429
+Capítulo: Capítulo 15
+Capítulo Capítulo 14 baixado com sucesso.
+Capítulo: Capítulo 16
+Capítulo Capítulo 15 baixado com sucesso.
+Capítulo: Capítulo 17
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 17 baixado com sucesso.
+Capítulo: Capítulo 18
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 18 baixado com sucesso.
+Capítulo: Capítulo 19
+Capítulo Capítulo 16 baixado com sucesso.
+Capítulo: Capítulo 20
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 20 baixado com sucesso.
+Capítulo: Capítulo 21
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 19 - Erro HTTP: 429
+Capítulo: Capítulo 22
+Capítulo Capítulo 21 baixado com sucesso.
+Capítulo: Capítulo 23
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 22 baixado com sucesso.
+Capítulo: Capítulo 24
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 24 baixado com sucesso.
+Capítulo: Capítulo 25
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 23 - Erro HTTP: 429
+Capítulo: Capítulo 26
+Capítulo Capítulo 25 baixado com sucesso.
+Capítulo: Capítulo 27
+Capítulo Capítulo 26 baixado com sucesso.
+Capítulo: Capítulo 28
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 28 baixado com sucesso.
+Capítulo: Capítulo 29
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 29 baixado com sucesso.
+Capítulo: Capítulo 30
+Capítulo Capítulo 27 baixado com sucesso.
+Capítulo: Capítulo 31
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 31 baixado com sucesso.
+Capítulo: Capítulo 32
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 32 baixado com sucesso.
+Capítulo: Capítulo 33
+Capítulo Capítulo 30 baixado com sucesso.
+Capítulo: Capítulo 34
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 34 baixado com sucesso.
+Capítulo: Capítulo 35
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 35 baixado com sucesso.
+Capítulo: Capítulo 36
+Capítulo Capítulo 33 baixado com sucesso.
+Capítulo: Capítulo 37
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 37 baixado com sucesso.
+Capítulo: Capítulo 38
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 38 baixado com sucesso.
+Capítulo: Capítulo 39
+Capítulo Capítulo 36 baixado com sucesso.
+Capítulo: Capítulo 40
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 40 baixado com sucesso.
+Capítulo: Capítulo 41
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 41 baixado com sucesso.
+Capítulo: Capítulo 42
+Capítulo Capítulo 39 baixado com sucesso.
+Capítulo: Capítulo 43
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 43 baixado com sucesso.
+Capítulo: Capítulo 44
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 42 - Erro HTTP: 429
+Capítulo: Capítulo 45
+Capítulo Capítulo 44 baixado com sucesso.
+Capítulo: Capítulo 46
+Capítulo Capítulo 45 baixado com sucesso.
+Capítulo: Capítulo 47
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 47 baixado com sucesso.
+Capítulo: Capítulo 48
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 48 baixado com sucesso.
+Capítulo: Capítulo 49
+Capítulo Capítulo 46 baixado com sucesso.
+Capítulo: Capítulo 50
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 50 baixado com sucesso.
+Capítulo: Capítulo 51
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 49 baixado com sucesso.
+Capítulo: Capítulo 52
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 52 baixado com sucesso.
+Capítulo: Capítulo 53
+Capítulo Capítulo 51 baixado com sucesso.
+Capítulo: Capítulo 54
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 54 baixado com sucesso.
+Capítulo: Capítulo 55
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 55 baixado com sucesso.
+Capítulo: Capítulo 56
+Capítulo Capítulo 53 baixado com sucesso.
+Capítulo: Capítulo 57
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 57 baixado com sucesso.
+Capítulo: Capítulo 58
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 58 baixado com sucesso.
+Capítulo: Capítulo 59
+Capítulo Capítulo 56 baixado com sucesso.
+Capítulo: Capítulo 60
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 60 baixado com sucesso.
+Capítulo: Capítulo 61
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 61 baixado com sucesso.
+Capítulo: Capítulo 62
+Capítulo Capítulo 59 baixado com sucesso.
+Capítulo: Capítulo 63
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 63 baixado com sucesso.
+Capítulo: Capítulo 64
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 64 baixado com sucesso.
+Capítulo: Capítulo 65
+Capítulo Capítulo 62 baixado com sucesso.
+Capítulo: Capítulo 66
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 66 baixado com sucesso.
+Capítulo: Capítulo 67
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 67 baixado com sucesso.
+Capítulo: Capítulo 68
+Capítulo Capítulo 65 baixado com sucesso.
+Capítulo: Capítulo 69
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 69 baixado com sucesso.
+Capítulo: Capítulo 70
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 70 baixado com sucesso.
+Capítulo: Capítulo 71
+Capítulo Capítulo 68 baixado com sucesso.
+Capítulo: Capítulo 72
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 72 baixado com sucesso.
+Capítulo: Capítulo 73
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 73 baixado com sucesso.
+Capítulo: Capítulo 74
+Capítulo Capítulo 71 baixado com sucesso.
+Capítulo: Capítulo 75
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 75 baixado com sucesso.
+Capítulo: Capítulo 76
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 76 baixado com sucesso.
+Capítulo: Capítulo 77
+Capítulo Capítulo 74 baixado com sucesso.
+Capítulo: Capítulo 78
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 78 baixado com sucesso.
+Capítulo: Capítulo 79
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 79 baixado com sucesso.
+Capítulo: Capítulo 80
+Capítulo Capítulo 77 baixado com sucesso.
+Capítulo: Capítulo 81
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 81 baixado com sucesso.
+Capítulo: Capítulo 82
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 82 baixado com sucesso.
+Capítulo: Capítulo 83
+Capítulo Capítulo 80 baixado com sucesso.
+Capítulo: Capítulo 84
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 84 baixado com sucesso.
+Capítulo: Capítulo 85
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 85 baixado com sucesso.
+Capítulo: Capítulo 86
+Capítulo Capítulo 83 baixado com sucesso.
+Capítulo: Capítulo 87
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 87 baixado com sucesso.
+Capítulo: Capítulo 88
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 86 baixado com sucesso.
+Capítulo: Capítulo 89
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 89 baixado com sucesso.
+Capítulo: Capítulo 90
+Capítulo Capítulo 88 baixado com sucesso.
+Capítulo: Capítulo 91
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 91 baixado com sucesso.
+Capítulo: Capítulo 92
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 92 baixado com sucesso.
+Capítulo: Capítulo 93
+Capítulo Capítulo 90 baixado com sucesso.
+Capítulo: Capítulo 94
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 94 baixado com sucesso.
+Capítulo: Capítulo 95
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 95 baixado com sucesso.
+Capítulo: Capítulo 96
+Capítulo Capítulo 93 baixado com sucesso.
+Capítulo: Capítulo 97
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 97 baixado com sucesso.
+Capítulo: Capítulo 98
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 96 - Erro HTTP: 429
+Capítulo: Capítulo 99
+ERRO tentativa 1: Capítulo Capítulo 98 retornou 0 páginas
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 2: Capítulo Capítulo 98 retornou 0 páginas
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 99 - Erro HTTP: 429
+Capítulo: Capítulo 100
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 3: Capítulo Capítulo 98 retornou 0 páginas
+FALHA DEFINITIVA: Capítulo Capítulo 98 - Capítulo Capítulo 98 retornou 0 páginas
+Capítulo: Capítulo 101
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 100 - Erro HTTP: 429
+Capítulo: Capítulo 102
+Capítulo Capítulo 101 baixado com sucesso.
+Capítulo: Capítulo 103
+Capítulo Capítulo 102 baixado com sucesso.
+Capítulo: Capítulo 104
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 103 baixado com sucesso.
+Capítulo: Capítulo 105
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 104 baixado com sucesso.
+Capítulo: Capítulo 106
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 106 baixado com sucesso.
+Capítulo: Capítulo 107
+Capítulo Capítulo 105 baixado com sucesso.
+Capítulo: Capítulo 108
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 108 baixado com sucesso.
+Capítulo: Capítulo 109
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 109 baixado com sucesso.
+Capítulo: Capítulo 110
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 107 - Erro HTTP: 429
+Capítulo: Capítulo 111
+Capítulo Capítulo 110 baixado com sucesso.
+Capítulo: Capítulo 112
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 112 baixado com sucesso.
+Capítulo: Capítulo 113
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 113 baixado com sucesso.
+Capítulo: Capítulo 114
+Capítulo Capítulo 111 baixado com sucesso.
+Capítulo: Capítulo 115
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 115 baixado com sucesso.
+Capítulo: Capítulo 116
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 116 baixado com sucesso.
+Capítulo: Capítulo 117
+Capítulo Capítulo 114 baixado com sucesso.
+Capítulo: Capítulo 118
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 1: request to https://cdn.sussytoons.site/wp-content/uploads/WP-manga/data/manga_66348610f1c5b/f18f0ca5d0d8d4eb6c2df5b1f391d767/005.webp failed, reason: read ECONNRESET
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 118 baixado com sucesso.
+Capítulo: Capítulo 119
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 117 - Erro HTTP: 429
+Capítulo: Capítulo 120
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 119 baixado com sucesso.
+Capítulo: Capítulo 121
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 121 baixado com sucesso.
+Capítulo: Capítulo 122
+Capítulo Capítulo 120 baixado com sucesso.
+Capítulo: Capítulo 123
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 123 baixado com sucesso.
+Capítulo: Capítulo 124
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 122 - Erro HTTP: 429
+Capítulo: Capítulo 125
+Capítulo Capítulo 124 baixado com sucesso.
+Capítulo: Capítulo 126
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 126 baixado com sucesso.
+Capítulo: Capítulo 127
+Capítulo Capítulo 125 baixado com sucesso.
+Capítulo: Capítulo 128
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 128 baixado com sucesso.
+Capítulo: Capítulo 129
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 129 baixado com sucesso.
+Capítulo: Capítulo 130
+Capítulo Capítulo 127 baixado com sucesso.
+Capítulo: Capítulo 131
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 131 baixado com sucesso.
+Capítulo: Capítulo 132
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 132 baixado com sucesso.
+Capítulo: Capítulo 133
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 130 - Erro HTTP: 429
+Capítulo: Capítulo 134
+Capítulo Capítulo 133 baixado com sucesso.
+Capítulo: Capítulo 135
+Capítulo Capítulo 134 baixado com sucesso.
+Capítulo: Capítulo 136
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 136 baixado com sucesso.
+Capítulo: Capítulo 137
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 137 baixado com sucesso.
+Capítulo: Capítulo 138
+Capítulo Capítulo 135 baixado com sucesso.
+Capítulo: Capítulo 139
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 139 baixado com sucesso.
+Capítulo: Capítulo 140
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 140 baixado com sucesso.
+Capítulo: Capítulo 141
+Capítulo Capítulo 138 baixado com sucesso.
+Capítulo: Capítulo 142
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 142 baixado com sucesso.
+Capítulo: Capítulo 143
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 143 baixado com sucesso.
+Capítulo: Capítulo 144
+Capítulo Capítulo 141 baixado com sucesso.
+Capítulo: Capítulo 145
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 145 baixado com sucesso.
+Capítulo: Capítulo 146
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 146 baixado com sucesso.
+Capítulo: Capítulo 147
+Capítulo Capítulo 144 baixado com sucesso.
+Capítulo: Capítulo 148
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 148 baixado com sucesso.
+Capítulo: Capítulo 149
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 149 baixado com sucesso.
+Capítulo: Capítulo 150
+Capítulo Capítulo 147 baixado com sucesso.
+Capítulo: Capítulo 151
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 151 baixado com sucesso.
+Capítulo: Capítulo 152
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 150 - Erro HTTP: 429
+Capítulo: Capítulo 153
+Capítulo Capítulo 152 baixado com sucesso.
+Capítulo: Capítulo 154
+Capítulo Capítulo 153 baixado com sucesso.
+Capítulo: Capítulo 155
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 155 baixado com sucesso.
+Capítulo: Capítulo 156
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 154 - Erro HTTP: 429
+Capítulo: Capítulo 157
+Capítulo Capítulo 156 baixado com sucesso.
+Capítulo: Capítulo 158
+Capítulo Capítulo 157 baixado com sucesso.
+Capítulo: Capítulo 159
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 159 baixado com sucesso.
+Capítulo: Capítulo 160
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 160 baixado com sucesso.
+Capítulo: Capítulo 161
+Capítulo Capítulo 158 baixado com sucesso.
+Capítulo: Capítulo 162
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 162 baixado com sucesso.
+Capítulo: Capítulo 163
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 163 baixado com sucesso.
+Capítulo: Capítulo 164
+Capítulo Capítulo 161 baixado com sucesso.
+Capítulo: Capítulo 165
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 165 baixado com sucesso.
+Capítulo: Capítulo 166
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 166 baixado com sucesso.
+Capítulo: Capítulo 167
+Capítulo Capítulo 164 baixado com sucesso.
+Capítulo: Capítulo 168
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 168 baixado com sucesso.
+Capítulo: Capítulo 169
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 169 baixado com sucesso.
+Capítulo: Capítulo 170
+Capítulo Capítulo 167 baixado com sucesso.
+Capítulo: Capítulo 171
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 171 baixado com sucesso.
+Capítulo: Capítulo 172
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 172 baixado com sucesso.
+Capítulo: Capítulo 173
+Capítulo Capítulo 170 baixado com sucesso.
+Capítulo: Capítulo 174
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 174 baixado com sucesso.
+Capítulo: Capítulo 175
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 175 baixado com sucesso.
+Capítulo: Capítulo 176
+Capítulo Capítulo 173 baixado com sucesso.
+Capítulo: Capítulo 177
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 177 baixado com sucesso.
+Capítulo: Capítulo 178
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 176 baixado com sucesso.
+Capítulo: Capítulo 179
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 179 baixado com sucesso.
+Capítulo: Capítulo 180
+Capítulo Capítulo 178 baixado com sucesso.
+Capítulo: Capítulo 181
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 181 baixado com sucesso.
+Capítulo: Capítulo 182
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 182 baixado com sucesso.
+Capítulo: Capítulo 183
+Capítulo Capítulo 180 baixado com sucesso.
+Capítulo: Capítulo 184
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 184 baixado com sucesso.
+Capítulo: Capítulo 185
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 183 baixado com sucesso.
+Capítulo: Capítulo 186
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 186 baixado com sucesso.
+Capítulo: Capítulo 187
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 187 baixado com sucesso.
+Capítulo: Capítulo 188
+Capítulo Capítulo 185 baixado com sucesso.
+Capítulo: Capítulo 189
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 189 baixado com sucesso.
+Capítulo: Capítulo 190
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 190 baixado com sucesso.
+Capítulo: Capítulo 191
+Capítulo Capítulo 188 baixado com sucesso.
+Capítulo: Capítulo 192
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 192 baixado com sucesso.
+Capítulo: Capítulo 193
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 193 baixado com sucesso.
+Capítulo: Capítulo 194
+Capítulo Capítulo 191 baixado com sucesso.
+Capítulo: Capítulo 195
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 195 baixado com sucesso.
+Capítulo: Capítulo 196
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 196 baixado com sucesso.
+Capítulo: Capítulo 197
+Capítulo Capítulo 194 baixado com sucesso.
+Capítulo: Capítulo 198
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 198 baixado com sucesso.
+Capítulo: Capítulo 199
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 199 baixado com sucesso.
+Capítulo: Capítulo 200
+Capítulo Capítulo 197 baixado com sucesso.
+Capítulo: Capítulo 201
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 201 baixado com sucesso.
+Capítulo: Capítulo 202
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 202 baixado com sucesso.
+Capítulo: Capítulo 203
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 200 - Erro HTTP: 429
+Capítulo: Capítulo 204
+Capítulo Capítulo 203 baixado com sucesso.
+Capítulo: Capítulo 205
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 205 baixado com sucesso.
+Capítulo: Capítulo 206
+Capítulo Capítulo 204 baixado com sucesso.
+Capítulo: Capítulo 206.1
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Capítulo Capítulo 206.1 retornou 0 páginas
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 206 - Erro HTTP: 429
+Capítulo: Capítulo 207
+Capítulo Capítulo 206.1 baixado com sucesso.
+Capítulo: Capítulo 208
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 207 baixado com sucesso.
+Capítulo: Capítulo 208
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 1: Failed to fetch https://cdn.sussytoons.site/wp-content/uploads/WP-manga/data/manga_66348610f1c5b/324266b8f3c1755bf8ff40f9a2aa850d/03.jpg: Not Found
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/wp-content/uploads/WP-manga/data/manga_66348610f1c5b/324266b8f3c1755bf8ff40f9a2aa850d/00.jpg: Not Found
+Capítulo Capítulo 208 baixado com sucesso.
+Capítulo: Capítulo 209
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 208 - Erro HTTP: 429
+Capítulo: Capítulo 210
+Capítulo Capítulo 209 baixado com sucesso.
+Capítulo: Capítulo 211
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 211 baixado com sucesso.
+Capítulo: Capítulo 212
+Capítulo Capítulo 210 baixado com sucesso.
+Capítulo: Capítulo 213
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 213 baixado com sucesso.
+Capítulo: Capítulo 214
+Capítulo Capítulo 212 baixado com sucesso.
+Capítulo: Capítulo 215
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 215 baixado com sucesso.
+Capítulo: Capítulo 216.5
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 216.5 baixado com sucesso.
+Capítulo: Capítulo 217
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 3: Capítulo Capítulo 214 retornou 0 páginas
+FALHA DEFINITIVA: Capítulo Capítulo 214 - Capítulo Capítulo 214 retornou 0 páginas
+Capítulo: Capítulo 218.1
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 217 baixado com sucesso.
+Capítulo: Capítulo 219
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 219 baixado com sucesso.
+Capítulo: Capítulo 220
+Capítulo Capítulo 218.1 baixado com sucesso.
+Capítulo: Capítulo 221
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 221 baixado com sucesso.
+Capítulo: Capítulo 222
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 222 baixado com sucesso.
+Capítulo: Capítulo 223
+Capítulo Capítulo 220 baixado com sucesso.
+Capítulo: Capítulo 224
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 224 baixado com sucesso.
+Capítulo: Capítulo 225
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 225 baixado com sucesso.
+Capítulo: Capítulo 226
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 223 - Erro HTTP: 429
+Capítulo: Capítulo 227
+Capítulo Capítulo 226 baixado com sucesso.
+Capítulo: Capítulo 228
+Capítulo Capítulo 227 baixado com sucesso.
+Capítulo: Capítulo 229
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 229 baixado com sucesso.
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 228 baixado com sucesso.
+=== FIM DA OBRA 18: Logando no Murim ===
+
+
+=== OBRA 17: O Mais Forte Mago Porradeiro ===
+Capítulo: Capítulo 76
+Capítulo: Capítulo 75
+Capítulo Capítulo 76 baixado com sucesso.
+Capítulo: Capítulo 00
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 00 baixado com sucesso.
+Capítulo: Capítulo 01
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 01 baixado com sucesso.
+Capítulo: Capítulo 02
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 75 - Erro HTTP: 429
+Capítulo: Capítulo 03
+Capítulo Capítulo 03 baixado com sucesso.
+Capítulo: Capítulo 04
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 02 baixado com sucesso.
+Capítulo: Capítulo 05
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 05 baixado com sucesso.
+Capítulo: Capítulo 06
+Capítulo Capítulo 04 baixado com sucesso.
+Capítulo: Capítulo 07
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 07 baixado com sucesso.
+Capítulo: Capítulo 08
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 08 baixado com sucesso.
+Capítulo: Capítulo 09
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 06 baixado com sucesso.
+Capítulo: Capítulo 10
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 10 baixado com sucesso.
+Capítulo: Capítulo 11
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 09 - Erro HTTP: 429
+Capítulo: Capítulo 12
+Capítulo Capítulo 11 baixado com sucesso.
+Capítulo: Capítulo 13
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 13 baixado com sucesso.
+Capítulo: Capítulo 14
+Capítulo Capítulo 12 baixado com sucesso.
+Capítulo: Capítulo 15
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 15 baixado com sucesso.
+Capítulo: Capítulo 16
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 14 - Erro HTTP: 429
+Capítulo: Capítulo 17
+ERRO tentativa 1: Erro HTTP: 429
 ERRO tentativa 1: fetch failed
-ERRO tentativa 1: fetch failed
-ERRO tentativa 2: fetch failed
-ERRO tentativa 2: fetch failed
-
-================================================================================
-🔄 MODO RENTRY AUTOMÁTICO INICIADO
-================================================================================
-
-=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
-RENTRY ERRO tentativa 1: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/20.webp: Not Found
-RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/20.webp: Not Found
-RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
-RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
-RENTRY SUCESSO: Capítulo 293 - tentativa 1
-RENTRY SUCESSO: Capítulo 111 - tentativa 1
-
-=== RENTRY OBRA 2: O Cavaleiro em Eterna Regressão ===
-RENTRY SUCESSO: Capítulo 63 - tentativa 1
-RENTRY SUCESSO: Capítulo 55 - tentativa 1
-RENTRY SUCESSO: Capítulo 50 - tentativa 1
-RENTRY SUCESSO: Capítulo 39 - tentativa 1
-RENTRY SUCESSO: Capítulo 30 - tentativa 1
-RENTRY SUCESSO: Capítulo 25 - tentativa 1
-RENTRY SUCESSO: Capítulo 11 - tentativa 1
-
-=== RENTRY OBRA 3: O Cavaleiro Prodígio com Tempo Limitado ===
-RENTRY SUCESSO: Capítulo 107 - tentativa 1
-RENTRY SUCESSO: Capítulo 106 - tentativa 1
-RENTRY SUCESSO: Capítulo 105 - tentativa 1
-RENTRY SUCESSO: Capítulo 104 - tentativa 1
-RENTRY SUCESSO: Capítulo 103 - tentativa 1
-RENTRY SUCESSO: Capítulo 102 - tentativa 1
-RENTRY ERRO tentativa 1: Timeout na requisição
-RENTRY ERRO tentativa 2: Timeout na requisição
-RENTRY ERRO tentativa 3: Timeout na requisição
-RENTRY FALHA FINAL: Capítulo 101 - Timeout na requisição
-RENTRY ERRO tentativa 1: Timeout na requisição
-RENTRY ERRO tentativa 2: Timeout na requisição
-RENTRY ERRO tentativa 3: Timeout na requisição
-RENTRY FALHA FINAL: Capítulo 100 - Timeout na requisição
-RENTRY ERRO tentativa 1: Timeout na requisição
-
-================================================================================
-🔄 MODO RENTRY AUTOMÁTICO INICIADO
-================================================================================
-
-=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
-RENTRY ERRO tentativa 1: Invalid URL
-RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/02.jpg: Not Found
-RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/00.webp: Not Found
-RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/00.webp: Not Found
-
-=== RENTRY OBRA 2: O Cavaleiro Prodígio com Tempo Limitado ===
-RENTRY ERRO tentativa 1: fetch failed
-RENTRY ERRO tentativa 2: fetch failed
-RENTRY SUCESSO: Capítulo 101 - tentativa 3
-RENTRY SUCESSO: Capítulo 100 - tentativa 1
-RENTRY SUCESSO: Capítulo 99 - tentativa 1
-RENTRY SUCESSO: Capítulo 98 - tentativa 1
-RENTRY SUCESSO: Capítulo 97 - tentativa 1
-RENTRY SUCESSO: Capítulo 96 - tentativa 1
-RENTRY SUCESSO: Capítulo 95 - tentativa 1
-RENTRY SUCESSO: Capítulo 94 - tentativa 1
-RENTRY SUCESSO: Capítulo 93 - tentativa 1
-RENTRY SUCESSO: Capítulo 92 - tentativa 1
-RENTRY SUCESSO: Capítulo 91 - tentativa 1
-RENTRY SUCESSO: Capítulo 90 - tentativa 1
-RENTRY SUCESSO: Capítulo 89 - tentativa 1
-RENTRY SUCESSO: Capítulo 88 - tentativa 1
-RENTRY SUCESSO: Capítulo 87 - tentativa 1
-RENTRY SUCESSO: Capítulo 86 - tentativa 1
-RENTRY SUCESSO: Capítulo 85 - tentativa 1
-RENTRY SUCESSO: Capítulo 84 - tentativa 1
-RENTRY SUCESSO: Capítulo 83 - tentativa 1
-RENTRY SUCESSO: Capítulo 82 - tentativa 1
-RENTRY SUCESSO: Capítulo 81 - tentativa 1
-RENTRY SUCESSO: Capítulo 80 - tentativa 1
-RENTRY SUCESSO: Capítulo 79 - tentativa 1
-RENTRY SUCESSO: Capítulo 78 - tentativa 1
-RENTRY SUCESSO: Capítulo 77 - tentativa 1
-RENTRY SUCESSO: Capítulo 76 - tentativa 1
-RENTRY SUCESSO: Capítulo 75 - tentativa 1
-RENTRY SUCESSO: Capítulo 74 - tentativa 1
-RENTRY SUCESSO: Capítulo 73 - tentativa 1
-RENTRY SUCESSO: Capítulo 72 - tentativa 1
-RENTRY SUCESSO: Capítulo 71 - tentativa 1
-RENTRY SUCESSO: Capítulo 70 - tentativa 1
-RENTRY SUCESSO: Capítulo 69 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 68 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 68 - tentativa 2
-RENTRY SUCESSO: Capítulo 66 - tentativa 1
-RENTRY ERRO tentativa 1: Invalid URL
-RENTRY SUCESSO: Capítulo 65 - tentativa 2
-RENTRY SUCESSO: Capítulo 64 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 63 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 63 - tentativa 2
-RENTRY SUCESSO: Capítulo 62 - tentativa 1
-RENTRY SUCESSO: Capítulo 61 - tentativa 1
-RENTRY SUCESSO: Capítulo 60 - tentativa 1
-RENTRY SUCESSO: Capítulo 59 - tentativa 1
-RENTRY SUCESSO: Capítulo 58 - tentativa 1
-RENTRY SUCESSO: Capítulo 57 - tentativa 1
-RENTRY SUCESSO: Capítulo 56 - tentativa 1
-RENTRY SUCESSO: Capítulo 55 - tentativa 1
-RENTRY SUCESSO: Capítulo 54 - tentativa 1
-RENTRY SUCESSO: Capítulo 53 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 52 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 52 - tentativa 2
-RENTRY SUCESSO: Capítulo 51 - tentativa 1
-RENTRY SUCESSO: Capítulo 50 - tentativa 1
-RENTRY SUCESSO: Capítulo 49 - tentativa 1
-RENTRY SUCESSO: Capítulo 48 - tentativa 1
-RENTRY SUCESSO: Capítulo 47 - tentativa 1
-RENTRY SUCESSO: Capítulo 46 - tentativa 1
-RENTRY SUCESSO: Capítulo 45 - tentativa 1
-RENTRY SUCESSO: Capítulo 44 - tentativa 1
-RENTRY SUCESSO: Capítulo 43 - tentativa 1
-RENTRY SUCESSO: Capítulo 42 - tentativa 1
-RENTRY SUCESSO: Capítulo 41 - tentativa 1
-RENTRY SUCESSO: Capítulo 40 - tentativa 1
-RENTRY SUCESSO: Capítulo 39 - tentativa 1
-RENTRY SUCESSO: Capítulo 38 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 37 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 37 - tentativa 2
-RENTRY SUCESSO: Capítulo 36 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 35 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 35 - tentativa 2
-RENTRY SUCESSO: Capítulo 34 - tentativa 1
-RENTRY SUCESSO: Capítulo 33 - tentativa 1
-RENTRY SUCESSO: Capítulo 32 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 31 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 31 - tentativa 2
-RENTRY SUCESSO: Capítulo 30 - tentativa 1
-RENTRY SUCESSO: Capítulo 29 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 28 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Invalid URL
-RENTRY SUCESSO: Capítulo 28 - tentativa 3
-RENTRY SUCESSO: Capítulo 27 - tentativa 1
-RENTRY SUCESSO: Capítulo 26 - tentativa 1
-RENTRY SUCESSO: Capítulo 25 - tentativa 1
-RENTRY SUCESSO: Capítulo 24 - tentativa 1
-RENTRY SUCESSO: Capítulo 23 - tentativa 1
-RENTRY SUCESSO: Capítulo 22 - tentativa 1
-RENTRY SUCESSO: Capítulo 21 - tentativa 1
-RENTRY SUCESSO: Capítulo 20 - tentativa 1
-RENTRY SUCESSO: Capítulo 19 - tentativa 1
-RENTRY SUCESSO: Capítulo 18 - tentativa 1
-RENTRY SUCESSO: Capítulo 17 - tentativa 1
-RENTRY SUCESSO: Capítulo 16 - tentativa 1
-RENTRY SUCESSO: Capítulo 15 - tentativa 1
-RENTRY SUCESSO: Capítulo 14 - tentativa 1
-RENTRY SUCESSO: Capítulo 13 - tentativa 1
-RENTRY SUCESSO: Capítulo 12 - tentativa 1
-RENTRY SUCESSO: Capítulo 11 - tentativa 1
-RENTRY SUCESSO: Capítulo 10 - tentativa 1
-RENTRY SUCESSO: Capítulo 09 - tentativa 1
-RENTRY SUCESSO: Capítulo 08 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 07 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Capítulo Capítulo 07 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 07 - tentativa 3
-RENTRY ERRO tentativa 1: Invalid URL
-RENTRY SUCESSO: Capítulo 06 - tentativa 2
-RENTRY ERRO tentativa 1: Capítulo Capítulo 05 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 05 - tentativa 2
-RENTRY ERRO tentativa 1: Capítulo Capítulo 04 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 04 - tentativa 2
-RENTRY SUCESSO: Capítulo 03 - tentativa 1
-RENTRY SUCESSO: Capítulo 02 - tentativa 1
-RENTRY SUCESSO: Capítulo 01 - tentativa 1
-
-=== RENTRY OBRA 3: O Jogador ===
-RENTRY SUCESSO: Capítulo 244 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 243 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 243 - tentativa 2
-RENTRY SUCESSO: Capítulo 242 - tentativa 1
-RENTRY SUCESSO: Capítulo 241 - tentativa 1
-RENTRY SUCESSO: Capítulo 240 - tentativa 1
-RENTRY SUCESSO: Capítulo 239 - tentativa 1
-RENTRY SUCESSO: Capítulo 238 - tentativa 1
-RENTRY SUCESSO: Capítulo 237 - tentativa 1
-RENTRY SUCESSO: Capítulo 236 - tentativa 1
-RENTRY SUCESSO: Capítulo 235 - tentativa 1
-RENTRY SUCESSO: Capítulo 234 - tentativa 1
-RENTRY SUCESSO: Capítulo 233 - tentativa 1
-RENTRY SUCESSO: Capítulo 232 - tentativa 1
-RENTRY SUCESSO: Capítulo 231 - tentativa 1
-RENTRY SUCESSO: Capítulo 230 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 229 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Capítulo Capítulo 229 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 229 - tentativa 3
-RENTRY SUCESSO: Capítulo 228 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 227 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 227 - tentativa 2
-RENTRY SUCESSO: Capítulo 226 - tentativa 1
-RENTRY SUCESSO: Capítulo 225 - tentativa 1
-RENTRY SUCESSO: Capítulo 224 - tentativa 1
-RENTRY SUCESSO: Capítulo 223 - tentativa 1
-RENTRY SUCESSO: Capítulo 222 - tentativa 1
-RENTRY SUCESSO: Capítulo 221 - tentativa 1
-RENTRY SUCESSO: Capítulo 220 - tentativa 1
-RENTRY SUCESSO: Capítulo 219 - tentativa 1
-RENTRY SUCESSO: Capítulo 218 - tentativa 1
-RENTRY SUCESSO: Capítulo 217 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 216 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Capítulo Capítulo 216 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 216 - tentativa 3
-RENTRY SUCESSO: Capítulo 215 - tentativa 1
-RENTRY SUCESSO: Capítulo 214 - tentativa 1
-RENTRY SUCESSO: Capítulo 213 - tentativa 1
-RENTRY SUCESSO: Capítulo 212 - tentativa 1
-RENTRY SUCESSO: Capítulo 211 - tentativa 1
-RENTRY SUCESSO: Capítulo 210 - tentativa 1
-RENTRY SUCESSO: Capítulo 209 - tentativa 1
-RENTRY SUCESSO: Capítulo 208 - tentativa 1
-RENTRY SUCESSO: Capítulo 207 - tentativa 1
-RENTRY SUCESSO: Capítulo 206 - tentativa 1
-RENTRY SUCESSO: Capítulo 205 - tentativa 1
-RENTRY SUCESSO: Capítulo 204 - tentativa 1
-RENTRY SUCESSO: Capítulo 203 - tentativa 1
-RENTRY SUCESSO: Capítulo 202 - tentativa 1
-RENTRY SUCESSO: Capítulo 201 - tentativa 1
-RENTRY SUCESSO: Capítulo 200 - tentativa 1
-RENTRY SUCESSO: Capítulo 199 - tentativa 1
-RENTRY SUCESSO: Capítulo 197 - tentativa 1
-RENTRY SUCESSO: Capítulo 138 - tentativa 1
-RENTRY SUCESSO: Capítulo 111 - tentativa 1
-RENTRY SUCESSO: Capítulo 104 - tentativa 1
-RENTRY SUCESSO: Capítulo 99 - tentativa 1
-RENTRY SUCESSO: Capítulo 94 - tentativa 1
-RENTRY SUCESSO: Capítulo 89 - tentativa 1
-RENTRY SUCESSO: Capítulo 84 - tentativa 1
-RENTRY SUCESSO: Capítulo 79 - tentativa 1
-RENTRY SUCESSO: Capítulo 74 - tentativa 1
-RENTRY SUCESSO: Capítulo 53 - tentativa 1
-RENTRY SUCESSO: Capítulo 42 - tentativa 1
-
-=== RENTRY OBRA 4: Provação ===
-RENTRY SUCESSO: Capitulo 86 (1) - tentativa 1
-RENTRY SUCESSO: Capítulo 143 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 142 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 142 - tentativa 2
-RENTRY SUCESSO: Capitulo 69 - tentativa 1
-RENTRY SUCESSO: Capitulo 68 - tentativa 1
-RENTRY SUCESSO: Capitulo 67 - tentativa 1
-RENTRY SUCESSO: Capitulo 66 - tentativa 1
-RENTRY SUCESSO: Capitulo 65 - tentativa 1
-RENTRY SUCESSO: Capitulo 64 - tentativa 1
-RENTRY SUCESSO: Capitulo 63 - tentativa 1
-
-================================================================================
-🔄 MODO RENTRY AUTOMÁTICO INICIADO
-================================================================================
-
-=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
-RENTRY ERRO tentativa 1: Capítulo Capítulo 294 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
-RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
-RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
-
-=== RENTRY OBRA 2: Provação ===
-RENTRY SUCESSO: Capitulo 62 - tentativa 1
-RENTRY SUCESSO: Capitulo 61 - tentativa 1
-RENTRY SUCESSO: Capitulo 60 - tentativa 1
-RENTRY SUCESSO: Capitulo 59 - tentativa 1
-RENTRY SUCESSO: Capitulo 58 - tentativa 1
-RENTRY SUCESSO: Capitulo 57 - tentativa 1
-RENTRY SUCESSO: Capitulo 56 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 55 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 55 - tentativa 2
-RENTRY SUCESSO: Capitulo 54 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 53 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 53 - tentativa 2
-RENTRY SUCESSO: Capitulo 52 - tentativa 1
-RENTRY SUCESSO: Capitulo 51 - tentativa 1
-RENTRY SUCESSO: Capitulo 50 - tentativa 1
-RENTRY SUCESSO: Capitulo 49 - tentativa 1
-RENTRY SUCESSO: Capitulo 48 - tentativa 1
-RENTRY SUCESSO: Capitulo 47 - tentativa 1
-RENTRY SUCESSO: Capitulo 46 - tentativa 1
-RENTRY SUCESSO: Capitulo 45 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 44 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 44 - tentativa 2
-RENTRY SUCESSO: Capitulo 43 - tentativa 1
-RENTRY SUCESSO: Capitulo 42 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 41 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 41 - tentativa 2
-RENTRY SUCESSO: Capitulo 40 - tentativa 1
-RENTRY SUCESSO: Capitulo 39 - tentativa 1
-RENTRY SUCESSO: Capitulo 38 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 37 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 37 - tentativa 2
-RENTRY SUCESSO: Capitulo 36 - tentativa 1
-RENTRY SUCESSO: Capitulo 35 - tentativa 1
-RENTRY SUCESSO: Capitulo 34 - tentativa 1
-RENTRY SUCESSO: Capitulo 33 - tentativa 1
-RENTRY SUCESSO: Capitulo 32 - tentativa 1
-RENTRY SUCESSO: Capitulo 31 - tentativa 1
-RENTRY SUCESSO: Capitulo 30 - tentativa 1
-RENTRY SUCESSO: Capitulo 29 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capitulo 28 ainda retorna 0 páginas
-RENTRY SUCESSO: Capitulo 28 - tentativa 2
-RENTRY SUCESSO: Capitulo 27 - tentativa 1
-RENTRY SUCESSO: Capitulo 26 - tentativa 1
-RENTRY SUCESSO: Capitulo 25 - tentativa 1
-RENTRY SUCESSO: Capitulo 24 - tentativa 1
-RENTRY SUCESSO: Capitulo 23 - tentativa 1
-RENTRY SUCESSO: Capitulo 22 - tentativa 1
-RENTRY SUCESSO: Capitulo 21 - tentativa 1
-RENTRY SUCESSO: Capitulo 20 - tentativa 1
-RENTRY SUCESSO: Capitulo 19 - tentativa 1
-RENTRY SUCESSO: Capitulo 18.5 - tentativa 1
-RENTRY SUCESSO: Capitulo 18 - tentativa 1
-RENTRY SUCESSO: Capitulo 17.5 - tentativa 1
-RENTRY SUCESSO: Capitulo 17 - tentativa 1
-RENTRY SUCESSO: Capitulo 16 - tentativa 1
-RENTRY SUCESSO: Capitulo 15 - tentativa 1
-RENTRY SUCESSO: Capitulo 14 - tentativa 1
-RENTRY SUCESSO: Capitulo 13 - tentativa 1
-RENTRY SUCESSO: Capitulo 12 - tentativa 1
-RENTRY SUCESSO: Capitulo 11 - tentativa 1
-RENTRY SUCESSO: Capitulo 10 - tentativa 1
-RENTRY SUCESSO: Capitulo 9 - tentativa 1
-RENTRY SUCESSO: Capitulo 8 - tentativa 1
-RENTRY SUCESSO: Capitulo 7 - tentativa 1
-RENTRY SUCESSO: Capitulo 6 - tentativa 1
-RENTRY SUCESSO: Capitulo 5 - tentativa 1
-RENTRY SUCESSO: Capitulo 4 - tentativa 1
-RENTRY SUCESSO: Capitulo 3 - tentativa 1
-RENTRY SUCESSO: Capitulo 2 - tentativa 1
-RENTRY SUCESSO: Capitulo 1 - tentativa 1
-RENTRY SUCESSO: Capitulo 0 - tentativa 1
-RENTRY SUCESSO: Capitulo 00 - tentativa 1
-
-=== RENTRY OBRA 3: Sentido Absoluto da Espada ===
-RENTRY SUCESSO: Capítulo 141 - tentativa 1
-RENTRY SUCESSO: Capítulo 140 - tentativa 1
-RENTRY SUCESSO: Capítulo 139 - tentativa 1
-RENTRY SUCESSO: Capítulo 138 - tentativa 1
-RENTRY SUCESSO: Capítulo 137 - tentativa 1
-RENTRY SUCESSO: Capítulo 136 - tentativa 1
-RENTRY SUCESSO: Capítulo 135 - tentativa 1
-RENTRY SUCESSO: Capítulo 134 - tentativa 1
-RENTRY SUCESSO: Capítulo 133 - tentativa 1
-RENTRY SUCESSO: Capítulo 132 - tentativa 1
-RENTRY SUCESSO: Capítulo 131 - tentativa 1
-RENTRY SUCESSO: Capítulo 130 - tentativa 1
-RENTRY SUCESSO: Capítulo 129 - tentativa 1
-RENTRY SUCESSO: Capítulo 128 - tentativa 1
-RENTRY SUCESSO: Capítulo 127 - tentativa 1
-RENTRY SUCESSO: Capítulo 126 - tentativa 1
-RENTRY SUCESSO: Capítulo 125 - tentativa 1
-RENTRY SUCESSO: Capítulo 124 - tentativa 1
-RENTRY SUCESSO: Capítulo 123 - tentativa 1
-RENTRY SUCESSO: Capítulo 122 - tentativa 1
-RENTRY SUCESSO: Capítulo 121 - tentativa 1
-RENTRY SUCESSO: Capítulo 120 - tentativa 1
-RENTRY SUCESSO: Capítulo 119 - tentativa 1
-RENTRY SUCESSO: Capítulo 118 - tentativa 1
-RENTRY SUCESSO: Capítulo 117 - tentativa 1
-RENTRY SUCESSO: Capítulo 116 - tentativa 1
-RENTRY SUCESSO: Capítulo 115 - tentativa 1
-RENTRY SUCESSO: Capítulo 114 - tentativa 1
-RENTRY SUCESSO: Capítulo 113 - tentativa 1
-RENTRY SUCESSO: Capítulo 112 - tentativa 1
-RENTRY SUCESSO: Capítulo 111 - tentativa 1
-RENTRY SUCESSO: Capítulo 110 - tentativa 1
-RENTRY SUCESSO: Capítulo 109 - tentativa 1
-RENTRY SUCESSO: Capítulo 108 - tentativa 1
-RENTRY SUCESSO: Capítulo 107 - tentativa 1
-RENTRY SUCESSO: Capítulo 106 - tentativa 1
-RENTRY SUCESSO: Capítulo 105 - tentativa 1
-RENTRY SUCESSO: Capítulo 104 - tentativa 1
-RENTRY SUCESSO: Capítulo 103 - tentativa 1
-RENTRY SUCESSO: Capítulo 102 - tentativa 1
-RENTRY SUCESSO: Capítulo 101 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 100 ainda retorna 0 páginas
-RENTRY ERRO tentativa 2: Capítulo Capítulo 100 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 100 - tentativa 3
-RENTRY SUCESSO: Capítulo 99 - tentativa 1
-RENTRY SUCESSO: Capítulo 98 - tentativa 1
-RENTRY SUCESSO: Capítulo 97 - tentativa 1
-RENTRY SUCESSO: Capítulo 96 - tentativa 1
-RENTRY SUCESSO: Capítulo 95 - tentativa 1
-RENTRY SUCESSO: Capítulo 94 - tentativa 1
-RENTRY SUCESSO: Capítulo 93 - tentativa 1
-RENTRY SUCESSO: Capítulo 92 - tentativa 1
-RENTRY SUCESSO: Capítulo 91 - tentativa 1
-RENTRY SUCESSO: Capítulo 90 - tentativa 1
-RENTRY SUCESSO: Capítulo 89 - tentativa 1
-RENTRY SUCESSO: Capítulo 88 - tentativa 1
-RENTRY SUCESSO: Capítulo 87 - tentativa 1
-RENTRY SUCESSO: Capítulo 86 - tentativa 1
-RENTRY ERRO tentativa 1: Capítulo Capítulo 85 ainda retorna 0 páginas
-RENTRY SUCESSO: Capítulo 85 - tentativa 2
-RENTRY SUCESSO: Capítulo 84 - tentativa 1
-RENTRY SUCESSO: Capítulo 83 - tentativa 1
-RENTRY SUCESSO: Capítulo 82 - tentativa 1
-RENTRY SUCESSO: Capítulo 81 - tentativa 1
-RENTRY SUCESSO: Capítulo 80 - tentativa 1
-RENTRY SUCESSO: Capítulo 79 - tentativa 1
-RENTRY SUCESSO: Capítulo 78 - tentativa 1
-RENTRY SUCESSO: Capítulo 77 - tentativa 1
-RENTRY SUCESSO: Capítulo 76 - tentativa 1
-RENTRY SUCESSO: Capítulo 75 - tentativa 1
-RENTRY SUCESSO: Capítulo 74 - tentativa 1
-RENTRY SUCESSO: Capítulo 73 - tentativa 1
-RENTRY SUCESSO: Capítulo 72 - tentativa 1
-RENTRY SUCESSO: Capítulo 71 - tentativa 1
-RENTRY SUCESSO: Capítulo 70 - tentativa 1
-RENTRY SUCESSO: Capítulo 69 - tentativa 1
-RENTRY SUCESSO: Capítulo 68 - tentativa 1
-RENTRY SUCESSO: Capítulo 67 - tentativa 1
-RENTRY SUCESSO: Capítulo 66 - tentativa 1
-RENTRY SUCESSO: Capítulo 65 - tentativa 1
-RENTRY SUCESSO: Capítulo 64 - tentativa 1
-RENTRY SUCESSO: Capítulo 63 - tentativa 1
-RENTRY SUCESSO: Capítulo 62 - tentativa 1
-RENTRY SUCESSO: Capítulo 61 - tentativa 1
-RENTRY SUCESSO: Capítulo 60 - tentativa 1
-RENTRY SUCESSO: Capítulo 59 - tentativa 1
-RENTRY SUCESSO: Capítulo 58 - tentativa 1
-RENTRY SUCESSO: Capítulo 57 - tentativa 1
-RENTRY SUCESSO: Capítulo 56 - tentativa 1
-RENTRY SUCESSO: Capítulo 55 - tentativa 1
-RENTRY SUCESSO: Capítulo 54 - tentativa 1
-RENTRY SUCESSO: Capítulo 53 - tentativa 1
-RENTRY SUCESSO: Capítulo 52 - tentativa 1
-RENTRY SUCESSO: Capítulo 51 - tentativa 1
-RENTRY SUCESSO: Capítulo 50 - tentativa 1
-RENTRY SUCESSO: Capítulo 49 - tentativa 1
-RENTRY SUCESSO: Capítulo 48 - tentativa 1
-RENTRY SUCESSO: Capítulo 47 - tentativa 1
-RENTRY SUCESSO: Capítulo 46 - tentativa 1
-RENTRY SUCESSO: Capítulo 45 - tentativa 1
-RENTRY SUCESSO: Capítulo 44 - tentativa 1
-RENTRY SUCESSO: Capítulo 43 - tentativa 1
-RENTRY SUCESSO: Capítulo 42 - tentativa 1
-RENTRY SUCESSO: Capítulo 41 - tentativa 1
-RENTRY SUCESSO: Capítulo 40 - tentativa 1
-RENTRY SUCESSO: Capítulo 39 - tentativa 1
-RENTRY SUCESSO: Capítulo 38 - tentativa 1
-RENTRY SUCESSO: Capítulo 37 - tentativa 1
-RENTRY SUCESSO: Capítulo 36 - tentativa 1
-RENTRY SUCESSO: Capítulo 35 - tentativa 1
-RENTRY SUCESSO: Capítulo 34 - tentativa 1
-RENTRY SUCESSO: Capítulo 33 - tentativa 1
-RENTRY SUCESSO: Capítulo 32 - tentativa 1
-RENTRY SUCESSO: Capítulo 31 - tentativa 1
-RENTRY SUCESSO: Capítulo 30 - tentativa 1
-RENTRY SUCESSO: Capítulo 29 - tentativa 1
-RENTRY SUCESSO: Capítulo 28 - tentativa 1
-RENTRY SUCESSO: Capítulo 27 - tentativa 1
-RENTRY SUCESSO: Capítulo 26 - tentativa 1
-RENTRY SUCESSO: Capítulo 25 - tentativa 1
-RENTRY SUCESSO: Capítulo 24 - tentativa 1
-RENTRY SUCESSO: Capítulo 23 - tentativa 1
-RENTRY SUCESSO: Capítulo 22 - tentativa 1
-RENTRY SUCESSO: Capítulo 21 - tentativa 1
-RENTRY SUCESSO: Capítulo 20 - tentativa 1
-RENTRY SUCESSO: Capítulo 19 - tentativa 1
-RENTRY SUCESSO: Capítulo 18 - tentativa 1
-RENTRY SUCESSO: Capítulo 17 - tentativa 1
-RENTRY SUCESSO: Capítulo 16 - tentativa 1
-RENTRY SUCESSO: Capítulo 15 - tentativa 1
-RENTRY SUCESSO: Capítulo 14 - tentativa 1
-RENTRY SUCESSO: Capítulo 13 - tentativa 1
-RENTRY SUCESSO: Capítulo 12 - tentativa 1
-RENTRY SUCESSO: Capítulo 11 - tentativa 1
-RENTRY SUCESSO: Capítulo 10 - tentativa 1
-RENTRY SUCESSO: Capítulo 09 - tentativa 1
-RENTRY SUCESSO: Capítulo 08 - tentativa 1
-RENTRY SUCESSO: Capítulo 07 - tentativa 1
-RENTRY SUCESSO: Capítulo 06 - tentativa 1
-RENTRY SUCESSO: Capítulo 05 - tentativa 1
-RENTRY SUCESSO: Capítulo 04 - tentativa 1
-RENTRY SUCESSO: Capítulo 03 - tentativa 1
-RENTRY SUCESSO: Capítulo 02 - tentativa 1
-RENTRY SUCESSO: Capítulo 01 - tentativa 1
-
-================================================================================
-RESULTADO RENTRY: 207 sucessos, 1 falhas
-================================================================================
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 2: Capítulo Capítulo 17 retornou 0 páginas
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 16 - Erro HTTP: 429
+Capítulo: Capítulo 18
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 3: Capítulo Capítulo 17 retornou 0 páginas
+FALHA DEFINITIVA: Capítulo Capítulo 17 - Capítulo Capítulo 17 retornou 0 páginas
+Capítulo: Capítulo 19
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 3: Capítulo Capítulo 18 retornou 0 páginas
+FALHA DEFINITIVA: Capítulo Capítulo 18 - Capítulo Capítulo 18 retornou 0 páginas
+Capítulo: Capítulo 20
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 19 baixado com sucesso.
+Capítulo: Capítulo 21
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 21 baixado com sucesso.
+Capítulo: Capítulo 22
+Capítulo Capítulo 20 baixado com sucesso.
+Capítulo: Capítulo 23
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 23 baixado com sucesso.
+Capítulo: Capítulo 24
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Invalid URL
+ERRO tentativa 3: Erro HTTP: 429
+FALHA DEFINITIVA: Capítulo Capítulo 22 - Erro HTTP: 429
+Capítulo: Capítulo 25
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Capítulo Capítulo 24 retornou 0 páginas
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 24 baixado com sucesso.
+Capítulo: Capítulo 26
+Capítulo Capítulo 25 baixado com sucesso.
+Capítulo: Capítulo 27
+ERRO tentativa 1: Erro HTTP: 429
+Capítulo Capítulo 27 baixado com sucesso.
+Capítulo: Capítulo 28
+ERRO tentativa 2: Erro HTTP: 429
+Capítulo Capítulo 26 baixado com sucesso.
+Capítulo: Capítulo 29
+ERRO tentativa 1: Erro HTTP: 429
+ERRO tentativa 2: Erro HTTP: 429
+ERRO tentativa 1: Capítulo Capítulo 29 retornou 0 páginas
+ERRO tentativa 3: fetch failed
+FALHA DEFINITIVA: Capítulo Capítulo 28 - fetch failed
+Capítulo: Capítulo 30

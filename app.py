@@ -9,6 +9,9 @@ import os
 import subprocess
 import platform
 import sys
+import shutil
+import tempfile
+import glob
 from flaresolverr_client import FlareSolverrClient
 
 # Add test directory to path for cf_bypass import
@@ -1302,6 +1305,73 @@ def emergency_restart():
         logger.error(f"Error in emergency restart: {str(e)}")
         return jsonify({
             "error": f"Emergency restart failed: {str(e)}"
+        }), 500
+
+# Endpoint para limpeza de arquivos temporários
+@app.route('/cleanup-temp', methods=['POST'])
+def cleanup_temp_files():
+    """Limpa arquivos temporários do Python e coordena com TypeScript"""
+    try:
+        logger.info("🧹 Iniciando limpeza de arquivos temporários...")
+        
+        temp_dir = tempfile.gettempdir()
+        cleaned_count = 0
+        total_size = 0
+        
+        # Padrões de arquivos temporários para limpar
+        patterns = [
+            'nodriver_*',
+            'chrome_*',
+            'tmp*Cap*',
+            '*Arquiteto*',
+            '*.png',
+            '*.jpg'
+        ]
+        
+        for pattern in patterns:
+            matching_files = glob.glob(os.path.join(temp_dir, pattern))
+            for file_path in matching_files:
+                try:
+                    if os.path.isfile(file_path):
+                        file_size = os.path.getsize(file_path)
+                        os.unlink(file_path)
+                        total_size += file_size
+                        cleaned_count += 1
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path, ignore_errors=True)
+                        cleaned_count += 1
+                except Exception as e:
+                    logger.warning(f"Não foi possível limpar {file_path}: {e}")
+        
+        size_mb = total_size / (1024 * 1024)
+        logger.info(f"✅ Limpeza Python concluída: {cleaned_count} itens ({size_mb:.2f}MB)")
+        
+        # Tentar coordenar com TypeScript (chamar endpoint de limpeza)
+        try:
+            result = subprocess.run([
+                'npx', 'ts-node', '--transpileOnly', '-e',
+                'import { cleanTempFiles } from "./src/utils/folder"; cleanTempFiles();'
+            ], capture_output=True, text=True, timeout=30, cwd=os.path.dirname(__file__))
+            
+            if result.returncode == 0:
+                logger.info("✅ Coordenação com TypeScript bem-sucedida")
+            else:
+                logger.warning(f"⚠️ Erro na coordenação TypeScript: {result.stderr}")
+        except Exception as coord_error:
+            logger.warning(f"⚠️ Falha na coordenação TypeScript: {coord_error}")
+        
+        return jsonify({
+            "status": "Cleanup completed",
+            "python_cleaned": cleaned_count,
+            "size_mb": round(size_mb, 2),
+            "success": True
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in cleanup: {str(e)}")
+        return jsonify({
+            "error": f"Cleanup failed: {str(e)}",
+            "success": False
         }), 500
 
 if __name__ == '__main__':

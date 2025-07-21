@@ -6,7 +6,7 @@ import { promptUser } from '../utils/prompt';
 import path from 'path';
 import { ChapterLogger } from '../utils/chapter_logger';
 import { TimeoutManager } from '../services/timeout_manager';
-import { getMangaBasePath, cleanTempFiles } from '../utils/folder';
+import { getMangaBasePath, cleanTempFiles, setupCleanupHandlers, periodicCleanup } from '../utils/folder';
 
 async function executeAutoRentry(): Promise<void> {
     const chapterLogger = new ChapterLogger();
@@ -163,6 +163,9 @@ async function executeAutoRentry(): Promise<void> {
 }
 
 async function downloadManga() {
+    // Configurar handlers de limpeza no início da aplicação
+    setupCleanupHandlers();
+    
     const provider = new NewSussyToonsProvider();
     const reportFile = 'download_report.txt';
     const failsFile = 'url_fails.txt';
@@ -315,7 +318,7 @@ async function downloadManga() {
                             try {
                                 if (chapterAttempt > 1) {
                                     console.log(`🔄 Tentativa ${chapterAttempt}/${maxRetries} para capítulo: ${chapter.number}`);
-                                    await new Promise(resolve => setTimeout(resolve, 1000 * chapterAttempt));
+                                    await new Promise(resolve => setTimeout(resolve, 2000 * chapterAttempt));
                                 }
                                 // Obter as páginas do capítulo com timeout de segurança
                                 console.log(`⏱️ Obtendo páginas...`);
@@ -365,7 +368,7 @@ async function downloadManga() {
                                 
                                 // Para erros de proteção anti-bot, esperar mais tempo antes da próxima tentativa
                                 if (error.message.includes('anti-bot') || error.message.includes('ofuscado')) {
-                                    const extraDelay = 3000 * chapterAttempt; // 3s, 6s, 9s extra
+                                    const extraDelay = 5000 * chapterAttempt; // 5s, 10s, 15s extra
                                     console.log(`🛡️ Proteção anti-bot detectada - aguardando ${extraDelay/1000}s extra...`);
                                     await new Promise(resolve => setTimeout(resolve, extraDelay));
                                 }
