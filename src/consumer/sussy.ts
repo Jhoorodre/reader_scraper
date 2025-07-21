@@ -414,7 +414,7 @@ async function downloadManga() {
                             
                             fs.appendFileSync(reportFile, `FALHA DEFINITIVA: Capítulo ${chapter.number} - ${lastChapterError?.message}\n`);
                         }
-                    }, { concurrency: 2 });
+                    }, { concurrency: 1 });
                     
                     // Mostrar estatísticas da obra
                     chapterLogger.showWorkStats(manga.name);

@@ -42,7 +42,12 @@ export function cleanTempFiles(): void {
             '*Arquiteto*',     // Padrão específico para manga "Arquiteto de Dungeons"
             '*_Cap*',          // Arquivos com prefixo + "Cap"
             'tmp*',            // Arquivos temporários genéricos
-            'temp*'            // Arquivos temporários genéricos
+            'temp*',           // Arquivos temporários genéricos
+            // Novos padrões para arquivos .tmp bloqueados
+            '*.tmp',           // Todos os arquivos .tmp
+            '*-*-*-*-*.tmp',   // UUIDs .tmp (formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.tmp)
+            '*guid*.tmp',      // Arquivos GUID temporários
+            '*uuid*.tmp'       // Arquivos UUID temporários
         ];
         
         const items = fs.readdirSync(tempDir);
@@ -77,8 +82,13 @@ export function cleanTempFiles(): void {
                     }
                     cleaned++;
                 } catch (e) {
-                    // Ignorar erros de arquivos em uso ou sem permissão
-                    console.log(`⚠️ Não foi possível limpar: ${item} (${e.message})`);
+                    // Para arquivos .tmp bloqueados, ignorar silenciosamente
+                    if (item.endsWith('.tmp') && (e.code === 'EBUSY' || e.code === 'ENOTEMPTY')) {
+                        // Não reportar arquivos .tmp em uso (muito comum no Windows)
+                    } else {
+                        // Reportar outros erros de permissão
+                        console.log(`⚠️ Não foi possível limpar: ${item} (${e.message})`);
+                    }
                 }
             }
         });
@@ -109,8 +119,10 @@ export function emergencyCleanTempFiles(): void {
             const isImageFile = /\.(png|jpg|jpeg|gif|webp)$/i.test(item);
             const isMangaRelated = /cap|capítulo|arquiteto|manga/i.test(item);
             const isTempFile = /^(tmp|temp|node|chrome|puppeteer|nodriver)/i.test(item);
+            const isTmpFile = /\.tmp$/i.test(item);
+            const isUuidTmpFile = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.tmp$/i.test(item);
             
-            if (isImageFile || isMangaRelated || isTempFile) {
+            if (isImageFile || isMangaRelated || isTempFile || isTmpFile || isUuidTmpFile) {
                 try {
                     const itemPath = path.join(tempDir, item);
                     const stats = fs.statSync(itemPath);
@@ -124,7 +136,11 @@ export function emergencyCleanTempFiles(): void {
                         cleaned++;
                     }
                 } catch (e) {
-                    // Continuar mesmo com erros
+                    // Para arquivos .tmp, ignorar silenciosamente durante limpeza de emergência
+                    if (item.endsWith('.tmp') && (e.code === 'EBUSY' || e.code === 'ENOTEMPTY')) {
+                        // Ignorar arquivos .tmp em uso durante limpeza de emergência
+                    }
+                    // Continuar mesmo com outros erros
                 }
             }
         });
