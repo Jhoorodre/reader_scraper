@@ -1,0 +1,501 @@
+Relatório de Download - Múltiplas Obras
+
+
+=== OBRA 1: Arquiteto de Dungeons ===
+
+=== OBRA 24: O Cavaleiro em Eterna Regressão ===
+Capítulo: Capítulo 63
+Capítulo: Capítulo 55
+ERRO tentativa 1: fetch failed
+ERRO tentativa 1: fetch failed
+ERRO tentativa 2: fetch failed
+ERRO tentativa 2: fetch failed
+ERRO tentativa 3: fetch failed
+FALHA DEFINITIVA: Capítulo Capítulo 63 - fetch failed
+Capítulo: Capítulo 11
+ERRO tentativa 3: fetch failed
+FALHA DEFINITIVA: Capítulo Capítulo 55 - fetch failed
+Capítulo: Capítulo 25
+ERRO tentativa 1: fetch failed
+ERRO tentativa 1: fetch failed
+ERRO tentativa 2: fetch failed
+ERRO tentativa 2: fetch failed
+
+================================================================================
+🔄 MODO RENTRY AUTOMÁTICO INICIADO
+================================================================================
+
+=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
+RENTRY ERRO tentativa 1: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/20.webp: Not Found
+RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/20.webp: Not Found
+RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
+RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
+RENTRY SUCESSO: Capítulo 293 - tentativa 1
+RENTRY SUCESSO: Capítulo 111 - tentativa 1
+
+=== RENTRY OBRA 2: O Cavaleiro em Eterna Regressão ===
+RENTRY SUCESSO: Capítulo 63 - tentativa 1
+RENTRY SUCESSO: Capítulo 55 - tentativa 1
+RENTRY SUCESSO: Capítulo 50 - tentativa 1
+RENTRY SUCESSO: Capítulo 39 - tentativa 1
+RENTRY SUCESSO: Capítulo 30 - tentativa 1
+RENTRY SUCESSO: Capítulo 25 - tentativa 1
+RENTRY SUCESSO: Capítulo 11 - tentativa 1
+
+=== RENTRY OBRA 3: O Cavaleiro Prodígio com Tempo Limitado ===
+RENTRY SUCESSO: Capítulo 107 - tentativa 1
+RENTRY SUCESSO: Capítulo 106 - tentativa 1
+RENTRY SUCESSO: Capítulo 105 - tentativa 1
+RENTRY SUCESSO: Capítulo 104 - tentativa 1
+RENTRY SUCESSO: Capítulo 103 - tentativa 1
+RENTRY SUCESSO: Capítulo 102 - tentativa 1
+RENTRY ERRO tentativa 1: Timeout na requisição
+RENTRY ERRO tentativa 2: Timeout na requisição
+RENTRY ERRO tentativa 3: Timeout na requisição
+RENTRY FALHA FINAL: Capítulo 101 - Timeout na requisição
+RENTRY ERRO tentativa 1: Timeout na requisição
+RENTRY ERRO tentativa 2: Timeout na requisição
+RENTRY ERRO tentativa 3: Timeout na requisição
+RENTRY FALHA FINAL: Capítulo 100 - Timeout na requisição
+RENTRY ERRO tentativa 1: Timeout na requisição
+
+================================================================================
+🔄 MODO RENTRY AUTOMÁTICO INICIADO
+================================================================================
+
+=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
+RENTRY ERRO tentativa 1: Invalid URL
+RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/02.jpg: Not Found
+RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/00.webp: Not Found
+RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/00.webp: Not Found
+
+=== RENTRY OBRA 2: O Cavaleiro Prodígio com Tempo Limitado ===
+RENTRY ERRO tentativa 1: fetch failed
+RENTRY ERRO tentativa 2: fetch failed
+RENTRY SUCESSO: Capítulo 101 - tentativa 3
+RENTRY SUCESSO: Capítulo 100 - tentativa 1
+RENTRY SUCESSO: Capítulo 99 - tentativa 1
+RENTRY SUCESSO: Capítulo 98 - tentativa 1
+RENTRY SUCESSO: Capítulo 97 - tentativa 1
+RENTRY SUCESSO: Capítulo 96 - tentativa 1
+RENTRY SUCESSO: Capítulo 95 - tentativa 1
+RENTRY SUCESSO: Capítulo 94 - tentativa 1
+RENTRY SUCESSO: Capítulo 93 - tentativa 1
+RENTRY SUCESSO: Capítulo 92 - tentativa 1
+RENTRY SUCESSO: Capítulo 91 - tentativa 1
+RENTRY SUCESSO: Capítulo 90 - tentativa 1
+RENTRY SUCESSO: Capítulo 89 - tentativa 1
+RENTRY SUCESSO: Capítulo 88 - tentativa 1
+RENTRY SUCESSO: Capítulo 87 - tentativa 1
+RENTRY SUCESSO: Capítulo 86 - tentativa 1
+RENTRY SUCESSO: Capítulo 85 - tentativa 1
+RENTRY SUCESSO: Capítulo 84 - tentativa 1
+RENTRY SUCESSO: Capítulo 83 - tentativa 1
+RENTRY SUCESSO: Capítulo 82 - tentativa 1
+RENTRY SUCESSO: Capítulo 81 - tentativa 1
+RENTRY SUCESSO: Capítulo 80 - tentativa 1
+RENTRY SUCESSO: Capítulo 79 - tentativa 1
+RENTRY SUCESSO: Capítulo 78 - tentativa 1
+RENTRY SUCESSO: Capítulo 77 - tentativa 1
+RENTRY SUCESSO: Capítulo 76 - tentativa 1
+RENTRY SUCESSO: Capítulo 75 - tentativa 1
+RENTRY SUCESSO: Capítulo 74 - tentativa 1
+RENTRY SUCESSO: Capítulo 73 - tentativa 1
+RENTRY SUCESSO: Capítulo 72 - tentativa 1
+RENTRY SUCESSO: Capítulo 71 - tentativa 1
+RENTRY SUCESSO: Capítulo 70 - tentativa 1
+RENTRY SUCESSO: Capítulo 69 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 68 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 68 - tentativa 2
+RENTRY SUCESSO: Capítulo 66 - tentativa 1
+RENTRY ERRO tentativa 1: Invalid URL
+RENTRY SUCESSO: Capítulo 65 - tentativa 2
+RENTRY SUCESSO: Capítulo 64 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 63 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 63 - tentativa 2
+RENTRY SUCESSO: Capítulo 62 - tentativa 1
+RENTRY SUCESSO: Capítulo 61 - tentativa 1
+RENTRY SUCESSO: Capítulo 60 - tentativa 1
+RENTRY SUCESSO: Capítulo 59 - tentativa 1
+RENTRY SUCESSO: Capítulo 58 - tentativa 1
+RENTRY SUCESSO: Capítulo 57 - tentativa 1
+RENTRY SUCESSO: Capítulo 56 - tentativa 1
+RENTRY SUCESSO: Capítulo 55 - tentativa 1
+RENTRY SUCESSO: Capítulo 54 - tentativa 1
+RENTRY SUCESSO: Capítulo 53 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 52 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 52 - tentativa 2
+RENTRY SUCESSO: Capítulo 51 - tentativa 1
+RENTRY SUCESSO: Capítulo 50 - tentativa 1
+RENTRY SUCESSO: Capítulo 49 - tentativa 1
+RENTRY SUCESSO: Capítulo 48 - tentativa 1
+RENTRY SUCESSO: Capítulo 47 - tentativa 1
+RENTRY SUCESSO: Capítulo 46 - tentativa 1
+RENTRY SUCESSO: Capítulo 45 - tentativa 1
+RENTRY SUCESSO: Capítulo 44 - tentativa 1
+RENTRY SUCESSO: Capítulo 43 - tentativa 1
+RENTRY SUCESSO: Capítulo 42 - tentativa 1
+RENTRY SUCESSO: Capítulo 41 - tentativa 1
+RENTRY SUCESSO: Capítulo 40 - tentativa 1
+RENTRY SUCESSO: Capítulo 39 - tentativa 1
+RENTRY SUCESSO: Capítulo 38 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 37 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 37 - tentativa 2
+RENTRY SUCESSO: Capítulo 36 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 35 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 35 - tentativa 2
+RENTRY SUCESSO: Capítulo 34 - tentativa 1
+RENTRY SUCESSO: Capítulo 33 - tentativa 1
+RENTRY SUCESSO: Capítulo 32 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 31 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 31 - tentativa 2
+RENTRY SUCESSO: Capítulo 30 - tentativa 1
+RENTRY SUCESSO: Capítulo 29 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 28 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Invalid URL
+RENTRY SUCESSO: Capítulo 28 - tentativa 3
+RENTRY SUCESSO: Capítulo 27 - tentativa 1
+RENTRY SUCESSO: Capítulo 26 - tentativa 1
+RENTRY SUCESSO: Capítulo 25 - tentativa 1
+RENTRY SUCESSO: Capítulo 24 - tentativa 1
+RENTRY SUCESSO: Capítulo 23 - tentativa 1
+RENTRY SUCESSO: Capítulo 22 - tentativa 1
+RENTRY SUCESSO: Capítulo 21 - tentativa 1
+RENTRY SUCESSO: Capítulo 20 - tentativa 1
+RENTRY SUCESSO: Capítulo 19 - tentativa 1
+RENTRY SUCESSO: Capítulo 18 - tentativa 1
+RENTRY SUCESSO: Capítulo 17 - tentativa 1
+RENTRY SUCESSO: Capítulo 16 - tentativa 1
+RENTRY SUCESSO: Capítulo 15 - tentativa 1
+RENTRY SUCESSO: Capítulo 14 - tentativa 1
+RENTRY SUCESSO: Capítulo 13 - tentativa 1
+RENTRY SUCESSO: Capítulo 12 - tentativa 1
+RENTRY SUCESSO: Capítulo 11 - tentativa 1
+RENTRY SUCESSO: Capítulo 10 - tentativa 1
+RENTRY SUCESSO: Capítulo 09 - tentativa 1
+RENTRY SUCESSO: Capítulo 08 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 07 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Capítulo Capítulo 07 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 07 - tentativa 3
+RENTRY ERRO tentativa 1: Invalid URL
+RENTRY SUCESSO: Capítulo 06 - tentativa 2
+RENTRY ERRO tentativa 1: Capítulo Capítulo 05 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 05 - tentativa 2
+RENTRY ERRO tentativa 1: Capítulo Capítulo 04 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 04 - tentativa 2
+RENTRY SUCESSO: Capítulo 03 - tentativa 1
+RENTRY SUCESSO: Capítulo 02 - tentativa 1
+RENTRY SUCESSO: Capítulo 01 - tentativa 1
+
+=== RENTRY OBRA 3: O Jogador ===
+RENTRY SUCESSO: Capítulo 244 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 243 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 243 - tentativa 2
+RENTRY SUCESSO: Capítulo 242 - tentativa 1
+RENTRY SUCESSO: Capítulo 241 - tentativa 1
+RENTRY SUCESSO: Capítulo 240 - tentativa 1
+RENTRY SUCESSO: Capítulo 239 - tentativa 1
+RENTRY SUCESSO: Capítulo 238 - tentativa 1
+RENTRY SUCESSO: Capítulo 237 - tentativa 1
+RENTRY SUCESSO: Capítulo 236 - tentativa 1
+RENTRY SUCESSO: Capítulo 235 - tentativa 1
+RENTRY SUCESSO: Capítulo 234 - tentativa 1
+RENTRY SUCESSO: Capítulo 233 - tentativa 1
+RENTRY SUCESSO: Capítulo 232 - tentativa 1
+RENTRY SUCESSO: Capítulo 231 - tentativa 1
+RENTRY SUCESSO: Capítulo 230 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 229 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Capítulo Capítulo 229 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 229 - tentativa 3
+RENTRY SUCESSO: Capítulo 228 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 227 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 227 - tentativa 2
+RENTRY SUCESSO: Capítulo 226 - tentativa 1
+RENTRY SUCESSO: Capítulo 225 - tentativa 1
+RENTRY SUCESSO: Capítulo 224 - tentativa 1
+RENTRY SUCESSO: Capítulo 223 - tentativa 1
+RENTRY SUCESSO: Capítulo 222 - tentativa 1
+RENTRY SUCESSO: Capítulo 221 - tentativa 1
+RENTRY SUCESSO: Capítulo 220 - tentativa 1
+RENTRY SUCESSO: Capítulo 219 - tentativa 1
+RENTRY SUCESSO: Capítulo 218 - tentativa 1
+RENTRY SUCESSO: Capítulo 217 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 216 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Capítulo Capítulo 216 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 216 - tentativa 3
+RENTRY SUCESSO: Capítulo 215 - tentativa 1
+RENTRY SUCESSO: Capítulo 214 - tentativa 1
+RENTRY SUCESSO: Capítulo 213 - tentativa 1
+RENTRY SUCESSO: Capítulo 212 - tentativa 1
+RENTRY SUCESSO: Capítulo 211 - tentativa 1
+RENTRY SUCESSO: Capítulo 210 - tentativa 1
+RENTRY SUCESSO: Capítulo 209 - tentativa 1
+RENTRY SUCESSO: Capítulo 208 - tentativa 1
+RENTRY SUCESSO: Capítulo 207 - tentativa 1
+RENTRY SUCESSO: Capítulo 206 - tentativa 1
+RENTRY SUCESSO: Capítulo 205 - tentativa 1
+RENTRY SUCESSO: Capítulo 204 - tentativa 1
+RENTRY SUCESSO: Capítulo 203 - tentativa 1
+RENTRY SUCESSO: Capítulo 202 - tentativa 1
+RENTRY SUCESSO: Capítulo 201 - tentativa 1
+RENTRY SUCESSO: Capítulo 200 - tentativa 1
+RENTRY SUCESSO: Capítulo 199 - tentativa 1
+RENTRY SUCESSO: Capítulo 197 - tentativa 1
+RENTRY SUCESSO: Capítulo 138 - tentativa 1
+RENTRY SUCESSO: Capítulo 111 - tentativa 1
+RENTRY SUCESSO: Capítulo 104 - tentativa 1
+RENTRY SUCESSO: Capítulo 99 - tentativa 1
+RENTRY SUCESSO: Capítulo 94 - tentativa 1
+RENTRY SUCESSO: Capítulo 89 - tentativa 1
+RENTRY SUCESSO: Capítulo 84 - tentativa 1
+RENTRY SUCESSO: Capítulo 79 - tentativa 1
+RENTRY SUCESSO: Capítulo 74 - tentativa 1
+RENTRY SUCESSO: Capítulo 53 - tentativa 1
+RENTRY SUCESSO: Capítulo 42 - tentativa 1
+
+=== RENTRY OBRA 4: Provação ===
+RENTRY SUCESSO: Capitulo 86 (1) - tentativa 1
+RENTRY SUCESSO: Capítulo 143 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 142 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 142 - tentativa 2
+RENTRY SUCESSO: Capitulo 69 - tentativa 1
+RENTRY SUCESSO: Capitulo 68 - tentativa 1
+RENTRY SUCESSO: Capitulo 67 - tentativa 1
+RENTRY SUCESSO: Capitulo 66 - tentativa 1
+RENTRY SUCESSO: Capitulo 65 - tentativa 1
+RENTRY SUCESSO: Capitulo 64 - tentativa 1
+RENTRY SUCESSO: Capitulo 63 - tentativa 1
+
+================================================================================
+🔄 MODO RENTRY AUTOMÁTICO INICIADO
+================================================================================
+
+=== RENTRY OBRA 1: Invencível Após 100 Anos de Reclusão ===
+RENTRY ERRO tentativa 1: Capítulo Capítulo 294 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
+RENTRY ERRO tentativa 3: Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
+RENTRY FALHA FINAL: Capítulo 294 - Failed to fetch https://cdn.sussytoons.site/scans/1/obras/6054/capitulos/294/01.jpg: Not Found
+
+=== RENTRY OBRA 2: Provação ===
+RENTRY SUCESSO: Capitulo 62 - tentativa 1
+RENTRY SUCESSO: Capitulo 61 - tentativa 1
+RENTRY SUCESSO: Capitulo 60 - tentativa 1
+RENTRY SUCESSO: Capitulo 59 - tentativa 1
+RENTRY SUCESSO: Capitulo 58 - tentativa 1
+RENTRY SUCESSO: Capitulo 57 - tentativa 1
+RENTRY SUCESSO: Capitulo 56 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 55 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 55 - tentativa 2
+RENTRY SUCESSO: Capitulo 54 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 53 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 53 - tentativa 2
+RENTRY SUCESSO: Capitulo 52 - tentativa 1
+RENTRY SUCESSO: Capitulo 51 - tentativa 1
+RENTRY SUCESSO: Capitulo 50 - tentativa 1
+RENTRY SUCESSO: Capitulo 49 - tentativa 1
+RENTRY SUCESSO: Capitulo 48 - tentativa 1
+RENTRY SUCESSO: Capitulo 47 - tentativa 1
+RENTRY SUCESSO: Capitulo 46 - tentativa 1
+RENTRY SUCESSO: Capitulo 45 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 44 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 44 - tentativa 2
+RENTRY SUCESSO: Capitulo 43 - tentativa 1
+RENTRY SUCESSO: Capitulo 42 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 41 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 41 - tentativa 2
+RENTRY SUCESSO: Capitulo 40 - tentativa 1
+RENTRY SUCESSO: Capitulo 39 - tentativa 1
+RENTRY SUCESSO: Capitulo 38 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 37 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 37 - tentativa 2
+RENTRY SUCESSO: Capitulo 36 - tentativa 1
+RENTRY SUCESSO: Capitulo 35 - tentativa 1
+RENTRY SUCESSO: Capitulo 34 - tentativa 1
+RENTRY SUCESSO: Capitulo 33 - tentativa 1
+RENTRY SUCESSO: Capitulo 32 - tentativa 1
+RENTRY SUCESSO: Capitulo 31 - tentativa 1
+RENTRY SUCESSO: Capitulo 30 - tentativa 1
+RENTRY SUCESSO: Capitulo 29 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capitulo 28 ainda retorna 0 páginas
+RENTRY SUCESSO: Capitulo 28 - tentativa 2
+RENTRY SUCESSO: Capitulo 27 - tentativa 1
+RENTRY SUCESSO: Capitulo 26 - tentativa 1
+RENTRY SUCESSO: Capitulo 25 - tentativa 1
+RENTRY SUCESSO: Capitulo 24 - tentativa 1
+RENTRY SUCESSO: Capitulo 23 - tentativa 1
+RENTRY SUCESSO: Capitulo 22 - tentativa 1
+RENTRY SUCESSO: Capitulo 21 - tentativa 1
+RENTRY SUCESSO: Capitulo 20 - tentativa 1
+RENTRY SUCESSO: Capitulo 19 - tentativa 1
+RENTRY SUCESSO: Capitulo 18.5 - tentativa 1
+RENTRY SUCESSO: Capitulo 18 - tentativa 1
+RENTRY SUCESSO: Capitulo 17.5 - tentativa 1
+RENTRY SUCESSO: Capitulo 17 - tentativa 1
+RENTRY SUCESSO: Capitulo 16 - tentativa 1
+RENTRY SUCESSO: Capitulo 15 - tentativa 1
+RENTRY SUCESSO: Capitulo 14 - tentativa 1
+RENTRY SUCESSO: Capitulo 13 - tentativa 1
+RENTRY SUCESSO: Capitulo 12 - tentativa 1
+RENTRY SUCESSO: Capitulo 11 - tentativa 1
+RENTRY SUCESSO: Capitulo 10 - tentativa 1
+RENTRY SUCESSO: Capitulo 9 - tentativa 1
+RENTRY SUCESSO: Capitulo 8 - tentativa 1
+RENTRY SUCESSO: Capitulo 7 - tentativa 1
+RENTRY SUCESSO: Capitulo 6 - tentativa 1
+RENTRY SUCESSO: Capitulo 5 - tentativa 1
+RENTRY SUCESSO: Capitulo 4 - tentativa 1
+RENTRY SUCESSO: Capitulo 3 - tentativa 1
+RENTRY SUCESSO: Capitulo 2 - tentativa 1
+RENTRY SUCESSO: Capitulo 1 - tentativa 1
+RENTRY SUCESSO: Capitulo 0 - tentativa 1
+RENTRY SUCESSO: Capitulo 00 - tentativa 1
+
+=== RENTRY OBRA 3: Sentido Absoluto da Espada ===
+RENTRY SUCESSO: Capítulo 141 - tentativa 1
+RENTRY SUCESSO: Capítulo 140 - tentativa 1
+RENTRY SUCESSO: Capítulo 139 - tentativa 1
+RENTRY SUCESSO: Capítulo 138 - tentativa 1
+RENTRY SUCESSO: Capítulo 137 - tentativa 1
+RENTRY SUCESSO: Capítulo 136 - tentativa 1
+RENTRY SUCESSO: Capítulo 135 - tentativa 1
+RENTRY SUCESSO: Capítulo 134 - tentativa 1
+RENTRY SUCESSO: Capítulo 133 - tentativa 1
+RENTRY SUCESSO: Capítulo 132 - tentativa 1
+RENTRY SUCESSO: Capítulo 131 - tentativa 1
+RENTRY SUCESSO: Capítulo 130 - tentativa 1
+RENTRY SUCESSO: Capítulo 129 - tentativa 1
+RENTRY SUCESSO: Capítulo 128 - tentativa 1
+RENTRY SUCESSO: Capítulo 127 - tentativa 1
+RENTRY SUCESSO: Capítulo 126 - tentativa 1
+RENTRY SUCESSO: Capítulo 125 - tentativa 1
+RENTRY SUCESSO: Capítulo 124 - tentativa 1
+RENTRY SUCESSO: Capítulo 123 - tentativa 1
+RENTRY SUCESSO: Capítulo 122 - tentativa 1
+RENTRY SUCESSO: Capítulo 121 - tentativa 1
+RENTRY SUCESSO: Capítulo 120 - tentativa 1
+RENTRY SUCESSO: Capítulo 119 - tentativa 1
+RENTRY SUCESSO: Capítulo 118 - tentativa 1
+RENTRY SUCESSO: Capítulo 117 - tentativa 1
+RENTRY SUCESSO: Capítulo 116 - tentativa 1
+RENTRY SUCESSO: Capítulo 115 - tentativa 1
+RENTRY SUCESSO: Capítulo 114 - tentativa 1
+RENTRY SUCESSO: Capítulo 113 - tentativa 1
+RENTRY SUCESSO: Capítulo 112 - tentativa 1
+RENTRY SUCESSO: Capítulo 111 - tentativa 1
+RENTRY SUCESSO: Capítulo 110 - tentativa 1
+RENTRY SUCESSO: Capítulo 109 - tentativa 1
+RENTRY SUCESSO: Capítulo 108 - tentativa 1
+RENTRY SUCESSO: Capítulo 107 - tentativa 1
+RENTRY SUCESSO: Capítulo 106 - tentativa 1
+RENTRY SUCESSO: Capítulo 105 - tentativa 1
+RENTRY SUCESSO: Capítulo 104 - tentativa 1
+RENTRY SUCESSO: Capítulo 103 - tentativa 1
+RENTRY SUCESSO: Capítulo 102 - tentativa 1
+RENTRY SUCESSO: Capítulo 101 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 100 ainda retorna 0 páginas
+RENTRY ERRO tentativa 2: Capítulo Capítulo 100 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 100 - tentativa 3
+RENTRY SUCESSO: Capítulo 99 - tentativa 1
+RENTRY SUCESSO: Capítulo 98 - tentativa 1
+RENTRY SUCESSO: Capítulo 97 - tentativa 1
+RENTRY SUCESSO: Capítulo 96 - tentativa 1
+RENTRY SUCESSO: Capítulo 95 - tentativa 1
+RENTRY SUCESSO: Capítulo 94 - tentativa 1
+RENTRY SUCESSO: Capítulo 93 - tentativa 1
+RENTRY SUCESSO: Capítulo 92 - tentativa 1
+RENTRY SUCESSO: Capítulo 91 - tentativa 1
+RENTRY SUCESSO: Capítulo 90 - tentativa 1
+RENTRY SUCESSO: Capítulo 89 - tentativa 1
+RENTRY SUCESSO: Capítulo 88 - tentativa 1
+RENTRY SUCESSO: Capítulo 87 - tentativa 1
+RENTRY SUCESSO: Capítulo 86 - tentativa 1
+RENTRY ERRO tentativa 1: Capítulo Capítulo 85 ainda retorna 0 páginas
+RENTRY SUCESSO: Capítulo 85 - tentativa 2
+RENTRY SUCESSO: Capítulo 84 - tentativa 1
+RENTRY SUCESSO: Capítulo 83 - tentativa 1
+RENTRY SUCESSO: Capítulo 82 - tentativa 1
+RENTRY SUCESSO: Capítulo 81 - tentativa 1
+RENTRY SUCESSO: Capítulo 80 - tentativa 1
+RENTRY SUCESSO: Capítulo 79 - tentativa 1
+RENTRY SUCESSO: Capítulo 78 - tentativa 1
+RENTRY SUCESSO: Capítulo 77 - tentativa 1
+RENTRY SUCESSO: Capítulo 76 - tentativa 1
+RENTRY SUCESSO: Capítulo 75 - tentativa 1
+RENTRY SUCESSO: Capítulo 74 - tentativa 1
+RENTRY SUCESSO: Capítulo 73 - tentativa 1
+RENTRY SUCESSO: Capítulo 72 - tentativa 1
+RENTRY SUCESSO: Capítulo 71 - tentativa 1
+RENTRY SUCESSO: Capítulo 70 - tentativa 1
+RENTRY SUCESSO: Capítulo 69 - tentativa 1
+RENTRY SUCESSO: Capítulo 68 - tentativa 1
+RENTRY SUCESSO: Capítulo 67 - tentativa 1
+RENTRY SUCESSO: Capítulo 66 - tentativa 1
+RENTRY SUCESSO: Capítulo 65 - tentativa 1
+RENTRY SUCESSO: Capítulo 64 - tentativa 1
+RENTRY SUCESSO: Capítulo 63 - tentativa 1
+RENTRY SUCESSO: Capítulo 62 - tentativa 1
+RENTRY SUCESSO: Capítulo 61 - tentativa 1
+RENTRY SUCESSO: Capítulo 60 - tentativa 1
+RENTRY SUCESSO: Capítulo 59 - tentativa 1
+RENTRY SUCESSO: Capítulo 58 - tentativa 1
+RENTRY SUCESSO: Capítulo 57 - tentativa 1
+RENTRY SUCESSO: Capítulo 56 - tentativa 1
+RENTRY SUCESSO: Capítulo 55 - tentativa 1
+RENTRY SUCESSO: Capítulo 54 - tentativa 1
+RENTRY SUCESSO: Capítulo 53 - tentativa 1
+RENTRY SUCESSO: Capítulo 52 - tentativa 1
+RENTRY SUCESSO: Capítulo 51 - tentativa 1
+RENTRY SUCESSO: Capítulo 50 - tentativa 1
+RENTRY SUCESSO: Capítulo 49 - tentativa 1
+RENTRY SUCESSO: Capítulo 48 - tentativa 1
+RENTRY SUCESSO: Capítulo 47 - tentativa 1
+RENTRY SUCESSO: Capítulo 46 - tentativa 1
+RENTRY SUCESSO: Capítulo 45 - tentativa 1
+RENTRY SUCESSO: Capítulo 44 - tentativa 1
+RENTRY SUCESSO: Capítulo 43 - tentativa 1
+RENTRY SUCESSO: Capítulo 42 - tentativa 1
+RENTRY SUCESSO: Capítulo 41 - tentativa 1
+RENTRY SUCESSO: Capítulo 40 - tentativa 1
+RENTRY SUCESSO: Capítulo 39 - tentativa 1
+RENTRY SUCESSO: Capítulo 38 - tentativa 1
+RENTRY SUCESSO: Capítulo 37 - tentativa 1
+RENTRY SUCESSO: Capítulo 36 - tentativa 1
+RENTRY SUCESSO: Capítulo 35 - tentativa 1
+RENTRY SUCESSO: Capítulo 34 - tentativa 1
+RENTRY SUCESSO: Capítulo 33 - tentativa 1
+RENTRY SUCESSO: Capítulo 32 - tentativa 1
+RENTRY SUCESSO: Capítulo 31 - tentativa 1
+RENTRY SUCESSO: Capítulo 30 - tentativa 1
+RENTRY SUCESSO: Capítulo 29 - tentativa 1
+RENTRY SUCESSO: Capítulo 28 - tentativa 1
+RENTRY SUCESSO: Capítulo 27 - tentativa 1
+RENTRY SUCESSO: Capítulo 26 - tentativa 1
+RENTRY SUCESSO: Capítulo 25 - tentativa 1
+RENTRY SUCESSO: Capítulo 24 - tentativa 1
+RENTRY SUCESSO: Capítulo 23 - tentativa 1
+RENTRY SUCESSO: Capítulo 22 - tentativa 1
+RENTRY SUCESSO: Capítulo 21 - tentativa 1
+RENTRY SUCESSO: Capítulo 20 - tentativa 1
+RENTRY SUCESSO: Capítulo 19 - tentativa 1
+RENTRY SUCESSO: Capítulo 18 - tentativa 1
+RENTRY SUCESSO: Capítulo 17 - tentativa 1
+RENTRY SUCESSO: Capítulo 16 - tentativa 1
+RENTRY SUCESSO: Capítulo 15 - tentativa 1
+RENTRY SUCESSO: Capítulo 14 - tentativa 1
+RENTRY SUCESSO: Capítulo 13 - tentativa 1
+RENTRY SUCESSO: Capítulo 12 - tentativa 1
+RENTRY SUCESSO: Capítulo 11 - tentativa 1
+RENTRY SUCESSO: Capítulo 10 - tentativa 1
+RENTRY SUCESSO: Capítulo 09 - tentativa 1
+RENTRY SUCESSO: Capítulo 08 - tentativa 1
+RENTRY SUCESSO: Capítulo 07 - tentativa 1
+RENTRY SUCESSO: Capítulo 06 - tentativa 1
+RENTRY SUCESSO: Capítulo 05 - tentativa 1
+RENTRY SUCESSO: Capítulo 04 - tentativa 1
+RENTRY SUCESSO: Capítulo 03 - tentativa 1
+RENTRY SUCESSO: Capítulo 02 - tentativa 1
+RENTRY SUCESSO: Capítulo 01 - tentativa 1
+
+================================================================================
+RESULTADO RENTRY: 207 sucessos, 1 falhas
+================================================================================

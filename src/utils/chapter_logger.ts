@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { getMangaBasePath } from './folder';
 
 interface ChapterLog {
     workName: string;
@@ -411,7 +412,7 @@ export class ChapterLogger {
     syncLogsWithMangaFolder(workName: string): void {
         console.log(`🔄 Verificação secundária: Sincronizando logs com pasta manga para ${workName}`);
         
-        const mangaDir = 'manga';
+        const mangaDir = getMangaBasePath();
         
         // Procurar pasta correspondente (pode ter nome ligeiramente diferente)
         if (!fs.existsSync(mangaDir)) {
@@ -483,7 +484,7 @@ export class ChapterLogger {
     recreateSuccessLogsFromFiles(): void {
         console.log('🔧 Recriando logs de sucesso baseado nos arquivos existentes...');
         
-        const mangaDir = 'manga';
+        const mangaDir = getMangaBasePath();
         if (!fs.existsSync(mangaDir)) {
             console.log('📂 Diretório manga não encontrado');
             return;
@@ -588,7 +589,7 @@ export class ChapterLogger {
     }
     
     // Escanear pasta manga e criar logs recursivamente
-    scanMangaFolder(mangaBasePath: string = 'manga'): void {
+    scanMangaFolder(mangaBasePath: string = getMangaBasePath()): void {
         console.log(`📂 Escaneando pasta manga: ${mangaBasePath}`);
         
         if (!fs.existsSync(mangaBasePath)) {
@@ -677,7 +678,7 @@ export class ChapterLogger {
     }
     
     // Recriar todos os logs baseados na pasta manga
-    rebuildLogsFromManga(mangaBasePath: string = 'manga'): void {
+    rebuildLogsFromManga(mangaBasePath: string = getMangaBasePath()): void {
         console.log(`🔄 Recriando logs baseados na pasta manga...`);
         
         // Limpar logs existentes
@@ -695,7 +696,7 @@ export class ChapterLogger {
     }
     
     // Função pública para inicializar logs baseados na pasta manga
-    initializeLogsFromManga(mangaBasePath: string = 'manga', rebuild: boolean = false): void {
+    initializeLogsFromManga(mangaBasePath: string = getMangaBasePath(), rebuild: boolean = false): void {
         console.log(`🚀 Inicializando logs da pasta manga...`);
         
         if (rebuild) {

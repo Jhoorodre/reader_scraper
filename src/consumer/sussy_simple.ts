@@ -6,6 +6,7 @@ import { promptUser } from '../utils/prompt';
 import path from 'path';
 import { ChapterLogger } from '../utils/chapter_logger';
 import { TimeoutManager } from '../services/timeout_manager';
+import { getMangaBasePath, cleanTempFiles } from '../utils/folder';
 
 async function executeAutoRentry(): Promise<void> {
     const chapterLogger = new ChapterLogger();
@@ -97,7 +98,7 @@ async function executeAutoRentry(): Promise<void> {
                         const capitulo = (pageIndex + 1) <= 9 ? `0${pageIndex + 1}` : `${pageIndex + 1}`;
                         console.log(`📥 Baixando Página ${capitulo}: ${pageUrl}`);
                         
-                        const dirPath = path.join('manga', path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
+                        const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
                         
                         if (!fs.existsSync(dirPath)) {
                             fs.mkdirSync(dirPath, { recursive: true });
@@ -111,8 +112,11 @@ async function executeAutoRentry(): Promise<void> {
                     fs.appendFileSync(reportFile, `RENTRY SUCESSO: ${failedChapter.chapterNumber} - tentativa ${attempt}\n`);
                     
                     // Salvar como sucesso e remover das falhas
-                    const downloadPath = path.join('manga', path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
+                    const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
                     chapterLogger.saveChapterSuccess(workName, failedChapter.workId, failedChapter.chapterNumber, failedChapter.chapterId, pages.pages.length, downloadPath);
+                    
+                    // Limpar arquivos temporários após sucesso
+                    cleanTempFiles();
                     
                     reprocessSuccess = true;
                     totalReprocessed++;
@@ -170,7 +174,7 @@ async function downloadManga() {
 
     // Escanear pasta manga e criar/atualizar logs automaticamente
     console.log('📂 Escaneando pasta manga e atualizando logs...');
-    chapterLogger.initializeLogsFromManga('manga');
+    chapterLogger.initializeLogsFromManga(getMangaBasePath());
     console.log('✅ Logs atualizados com base na pasta manga\n');
 
     try {
@@ -288,7 +292,7 @@ async function downloadManga() {
                         }
                         
                         // Verificação secundária na pasta física (apenas como backup)
-                        const chapterDir = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                        const chapterDir = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                         
                         if (fs.existsSync(chapterDir)) {
                             const existingFiles = fs.readdirSync(chapterDir);
@@ -327,7 +331,7 @@ async function downloadManga() {
                                     console.log(`Baixando Página ${capitulo}: ${pageUrl}`);
                             
                                     // Criar o diretório para o capítulo
-                                    const dirPath = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                                    const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                             
                                     // Verificar se o diretório existe, se não, criar
                                     if (!fs.existsSync(dirPath)) {
@@ -345,8 +349,11 @@ async function downloadManga() {
                                 fs.appendFileSync(reportFile, `Capítulo ${chapter.number} baixado com sucesso.\n`);
                                 
                                 // Salvar log individual do capítulo
-                                const downloadPath = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                                const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                                 chapterLogger.saveChapterSuccess(manga.name, workId, chapter.number, chapter.id[1], pages.pages.length, downloadPath);
+                                
+                                // Limpar arquivos temporários após sucesso
+                                cleanTempFiles();
                                 
                                 chapterSuccess = true;
                                 break;

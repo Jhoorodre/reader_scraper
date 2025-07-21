@@ -1,4 +1,5 @@
 // Correção para o modo batch - substitua o Bluebird.map por um for sequencial
+import { getMangaBasePath } from '../src/utils/folder';
 
 // EM VEZ DE:
 await Bluebird.map(mangaUrls, async (mangaUrl, urlIndex) => {
@@ -76,7 +77,7 @@ for (const [urlIndex, mangaUrl] of mangaUrls.entries()) {
                         const capitulo = (pageIndex + 1) <= 9 ? `0${pageIndex + 1}` : `${pageIndex + 1}`;
                         console.log(`Baixando Página ${capitulo}: ${pageUrl}`);
                 
-                        const dirPath = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                        const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                         if (!fs.existsSync(dirPath)) {
                             fs.mkdirSync(dirPath, { recursive: true });
                         }
@@ -87,7 +88,7 @@ for (const [urlIndex, mangaUrl] of mangaUrls.entries()) {
                     console.log(`✅ Capítulo ${chapter.number} baixado com sucesso`);
                     
                     // Salvar log de sucesso
-                    const downloadPath = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                    const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                     chapterLogger.saveChapterSuccess(manga.name, workId, chapter.number, chapter.id[1], pages.pages.length, downloadPath);
                     
                     chapterSuccess = true;

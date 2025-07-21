@@ -264,6 +264,19 @@ export class NewSussyToonsProvider  {
                         setTimeout(() => reject(new Error('Timeout na requisição')), finalTimeout)
                     )
                 ]);
+
+                // Auto-recovery para servidor Python inativo
+                if (!response.ok && response.status >= 500) {
+                    console.log('🚨 Servidor Python com erro 500+, tentando emergency restart...');
+                    try {
+                        await fetch('http://localhost:3333/emergency-restart', { method: 'POST' });
+                        console.log('✅ Emergency restart executado');
+                        // Aguardar 3s para o servidor se recuperar
+                        await this.delay(3000);
+                    } catch (e) {
+                        console.log('⚠️ Emergency restart falhou, servidor pode estar completamente parado');
+                    }
+                }
                 
                 const responseTime = Date.now() - startTime;
                 timeoutManager.recordResponseTime('scrape', responseTime);

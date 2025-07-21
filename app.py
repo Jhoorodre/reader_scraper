@@ -30,11 +30,24 @@ last_chapter_url = None
 chapter_session_count = 0
 MAX_CHAPTER_SESSION = 3  # Reset driver after 3 chapters
 
-# Concurrency control simples
+# Concurrency control aprimorado
 import threading
+import queue
+from datetime import datetime, timedelta
+
 request_lock = threading.Lock()
 active_requests = {}  # Track active requests by URL
+request_queue = queue.Queue(maxsize=10)  # Limit queue size
 max_concurrent_requests = 1  # Process one request at a time for stability
+
+# Rate limiting melhorado
+last_request_time = None
+min_request_interval = 2.0  # Minimum 2 seconds between requests
+
+# Health monitoring
+server_start_time = datetime.now()
+request_count = 0
+error_count = 0
 
 # Função para minimizar janela do Chrome automaticamente
 async def minimize_chrome_window():
@@ -74,8 +87,14 @@ async def start_driver():
             
             # Só pedir seleção do modo se não foi selecionado ainda
             if browser_mode_selected is None:
-                browser_mode_selected = input("Escolha o modo do navegador:\n1 - Normal (visível)\n2 - Minimizado automaticamente\n3 - Headless\nOpção (1-3): ").strip()
-                logger.info(f"💾 Modo selecionado: {browser_mode_selected} (será usado para todas as próximas requisições)")
+                # Verificar se há modo definido no .env primeiro
+                env_browser_mode = os.getenv('BROWSER_MODE')
+                if env_browser_mode and env_browser_mode in ['1', '2', '3']:
+                    browser_mode_selected = env_browser_mode
+                    logger.info(f"💾 Modo carregado do .env: {browser_mode_selected}")
+                else:
+                    browser_mode_selected = input("Escolha o modo do navegador:\n1 - Normal (visível)\n2 - Minimizado automaticamente\n3 - Headless\nOpção (1-3): ").strip()
+                    logger.info(f"💾 Modo selecionado: {browser_mode_selected} (será usado para todas as próximas requisições)")
             else:
                 logger.info(f"🔄 Reutilizando modo selecionado: {browser_mode_selected}")
             
@@ -1082,9 +1101,23 @@ def run_async(func, *args):
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
+    global last_request_time, request_count, error_count
+    
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "URL is required"}), 400
+
+    # Rate limiting - força intervalo mínimo entre requests
+    current_time = datetime.now()
+    if last_request_time:
+        time_since_last = (current_time - last_request_time).total_seconds()
+        if time_since_last < min_request_interval:
+            sleep_time = min_request_interval - time_since_last
+            logger.info(f"⏳ Rate limiting: aguardando {sleep_time:.1f}s")
+            time.sleep(sleep_time)
+    
+    last_request_time = datetime.now()
+    request_count += 1
 
     # Concurrency control to ensure one request at a time
     with request_lock:
@@ -1124,12 +1157,25 @@ def scrape():
             raise Exception("Scraper returned empty content")
             
     except Exception as e:
+        error_count += 1
         logger.error(f"Scraping failed: {str(e)}")
+        
+        # Force reset driver on critical errors
+        if "nodriver" in str(e).lower() or "chrome" in str(e).lower():
+            logger.warning("🔄 Critical driver error detected, forcing reset...")
+            try:
+                if driver:
+                    run_async(driver.stop)
+                driver = None
+            except:
+                pass
+        
         return jsonify({
             "error": "Scraping failed",
             "details": str(e),
             "url": url,
-            "success": False
+            "success": False,
+            "error_count": error_count
         }), 500
     finally:
         # Always remove from active requests
@@ -1139,10 +1185,20 @@ def scrape():
 
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
+    """Health check endpoint com monitoramento avançado"""
+    uptime = datetime.now() - server_start_time
+    
     return jsonify({
         "status": "healthy",
-        "driver": "active" if driver else "inactive"
+        "driver": "active" if driver else "inactive",
+        "uptime_seconds": int(uptime.total_seconds()),
+        "total_requests": request_count,
+        "error_count": error_count,
+        "success_rate": f"{((request_count - error_count) / max(request_count, 1) * 100):.1f}%",
+        "active_requests": len(active_requests),
+        "queue_size": request_queue.qsize() if hasattr(request_queue, 'qsize') else 0,
+        "memory_usage": "monitoring_available",
+        "last_request": last_request_time.isoformat() if last_request_time else None
     })
 
 @app.route('/reset', methods=['POST'])
@@ -1212,5 +1268,47 @@ def force_reset_driver():
             "success": False
         }), 500
 
+# Endpoint para emergency restart
+@app.route('/emergency-restart', methods=['POST'])
+def emergency_restart():
+    """Emergency restart - força reset completo do driver"""
+    global driver, browser_mode_selected, last_chapter_url, chapter_session_count, error_count
+    try:
+        logger.warning("🚨 EMERGENCY RESTART - Resetando tudo...")
+        
+        # Reset driver
+        if driver:
+            run_async(driver.stop)
+        driver = None
+        
+        # Reset session state  
+        browser_mode_selected = None
+        last_chapter_url = None
+        chapter_session_count = 0
+        error_count = 0
+        
+        # Clear active requests
+        with request_lock:
+            active_requests.clear()
+            
+        logger.info("✅ Emergency restart concluído")
+        return jsonify({
+            "status": "Emergency restart completed",
+            "driver": "reset",
+            "session": "cleared"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in emergency restart: {str(e)}")
+        return jsonify({
+            "error": f"Emergency restart failed: {str(e)}"
+        }), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=3333)
+    try:
+        logger.info("🚀 Iniciando servidor com melhorias anti-travamento...")
+        app.run(debug=True, host='0.0.0.0', port=3333, threaded=True)
+    except KeyboardInterrupt:
+        logger.info("🛑 Servidor interrompido pelo usuário")
+    except Exception as e:
+        logger.error(f"💥 Erro crítico no servidor: {str(e)}")
