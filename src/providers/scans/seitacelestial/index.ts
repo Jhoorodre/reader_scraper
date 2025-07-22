@@ -13,7 +13,7 @@ export class SeitaCelestialProvider extends WordPressMadara {
         this.query_title_for_uri = 'h1.entry-title';
     }
 
-    async getPages(chapter) {
+    async getPages(chapter, attemptNumber = 1) {
         const response = await this.http.getInstance().get(new URL(chapter.id, this.url).toString());
         const dom = new JSDOM(response.data);
         const document = dom.window.document;

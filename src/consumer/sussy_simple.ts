@@ -189,10 +189,6 @@ async function downloadManga() {
             return;
         } else if (isBatchMode) {
             console.log('🔄 Modo batch ativado - processando múltiplas URLs...');
-            
-            // Aplicar timeouts progressivos no provider (igual ao rentry)
-            provider.applyProgressiveTimeouts();
-            
             const urlsFile = 'obra_urls.txt';
             if (!fs.existsSync(urlsFile)) {
                 console.error(`❌ Arquivo ${urlsFile} não encontrado!`);
@@ -362,9 +358,6 @@ async function downloadManga() {
                                 // Limpar arquivos temporários após sucesso
                                 cleanTempFiles();
                                 
-                                // Limpeza periódica a cada N downloads
-                                periodicCleanup();
-                                
                                 chapterSuccess = true;
                                 break;
                                 
@@ -382,9 +375,6 @@ async function downloadManga() {
                                 
                                 if (chapterAttempt === maxRetries) {
                                     console.error(`💀 Todas as ${maxRetries} tentativas falharam para capítulo: ${chapter.number}`);
-                                    // Limpeza de arquivos temporários após falha final
-                                    console.log('🧹 Limpando arquivos temporários após falha...');
-                                    cleanTempFiles();
                                 }
                             }
                         }
@@ -414,7 +404,7 @@ async function downloadManga() {
                             
                             fs.appendFileSync(reportFile, `FALHA DEFINITIVA: Capítulo ${chapter.number} - ${lastChapterError?.message}\n`);
                         }
-                    }, { concurrency: 1 });
+                    }, { concurrency: 2 });
                     
                     // Mostrar estatísticas da obra
                     chapterLogger.showWorkStats(manga.name);
@@ -439,10 +429,6 @@ async function downloadManga() {
     } catch (error) {
         console.error('Erro durante a execução:', error);
         fs.appendFileSync(reportFile, `Erro durante a execução: ${error.message}\n`);
-        
-        // Limpeza de emergência em caso de erro crítico
-        console.log('🚨 Erro crítico detectado - executando limpeza de emergência...');
-        cleanTempFiles();
     }
 }
 

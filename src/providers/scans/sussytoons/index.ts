@@ -2,7 +2,101 @@ import { JSDOM } from 'jsdom';
 import { CustomAxios } from '../../../services/axios';
 import { Chapter, Manga, Pages } from  '../../../providers/base/entities'
 import logger from '../../../utils/logger';
-import { TimeoutManager } from '../../../services/timeout_manager';
+import { TimeoutManager, ErrorType } from '../../../services/timeout_manager';
+
+class AntiBotCircuitBreaker {
+    private failures = 0;
+    private lastFailure = 0;
+    private readonly threshold = 5; // Aumentado para 5 falhas
+    private readonly cooldown = 60000; // Reduzido para 1 minuto
+    private readonly backoffMultiplier = 1.2; // Backoff mais suave
+    private readonly resetWindow = 300000; // 5 minutos para resetar contador
+    
+    public async executeWithBreaker<T>(operation: () => Promise<T>): Promise<T> {
+        // Reset automático se passou tempo suficiente
+        if (Date.now() - this.lastFailure > this.resetWindow) {
+            this.reset();
+        }
+        
+        if (this.isOpen()) {
+            const waitTime = this.getRemainingCooldown();
+            if (waitTime > 0) {
+                console.log(`🚫 Circuit breaker ativo - aguardando ${waitTime/1000}s`);
+                await this.delay(waitTime);
+            }
+            // Após o cooldown, tentar reduzir failures gradualmente
+            this.failures = Math.max(0, this.failures - 1);
+            if (this.failures === 0) {
+                console.log('🔄 Circuit breaker resetado após cooldown');
+            }
+        }
+        
+        try {
+            const result = await operation();
+            this.onSuccess();
+            return result;
+        } catch (error) {
+            // Só contar como falha se for erro relacionado a anti-bot
+            if (this.isAntiBotError(error)) {
+                this.onFailure();
+            }
+            throw error;
+        }
+    }
+    
+    private isOpen(): boolean {
+        return this.failures >= this.threshold;
+    }
+    
+    private getRemainingCooldown(): number {
+        if (!this.isOpen()) return 0;
+        const elapsed = Date.now() - this.lastFailure;
+        const dynamicCooldown = this.cooldown * Math.pow(this.backoffMultiplier, this.failures - this.threshold);
+        return Math.max(0, dynamicCooldown - elapsed);
+    }
+    
+    private onSuccess(): void {
+        this.failures = 0;
+        this.lastFailure = 0;
+    }
+    
+    private onFailure(): void {
+        this.failures++;
+        this.lastFailure = Date.now();
+        console.log(`⚠️ Circuit breaker: ${this.failures}/${this.threshold} falhas`);
+    }
+    
+    private isAntiBotError(error: any): boolean {
+        const message = error.message?.toLowerCase() || '';
+        return message.includes('anti-bot') || 
+               message.includes('ofuscado') || 
+               message.includes('cloudflare') ||
+               message.includes('just a moment') ||
+               message.includes('checking') ||
+               (error.response?.status === 403) ||
+               (error.response?.status === 429);
+    }
+    
+    private reset(): void {
+        if (this.failures > 0) {
+            console.log('🔄 Circuit breaker resetado');
+        }
+        this.failures = 0;
+        this.lastFailure = 0;
+    }
+    
+    private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    public getStatus(): { isOpen: boolean; failures: number; remainingCooldown: number } {
+        return {
+            isOpen: this.isOpen(),
+            failures: this.failures,
+            remainingCooldown: this.getRemainingCooldown()
+        };
+    }
+}
 
 export class NewSussyToonsProvider  {
     name = 'New Sussy Toons';
@@ -20,9 +114,11 @@ export class NewSussyToonsProvider  {
     private webBase = 'https://www.sussytoons.wtf';
 
     private http: CustomAxios;
+    private antiBotBreaker: AntiBotCircuitBreaker;
 
     constructor() {
         this.http = new CustomAxios(false); // Desabilita proxies externos - usa apenas proxy Python local
+        this.antiBotBreaker = new AntiBotCircuitBreaker();
     }
     
     /**
@@ -30,32 +126,60 @@ export class NewSussyToonsProvider  {
      */
     public applyProgressiveTimeouts(): void {
         const timeoutManager = TimeoutManager.getInstance();
-        const axiosTimeout = timeoutManager.getTimeout('axios');
+        const axiosTimeout = timeoutManager.getTimeoutFor('provider_operation');
         this.http.updateTimeout(axiosTimeout);
+        // this.http.applyCentralizedTimeouts(); // Removido para evitar erro de referência
+        
+        console.log(`🕐 Provider timeouts atualizados: ${axiosTimeout/1000}s`);
     }
     
     /**
      * Restaura timeouts para valores padrão
      */
     public resetTimeouts(): void {
+        const timeoutManager = TimeoutManager.getInstance();
+        timeoutManager.resetToDefaults();
         this.http.resetTimeout();
+        console.log(`🔄 Provider timeouts restaurados para padrão`);
     }
     
     /**
      * Verifica se a resposta contém JavaScript ofuscado (proteção anti-bot)
      */
     private isProtectedResponse(htmlContent: string): boolean {
-        // Detectar padrões comuns de proteção anti-bot
+        // Verifica se o conteúdo é muito pequeno (provável erro/proteção)
+        if (htmlContent.length < 1000) {
+            return true;
+        }
+        
+        // Verifica se contém apenas JavaScript sem conteúdo HTML útil
+        const hasUsefulContent = htmlContent.includes('chakra-image') || 
+                                htmlContent.includes('img') || 
+                                htmlContent.includes('chapter') ||
+                                htmlContent.includes('manga') ||
+                                htmlContent.includes('image');
+        
+        if (!hasUsefulContent) {
+            return true;
+        }
+        
+        // Detectar padrões específicos de proteção anti-bot apenas se não há conteúdo útil
         const protectionPatterns = [
-            /^\s*\{"use strict"/,  // JavaScript ofuscado
-            /const\s+[a-z]=[a-z]=>/,  // Funções arrow ofuscadas
-            /return\s+JSON\.parse\(/,  // Parse JSON obfuscado
-            /\.split\(''\)\.map\(/,   // Mapeamento de strings
-            /challenge/i,             // Cloudflare challenge
-            /turnstile/i             // Cloudflare Turnstile
+            /just\s+a\s+moment/i,         // Cloudflare "Just a moment"
+            /checking.*browser/i,         // Mensagens de verificação
+            /please.*wait/i,              // Mensagens de espera
+            /enable.*javascript/i,        // Avisos sobre JavaScript
+            /ray\s+id/i                   // Cloudflare Ray ID
         ];
         
         return protectionPatterns.some(pattern => pattern.test(htmlContent));
+    }
+    
+    /**
+     * Obtém status do circuit breaker
+     */
+    public getCircuitBreakerStatus(): { isOpen: boolean; failures: number; remainingCooldown: number } {
+        return this.antiBotBreaker.getStatus();
     }
 
     async getManga(link: string): Promise<Manga> {
@@ -89,59 +213,239 @@ export class NewSussyToonsProvider  {
         }
     }
 
-    private async getPagesWithPuppeteer(url: string): Promise<string> {
-        // Monta a URL da API, codificando a URL de destino
-        logger.info(`calling url: ${url}`);
-        const apiUrl = `http://localhost:3333/scrape?url=${encodeURIComponent(url)}`;
+    private async getPagesWithPuppeteer(url: string, attemptNumber: number = 1): Promise<string> {
+        return await this.antiBotBreaker.executeWithBreaker(async () => {
+            // Força reset do driver para cada tentativa (especialmente importante para rentry)
+            if (attemptNumber > 1) {
+                try {
+                    await this.forceResetDriver();
+                } catch (error) {
+                    console.log('⚠️ Erro ao resetar driver, continuando sem reset:', error.message);
+                }
+            }
+            
+            // Monta a URL da API, codificando a URL de destino
+            logger.info(`calling url: ${url}`);
+            const apiUrl = `http://localhost:3333/scrape?url=${encodeURIComponent(url)}`;
+            
+            const timeoutManager = TimeoutManager.getInstance();
+            const baseTimeout = timeoutManager.getTimeoutFor('bypass_cloudflare');
+            
+            // Calcular timeout progressivo mais eficiente: 45s, 54s, 65s (20% de aumento)
+            const progressiveTimeout = baseTimeout * Math.pow(1.2, attemptNumber - 1);
+            
+            // Tempo reduzido para inicialização do Chrome
+            const chromeInitTime = 500; // 0.5s para inicialização
+            
+            // Tempo reduzido para bypass Cloudflare
+            const cloudflareBypassTime = 20000; // 20s para bypass (reduzido)
+            
+            // Adicionar tempo extra apenas na primeira tentativa
+            const finalTimeout = attemptNumber === 1 ? 
+                progressiveTimeout + chromeInitTime + cloudflareBypassTime : // Chrome + Cloudflare extra
+                progressiveTimeout;
+            
+            const startTime = Date.now();
+            
+            // Verificar se devemos fazer uma pausa preventiva para evitar rate limiting
+            const preventiveDelay = timeoutManager.shouldPreventiveDelay('scrape');
+            if (preventiveDelay > 0) {
+                console.log(`⏳ Pausa preventiva de ${preventiveDelay/1000}s para evitar rate limiting...`);
+                await this.delay(preventiveDelay);
+            }
+            
+            console.log(`📡 Bypass Cloudflare (tentativa ${attemptNumber}, timeout: ${finalTimeout/1000}s)...`);
+            
+            try {
+                // Realiza a requisição à API utilizando fetch com timeout progressivo
+                const response = await Promise.race([
+                    fetch(apiUrl),
+                    new Promise<never>((_, reject) => 
+                        setTimeout(() => reject(new Error('Timeout na requisição')), finalTimeout)
+                    )
+                ]);
+
+                // Auto-recovery para servidor Python inativo
+                if (!response.ok && response.status >= 500) {
+                    console.log('🚨 Servidor Python com erro 500+, tentando emergency restart...');
+                    try {
+                        await fetch('http://localhost:3333/emergency-restart', { method: 'POST' });
+                        console.log('✅ Emergency restart executado');
+                        // Aguardar 3s para o servidor se recuperar
+                        await this.delay(3000);
+                    } catch (e) {
+                        console.log('⚠️ Emergency restart falhou, servidor pode estar completamente parado');
+                    }
+                }
+                
+                const responseTime = Date.now() - startTime;
+                timeoutManager.recordResponseTime('scrape', responseTime);
+                
+                if (!response.ok) {
+                    // Tratamento específico para rate limiting (429)
+                    if (response.status === 429) {
+                        const rateLimitDelay = timeoutManager.recordRateLimit('scrape');
+                        timeoutManager.recordError('scrape', ErrorType.RATE_LIMIT);
+                        
+                        // Aguardar o delay calculado para rate limiting
+                        await this.delay(rateLimitDelay);
+                        
+                        const error = new Error(`Erro HTTP: ${response.status}`);
+                        throw error;
+                    } else {
+                        const error = new Error(`Erro HTTP: ${response.status}`);
+                        timeoutManager.recordError('scrape', ErrorType.NETWORK);
+                        throw error;
+                    }
+                }
+                
+                const data = await response.json();
+                
+                // Verificar se o HTML contém proteção anti-bot
+                if (this.isProtectedResponse(data.html)) {
+                    timeoutManager.recordError('scrape', ErrorType.ANTI_BOT);
+                    logger.info('Proteção anti-bot detectada, aguardando bypass...');
+                    
+                    // Aguarda mais tempo para o bypass Cloudflare funcionar completamente
+                    await this.delay(8000); // Aumentado para 8s
+                    
+                    // Tenta novamente com timeout maior para dar tempo ao bypass
+                    const retryResponse = await Promise.race([
+                        fetch(apiUrl),
+                        new Promise<never>((_, reject) => 
+                            setTimeout(() => reject(new Error('Timeout no retry')), finalTimeout * 1.5)
+                        )
+                    ]);
+                    
+                    if (!retryResponse.ok) {
+                        throw new Error(`Erro HTTP no retry: ${retryResponse.status}`);
+                    }
+                    
+                    const retryData = await retryResponse.json();
+                    
+                    // Se ainda tiver proteção, aguarda mais tempo
+                    if (this.isProtectedResponse(retryData.html)) {
+                        logger.info('Ainda protegido, aguardando bypass completo...');
+                        await this.delay(15000); // Aumentado para 15s
+                        
+                        // Terceira tentativa com timeout extendido
+                        const finalResponse = await Promise.race([
+                            fetch(apiUrl),
+                            new Promise<never>((_, reject) => 
+                                setTimeout(() => reject(new Error('Timeout na tentativa final')), finalTimeout * 2)
+                            )
+                        ]);
+                        
+                        if (!finalResponse.ok) {
+                            throw new Error(`Erro HTTP na tentativa final: ${finalResponse.status}`);
+                        }
+                        
+                        const finalData = await finalResponse.json();
+                        
+                        if (this.isProtectedResponse(finalData.html)) {
+                            const error = new Error('Página protegida por anti-bot (JavaScript ofuscado detectado)');
+                            timeoutManager.recordError('scrape', ErrorType.ANTI_BOT);
+                            throw error;
+                        }
+                        
+                        return finalData.html;
+                    }
+                    
+                    return retryData.html;
+                }
+                
+                // Retorna o conteúdo HTML obtido da API
+                return data.html;
+            } catch (error) {
+                console.error("Erro ao consumir a API:", error);
+                
+                // Registrar tipo de erro
+                if (error.message.includes('Timeout')) {
+                    timeoutManager.recordError('scrape', ErrorType.TIMEOUT);
+                } else if (error.message.includes('anti-bot')) {
+                    timeoutManager.recordError('scrape', ErrorType.ANTI_BOT);
+                } else if (error.message.includes('ECONNREFUSED') || error.message.includes('ECONNRESET')) {
+                    console.error('🚨 Servidor Python (localhost:3333) não está respondendo!');
+                    console.error('🔄 Certifique-se de que o comando "python app.py" está rodando.');
+                    timeoutManager.recordError('scrape', ErrorType.NETWORK);
+                } else {
+                    timeoutManager.recordError('scrape', ErrorType.NETWORK);
+                }
+                
+                throw error;
+            }
+        });
+    }
       
-        try {
-          // Realiza a requisição à API utilizando fetch
-          const response = await fetch(apiUrl);
-      
-          // Verifica se a resposta foi satisfatória
-          if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-          }
-      
-          // Converte a resposta para JSON
-          const data = await response.json();
-          
-          // Verificar se o HTML contém proteção anti-bot
-          if (this.isProtectedResponse(data.html)) {
-            throw new Error('Página protegida por anti-bot (JavaScript ofuscado detectado)');
-          }
-      
-          // Retorna o conteúdo HTML obtido da API
-          return data.html;
-        } catch (error) {
-          console.error("Erro ao consumir a API:", error);
-          throw error;
-        }
+      private delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
       }
 
-    public async getPages(ch: Chapter): Promise<Pages> {
+    public async getPages(ch: Chapter, attemptNumber: number = 1): Promise<Pages> {
         try {
             let list: string[] = [];
-            let whileIsTrue = true;
-            let currentPage = 0;
-            let sleepTime = 10;
             
-            while (whileIsTrue) {
-                const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`);
-                const dom = new JSDOM(html);
-                //@ts-ignore
-                const images = [...dom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+            const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
+            const dom = new JSDOM(html);
+            //@ts-ignore
+            const images = [...dom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+            
+            if (images && images.length > 0) {
+                list.push(...images);
+            } else {
+                console.log(`⚠️ Tentativa ${attemptNumber}/5: 0 páginas encontradas, aguardando bypass Cloudflare...`);
                 
-                if (images) {
-                    list.push(...images);
+                // Aguarda mais tempo para o bypass Cloudflare processar completamente
+                const delay = 10000 * attemptNumber; // 10s, 20s, 30s, 40s, 50s
+                console.log(`⏳ Aguardando ${delay/1000}s para bypass Cloudflare completar...`);
+                await this.delay(delay);
+                
+                // Tentar novamente após delay
+                const retryHtml = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
+                const retryDom = new JSDOM(retryHtml);
+                //@ts-ignore
+                const retryImages = [...retryDom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+                
+                if (retryImages && retryImages.length > 0) {
+                    list.push(...retryImages);
                 }
-                    break;
             }
 
             return new Pages(ch.id, ch.number, ch.name, list);
         } catch (error) {
             logger.error(error);
             throw error;
+        }
+    }
+    
+    /**
+     * Força o reset do driver para tentar novamente com estado limpo
+     */
+    private async forceResetDriver(): Promise<void> {
+        try {
+            console.log('🔄 Forçando reset do driver para retry...');
+            const resetUrl = 'http://localhost:3333/force-reset';
+            
+            const response = await fetch(resetUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Reset failed: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('✅ Driver reset realizado com sucesso');
+            
+            // Aguardar um pouco para garantir que o driver foi totalmente resetado
+            await this.delay(2000);
+            
+        } catch (error) {
+            console.error('❌ Erro ao resetar driver:', error);
+            // Continuar mesmo se o reset falhar
         }
     }
 }

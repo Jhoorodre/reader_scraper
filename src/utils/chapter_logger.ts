@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { getMangaBasePath } from './folder';
 
 interface ChapterLog {
     workName: string;
@@ -81,6 +82,12 @@ export class ChapterLogger {
     private saveWorkLog(workLog: WorkLog, type: 'success' | 'failed'): void {
         const logPath = this.getWorkLogPath(workLog.workName, type);
         workLog.lastUpdate = new Date().toISOString();
+        
+        // Garantir que o diretório existe antes de escrever
+        const logDir = path.dirname(logPath);
+        if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
+        }
         
         // Ordenar capítulos por número (decrescente)
         workLog.chapters.sort((a, b) => {
@@ -207,22 +214,41 @@ export class ChapterLogger {
     
     // Detectar capítulos novos baseado nos logs existentes
     detectNewChapters(workName: string, availableChapters: any[]): any[] {
-        const { successful, failed } = this.readWorkChapters(workName);
+        console.log(`🔍 Verificando logs de sucesso para obra: ${workName}`);
+        console.log(`🔍 DEBUG: Capítulos disponíveis no site (${availableChapters.length}):`, availableChapters.map(ch => ch.number));
+        
+        // PRIORIDADE 1: Ler logs de sucesso
+        let { successful, failed } = this.readWorkChapters(workName);
+        
+        // PRIORIDADE 2: Verificação secundária - sincronizar com pasta manga
+        console.log(`🔄 Verificação secundária: Sincronizando com pasta manga...`);
+        this.syncLogsWithMangaFolder(workName);
+        
+        // Re-ler logs após sincronização
+        const syncedLogs = this.readWorkChapters(workName);
+        successful = syncedLogs.successful;
+        failed = syncedLogs.failed;
         
         if (successful.length === 0) {
             console.log('📋 Primeiro download desta obra - baixando todos os capítulos');
+            console.log('🔒 PRIORIDADE: Logs de sucesso serão criados e preservados');
             return availableChapters;
         }
         
-        // Encontrar o maior número de capítulo baixado com sucesso
-        const lastSuccessful = successful[0]; // Já está ordenado decrescente
-        const lastChapterNum = parseFloat(lastSuccessful.chapterNumber.replace(/[^\d.]/g, ''));
-        console.log(`📊 Último capítulo no log: ${lastSuccessful.chapterNumber} (${lastChapterNum})`);
+        // Criar lista de capítulos JÁ baixados com sucesso
+        const downloadedChapters = successful.map(s => s.chapterNumber);
+        console.log(`📊 Capítulos já baixados (${downloadedChapters.length}):`, downloadedChapters);
         
-        // Filtrar capítulos novos (número maior que o último baixado)
-        const newChapters = availableChapters.filter(chapter => {
-            const chapterNum = parseFloat(chapter.number.replace(/[^\d.]/g, ''));
-            return chapterNum > lastChapterNum;
+        // DEBUG: Comparação detalhada
+        console.log(`🔍 DEBUG: Comparando capítulos...`);
+        availableChapters.forEach(chapter => {
+            const isDownloaded = downloadedChapters.includes(chapter.number);
+            console.log(`  ${isDownloaded ? '✅' : '❌'} "${chapter.number}" - ${isDownloaded ? 'JÁ BAIXADO' : 'NOVO'}`);
+        });
+        
+        // Filtrar capítulos que NÃO estão nos logs de sucesso
+        const missingChapters = availableChapters.filter(chapter => {
+            return !downloadedChapters.includes(chapter.number);
         });
         
         // Incluir capítulos que falharam anteriormente
@@ -231,13 +257,24 @@ export class ChapterLogger {
             failedChapterNumbers.includes(chapter.number)
         );
         
-        const allToDownload = [...newChapters, ...retriableChapters];
+        // Combinar capítulos faltantes + falhas (sem duplicatas)
+        const allToDownload = [...missingChapters];
+        retriableChapters.forEach(retry => {
+            if (!allToDownload.find(ch => ch.number === retry.number)) {
+                allToDownload.push(retry);
+            }
+        });
+        
+        console.log(`🔍 DEBUG: Resultado final da detecção:`);
+        console.log(`  - Capítulos faltantes: ${missingChapters.length}`);
+        console.log(`  - Capítulos para retry: ${retriableChapters.length}`);
+        console.log(`  - Total para download: ${allToDownload.length}`);
         
         if (allToDownload.length > 0) {
-            console.log(`🆕 Detectados ${newChapters.length} capítulos novos e ${retriableChapters.length} falhas para reprocessar`);
+            console.log(`🔍 Detectados ${missingChapters.length} capítulos faltantes e ${retriableChapters.length} falhas para reprocessar`);
             allToDownload.forEach(ch => {
-                const isNew = newChapters.includes(ch);
-                console.log(`  ${isNew ? '🆕' : '🔄'} Capítulo ${ch.number}`);
+                const isMissing = missingChapters.includes(ch);
+                console.log(`  ${isMissing ? '🆕' : '🔄'} Capítulo ${ch.number}`);
             });
         } else {
             console.log('✅ Todos os capítulos já estão baixados - obra atualizada');
@@ -368,6 +405,122 @@ export class ChapterLogger {
         return files.length > 0;
     }
     
+    /**
+     * Verifica pasta manga e atualiza logs de sucesso (método secundário/backup)
+     * Prioridade: Logs primeiro, depois pasta manga para verificação
+     */
+    syncLogsWithMangaFolder(workName: string): void {
+        console.log(`🔄 Verificação secundária: Sincronizando logs com pasta manga para ${workName}`);
+        
+        const mangaDir = getMangaBasePath();
+        
+        // Procurar pasta correspondente (pode ter nome ligeiramente diferente)
+        if (!fs.existsSync(mangaDir)) {
+            console.log(`📂 Diretório manga não encontrado - usando apenas logs de sucesso`);
+            return;
+        }
+        
+        const allFolders = fs.readdirSync(mangaDir).filter(item => 
+            fs.statSync(path.join(mangaDir, item)).isDirectory()
+        );
+        
+        // Buscar pasta que corresponde ao nome da obra
+        const matchingFolder = allFolders.find(folder => 
+            folder.toLowerCase().includes(workName.toLowerCase().slice(0, 10)) ||
+            workName.toLowerCase().includes(folder.toLowerCase().slice(0, 10))
+        );
+        
+        if (!matchingFolder) {
+            console.log(`📂 Pasta manga não encontrada para ${workName} - usando apenas logs de sucesso`);
+            return;
+        }
+        
+        const workDir = path.join(mangaDir, matchingFolder);
+        console.log(`📂 Encontrada pasta: ${matchingFolder}`);
+        
+        // Ler logs de sucesso atuais
+        const { successful } = this.readWorkChapters(workName);
+        const loggedChapters = successful.map(s => s.chapterNumber);
+        
+        // Verificar capítulos na pasta manga
+        const chapters = fs.readdirSync(workDir).filter(item => 
+            fs.statSync(path.join(workDir, item)).isDirectory() && 
+            item.startsWith('Capítulo')
+        );
+        
+        let updatedCount = 0;
+        
+        for (const chapterDir of chapters) {
+            const chapterPath = path.join(workDir, chapterDir);
+            const chapterNumber = chapterDir.replace('Capítulo ', '');
+            
+            // Se capítulo não está nos logs, verificar se tem conteúdo
+            if (!loggedChapters.includes(chapterNumber)) {
+                const images = fs.readdirSync(chapterPath).filter(file => 
+                    file.endsWith('.jpg') || file.endsWith('.png') || file.endsWith('.webp')
+                );
+                
+                if (images.length > 0) {
+                    console.log(`🔄 Backup: Encontrado capítulo ${chapterNumber} na pasta (${images.length} páginas) - atualizando logs`);
+                    const chapterId = 'folder_sync'; // ID para sincronização
+                    
+                    this.saveChapterSuccess(workName, workName, chapterNumber, chapterId, images.length, chapterPath);
+                    updatedCount++;
+                }
+            }
+        }
+        
+        if (updatedCount > 0) {
+            console.log(`✅ Logs atualizados: ${updatedCount} capítulos sincronizados da pasta manga`);
+        } else {
+            console.log(`✅ Logs estão sincronizados com pasta manga`);
+        }
+    }
+
+    /**
+     * Recria logs de sucesso baseado nas pastas existentes
+     * USADO APENAS para recuperar logs perdidos - prioridade máxima
+     */
+    recreateSuccessLogsFromFiles(): void {
+        console.log('🔧 Recriando logs de sucesso baseado nos arquivos existentes...');
+        
+        const mangaDir = getMangaBasePath();
+        if (!fs.existsSync(mangaDir)) {
+            console.log('📂 Diretório manga não encontrado');
+            return;
+        }
+        
+        const works = fs.readdirSync(mangaDir).filter(item => 
+            fs.statSync(path.join(mangaDir, item)).isDirectory()
+        );
+        
+        for (const workName of works) {
+            console.log(`📝 Recriando logs para: ${workName}`);
+            const workDir = path.join(mangaDir, workName);
+            
+            const chapters = fs.readdirSync(workDir).filter(item => 
+                fs.statSync(path.join(workDir, item)).isDirectory() && 
+                item.startsWith('Capítulo')
+            );
+            
+            for (const chapterDir of chapters) {
+                const chapterPath = path.join(workDir, chapterDir);
+                const images = fs.readdirSync(chapterPath).filter(file => 
+                    file.endsWith('.jpg') || file.endsWith('.png') || file.endsWith('.webp')
+                );
+                
+                if (images.length > 0) {
+                    const chapterNumber = chapterDir.replace('Capítulo ', '');
+                    const chapterId = 'recreated'; // ID genérico para logs recriados
+                    
+                    this.saveChapterSuccess(workName, workName, chapterNumber, chapterId, images.length, chapterPath);
+                }
+            }
+        }
+        
+        console.log('✅ Logs de sucesso recriados com base nos arquivos existentes');
+    }
+
     // Migrar logs antigos (formato individual) para novo formato (JSON único)
     migrateOldLogs(): void {
         if (!fs.existsSync(this.logsDir)) {
@@ -428,10 +581,153 @@ export class ChapterLogger {
                 
                 console.log(`✅ Migração concluída: ${successChapters.length} sucessos, ${failedChapters.length} falhas migrados`);
                 
-                // Remover diretório antigo
-                fs.rmSync(oldWorkDir, { recursive: true, force: true });
-                console.log(`🗑️ Diretório antigo removido: ${oldWorkDir}`);
+                // IMPORTANTE: NUNCA remover logs de sucesso - eles são fundamentais para continuidade
+                // Logs de sucesso têm prioridade máxima e devem ser preservados sempre
+                console.log(`🔒 Logs antigos preservados em: ${oldWorkDir} (NUNCA removidos)`);
             }
         }
+    }
+    
+    // Escanear pasta manga e criar logs recursivamente
+    scanMangaFolder(mangaBasePath: string = getMangaBasePath()): void {
+        console.log(`📂 Escaneando pasta manga: ${mangaBasePath}`);
+        
+        if (!fs.existsSync(mangaBasePath)) {
+            console.log(`❌ Pasta manga não encontrada: ${mangaBasePath}`);
+            return;
+        }
+        
+        const mangaFolders = fs.readdirSync(mangaBasePath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name);
+        
+        console.log(`📚 Encontradas ${mangaFolders.length} obras na pasta manga`);
+        
+        mangaFolders.forEach(mangaName => {
+            this.scanMangaWork(mangaBasePath, mangaName);
+        });
+        
+        console.log(`✅ Escaneamento completo da pasta manga finalizado`);
+    }
+    
+    // Escanear uma obra específica na pasta manga
+    private scanMangaWork(mangaBasePath: string, mangaName: string): void {
+        const mangaPath = path.join(mangaBasePath, mangaName);
+        
+        if (!fs.existsSync(mangaPath)) {
+            return;
+        }
+        
+        const chapterFolders = fs.readdirSync(mangaPath, { withFileTypes: true })
+            .filter(dirent => dirent.isDirectory())
+            .map(dirent => dirent.name)
+            .sort((a, b) => {
+                const numA = parseFloat(a.replace(/[^\d.]/g, ''));
+                const numB = parseFloat(b.replace(/[^\d.]/g, ''));
+                return numB - numA; // Decrescente para manter padrão
+            });
+        
+        if (chapterFolders.length === 0) {
+            console.log(`⚠️ Nenhum capítulo encontrado para: ${mangaName}`);
+            return;
+        }
+        
+        console.log(`📖 Escaneando ${mangaName}: ${chapterFolders.length} capítulos`);
+        
+        // Gerar ID único para a obra baseado no nome
+        const workId = Buffer.from(mangaName).toString('base64').substring(0, 16);
+        
+        chapterFolders.forEach(chapterName => {
+            const chapterPath = path.join(mangaPath, chapterName);
+            const imageFiles = this.getImageFiles(chapterPath);
+            
+            if (imageFiles.length > 0) {
+                // Registrar capítulo como sucesso
+                this.saveChapterSuccess(
+                    mangaName,
+                    workId,
+                    chapterName,
+                    `${workId}_${chapterName}`,
+                    imageFiles.length,
+                    chapterPath
+                );
+            } else {
+                console.log(`⚠️ Capítulo sem imagens: ${mangaName} - ${chapterName}`);
+            }
+        });
+    }
+    
+    // Obter arquivos de imagem de um diretório
+    private getImageFiles(dirPath: string): string[] {
+        if (!fs.existsSync(dirPath)) {
+            return [];
+        }
+        
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+        
+        return fs.readdirSync(dirPath)
+            .filter(file => {
+                const ext = path.extname(file).toLowerCase();
+                return imageExtensions.includes(ext);
+            })
+            .sort((a, b) => {
+                const numA = parseInt(a.match(/\d+/)?.[0] || '0');
+                const numB = parseInt(b.match(/\d+/)?.[0] || '0');
+                return numA - numB;
+            });
+    }
+    
+    // Recriar todos os logs baseados na pasta manga
+    rebuildLogsFromManga(mangaBasePath: string = getMangaBasePath()): void {
+        console.log(`🔄 Recriando logs baseados na pasta manga...`);
+        
+        // Limpar logs existentes
+        if (fs.existsSync(this.successDir)) {
+            const successFiles = fs.readdirSync(this.successDir);
+            successFiles.forEach(file => {
+                fs.unlinkSync(path.join(this.successDir, file));
+            });
+        }
+        
+        // Escanear pasta manga novamente
+        this.scanMangaFolder(mangaBasePath);
+        
+        console.log(`✅ Logs recriados com sucesso`);
+    }
+    
+    // Função pública para inicializar logs baseados na pasta manga
+    initializeLogsFromManga(mangaBasePath: string = getMangaBasePath(), rebuild: boolean = false): void {
+        console.log(`🚀 Inicializando logs da pasta manga...`);
+        
+        if (rebuild) {
+            this.rebuildLogsFromManga(mangaBasePath);
+        } else {
+            this.scanMangaFolder(mangaBasePath);
+        }
+    }
+    
+    // Função para obter estatísticas dos logs
+    getLogStatistics(): { totalWorks: number, totalChapters: number, successWorks: number, failedWorks: number } {
+        const successFiles = fs.existsSync(this.successDir) ? fs.readdirSync(this.successDir) : [];
+        const failedFiles = fs.existsSync(this.failedDir) ? fs.readdirSync(this.failedDir) : [];
+        
+        let totalChapters = 0;
+        
+        successFiles.forEach(file => {
+            const filePath = path.join(this.successDir, file);
+            try {
+                const logData = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+                totalChapters += logData.chapters.length;
+            } catch (error) {
+                console.error(`Erro ao ler log: ${file}`, error);
+            }
+        });
+        
+        return {
+            totalWorks: successFiles.length + failedFiles.length,
+            totalChapters,
+            successWorks: successFiles.length,
+            failedWorks: failedFiles.length
+        };
     }
 }

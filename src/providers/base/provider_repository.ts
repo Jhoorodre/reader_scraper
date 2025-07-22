@@ -9,6 +9,6 @@ export interface ProviderRepository {
     login(): void;
     getManga(link: string): Promise<Manga>;
     getChapters(id: string): Promise<Chapter[]>;
-    getPages(ch: Chapter): Promise<Pages>;
+    getPages(ch: Chapter, attemptNumber?: number): Promise<Pages>;
     download(pages: Pages, fn: any, headers?: any, cookies?: any): Promise<void>;
 }

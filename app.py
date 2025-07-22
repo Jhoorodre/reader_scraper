@@ -8,7 +8,15 @@ import json
 import os
 import subprocess
 import platform
+import sys
+import shutil
+import tempfile
+import glob
 from flaresolverr_client import FlareSolverrClient
+
+# Add test directory to path for cf_bypass import
+sys.path.append(os.path.join(os.path.dirname(__file__), 'test'))
+from cf_bypass import CFBypass
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -19,6 +27,30 @@ app = Flask(__name__)
 # Global variables to store the driver instance and browser mode
 driver = None
 browser_mode_selected = None
+
+# Global variables for chapter session tracking
+last_chapter_url = None
+chapter_session_count = 0
+MAX_CHAPTER_SESSION = 3  # Reset driver after 3 chapters
+
+# Concurrency control aprimorado
+import threading
+import queue
+from datetime import datetime, timedelta
+
+request_lock = threading.Lock()
+active_requests = {}  # Track active requests by URL
+request_queue = queue.Queue(maxsize=10)  # Limit queue size
+max_concurrent_requests = 1  # Process one request at a time for stability
+
+# Rate limiting melhorado
+last_request_time = None
+min_request_interval = 2.0  # Minimum 2 seconds between requests
+
+# Health monitoring
+server_start_time = datetime.now()
+request_count = 0
+error_count = 0
 
 # Função para minimizar janela do Chrome automaticamente
 async def minimize_chrome_window():
@@ -58,8 +90,14 @@ async def start_driver():
             
             # Só pedir seleção do modo se não foi selecionado ainda
             if browser_mode_selected is None:
-                browser_mode_selected = input("Escolha o modo do navegador:\n1 - Normal (visível)\n2 - Minimizado automaticamente\n3 - Headless\nOpção (1-3): ").strip()
-                logger.info(f"💾 Modo selecionado: {browser_mode_selected} (será usado para todas as próximas requisições)")
+                # Verificar se há modo definido no .env primeiro
+                env_browser_mode = os.getenv('BROWSER_MODE')
+                if env_browser_mode and env_browser_mode in ['1', '2', '3']:
+                    browser_mode_selected = env_browser_mode
+                    logger.info(f"💾 Modo carregado do .env: {browser_mode_selected}")
+                else:
+                    browser_mode_selected = input("Escolha o modo do navegador:\n1 - Normal (visível)\n2 - Minimizado automaticamente\n3 - Headless\nOpção (1-3): ").strip()
+                    logger.info(f"💾 Modo selecionado: {browser_mode_selected} (será usado para todas as próximas requisições)")
             else:
                 logger.info(f"🔄 Reutilizando modo selecionado: {browser_mode_selected}")
             
@@ -490,191 +528,78 @@ async def handle_turnstile_and_terms(page, url):
     # Aguardar carregamento final
     await asyncio.sleep(8)
 
-async def handle_legacy_turnstile_challenge(page):
-    """Handle Cloudflare Turnstile challenge specifically (versão original para fallback)"""
-    logger.info("Attempting to handle Turnstile challenge (legacy)...")
-    
+# Enhanced Turnstile challenge handler using CFBypass
+async def handle_turnstile_challenge(page):
+    """Handle Turnstile challenge using CFBypass"""
     try:
-        # Wait for turnstile elements to load
-        await asyncio.sleep(3)
+        logger.info("Starting enhanced Turnstile challenge handling with CFBypass")
         
-        # Enhanced Turnstile detection and interaction with checkbox focus
-        turnstile_handled = await page.evaluate("""
+        # Create CFBypass instance
+        cf_bypass = CFBypass(page, debug=True)
+        
+        # Run the bypass
+        success = await cf_bypass.bypass(
+            max_retries=3,
+            interval_between_retries=2,
+            reload_page_after_n_retries=2
+        )
+        
+        if success:
+            logger.info("CFBypass successfully handled Turnstile challenge")
+            return True
+        else:
+            logger.warning("CFBypass failed to handle Turnstile challenge")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Error in enhanced Turnstile handling: {e}")
+        return False
+
+# Legacy Turnstile challenge handler (fallback)
+async def handle_legacy_turnstile_challenge(page):
+    """Legacy Turnstile challenge handler as fallback"""
+    try:
+        logger.info("Starting legacy Turnstile challenge handling")
+        
+        # Wait for Turnstile to load
+        await asyncio.sleep(2)
+        
+        # Try to click Turnstile elements
+        turnstile_clicked = await page.evaluate("""
             (() => {
-                console.log('[Turnstile] Starting enhanced challenge detection...');
-                
-                // Function to simulate human-like click with proper events
-                function simulateHumanClick(element) {
-                    const rect = element.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    
-                    // Sequence of events that mimic human interaction
-                    const events = [
-                        new MouseEvent('mouseenter', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mouseover', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mousemove', { clientX: centerX - 1, clientY: centerY - 1, bubbles: true }),
-                        new MouseEvent('mousemove', { clientX: centerX, clientY: centerY, bubbles: true }),
-                        new MouseEvent('mousedown', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 }),
-                        new MouseEvent('focus', { bubbles: true }),
-                        new MouseEvent('mouseup', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 }),
-                        new MouseEvent('click', { clientX: centerX, clientY: centerY, bubbles: true, button: 0 })
-                    ];
-                    
-                    // Dispatch events with small delays
-                    events.forEach((event, index) => {
-                        setTimeout(() => element.dispatchEvent(event), index * 50);
-                    });
-                }
-                
-                // Strategy 1: Look for Turnstile checkbox specifically
-                const checkboxSelectors = [
-                    'iframe[src*="challenges.cloudflare.com"] input[type="checkbox"]',
-                    'iframe[src*="turnstile"] input[type="checkbox"]',
-                    '.cf-turnstile input[type="checkbox"]',
-                    '[data-sitekey] input[type="checkbox"]',
-                    'input[type="checkbox"][data-cf]'
-                ];
-                
-                for (const selector of checkboxSelectors) {
-                    const checkboxes = document.querySelectorAll(selector);
-                    if (checkboxes.length > 0) {
-                        console.log(`[Turnstile] Found checkbox via: ${selector}`);
-                        for (const checkbox of checkboxes) {
-                            if (!checkbox.checked) {
-                                console.log('[Turnstile] Clicking unchecked checkbox');
-                                checkbox.focus();
-                                simulateHumanClick(checkbox);
-                                return true;
-                            }
-                        }
-                    }
-                }
-                
-                // Strategy 2: Look for Turnstile iframes and try to access their content
-                const iframes = document.querySelectorAll('iframe[src*="challenges.cloudflare.com"], iframe[src*="turnstile"]');
-                console.log(`[Turnstile] Found ${iframes.length} potential turnstile iframes`);
-                
-                for (const iframe of iframes) {
-                    try {
-                        console.log('[Turnstile] Attempting to interact with iframe...');
-                        
-                        // Scroll iframe into view
-                        iframe.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        
-                        // Wait a bit for scroll
-                        setTimeout(() => {
-                            simulateHumanClick(iframe);
-                        }, 200);
-                        
-                        // Try to access iframe content if possible
-                        try {
-                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                            if (iframeDoc) {
-                                const iframeCheckbox = iframeDoc.querySelector('input[type="checkbox"]');
-                                if (iframeCheckbox && !iframeCheckbox.checked) {
-                                    console.log('[Turnstile] Found checkbox inside iframe');
-                                    iframeCheckbox.focus();
-                                    simulateHumanClick(iframeCheckbox);
-                                    return true;
-                                }
-                            }
-                        } catch (e) {
-                            console.log('[Turnstile] Cannot access iframe content (CORS):', e.message);
-                        }
-                        
-                        return true;
-                    } catch (e) {
-                        console.log('[Turnstile] Error with iframe:', e);
-                    }
-                }
-                
-                // Strategy 3: Look for Turnstile containers
                 const turnstileSelectors = [
+                    'iframe[src*="challenges.cloudflare.com"]',
+                    'iframe[src*="turnstile"]',
                     '.cf-turnstile',
                     '[data-sitekey]',
-                    '.cloudflare-turnstile',
-                    'div[data-callback]',
-                    '#turnstile-wrapper',
-                    '.turnstile-container'
+                    'input[type="checkbox"]'
                 ];
                 
                 for (const selector of turnstileSelectors) {
-                    const elements = document.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        console.log(`[Turnstile] Found turnstile container: ${selector}`);
-                        
-                        for (const element of elements) {
-                            // Scroll into view
-                            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            
-                            // Look for clickable elements
-                            const clickables = element.querySelectorAll('input[type="checkbox"], button, [role="button"], div[tabindex], span[tabindex]');
-                            for (const clickable of clickables) {
-                                try {
-                                    console.log('[Turnstile] Clicking turnstile element');
-                                    clickable.focus();
-                                    simulateHumanClick(clickable);
-                                    return true;
-                                } catch (e) {
-                                    console.log('[Turnstile] Click failed:', e);
-                                }
-                            }
-                            
-                            // If no specific clickables, try the container itself
-                            try {
-                                console.log('[Turnstile] Clicking container itself');
-                                simulateHumanClick(element);
-                                return true;
-                            } catch (e) {
-                                console.log('[Turnstile] Container click failed:', e);
-                            }
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        try {
+                            element.click();
+                            return true;
+                        } catch (e) {
+                            console.log('Click failed for', selector, e);
                         }
                     }
                 }
-                
-                // Strategy 4: Generic challenge elements
-                const challengeSelectors = [
-                    '.challenge-form input[type="checkbox"]',
-                    '.cf-challenge input[type="checkbox"]',
-                    '#challenge-stage input[type="checkbox"]',
-                    '.cf-wrapper input[type="checkbox"]',
-                    '.cf-wrapper button',
-                    'button[data-action*="challenge"]'
-                ];
-                
-                for (const selector of challengeSelectors) {
-                    const elements = document.querySelectorAll(selector);
-                    if (elements.length > 0) {
-                        console.log(`[Turnstile] Found challenge element: ${selector}`);
-                        for (const element of elements) {
-                            try {
-                                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                element.focus();
-                                simulateHumanClick(element);
-                                return true;
-                            } catch (e) {
-                                console.log('[Turnstile] Challenge element click failed:', e);
-                            }
-                        }
-                    }
-                }
-                
-                console.log('[Turnstile] No turnstile elements found or all interactions failed');
                 return false;
             })()
         """)
         
-        if turnstile_handled:
-            logger.info("Turnstile interaction completed, waiting for resolution...")
-            await asyncio.sleep(12)  # Aguardar resolução (aumentado de 5 para 12)
+        if turnstile_clicked:
+            logger.info("Turnstile element clicked, waiting for resolution...")
+            await asyncio.sleep(3)
             return True
         else:
-            logger.info("No Turnstile elements found or interaction failed")
+            logger.info("No Turnstile elements found to click")
             return False
             
     except Exception as e:
-        logger.error(f"Error handling Turnstile: {e}")
+        logger.error(f"Error in legacy Turnstile handling: {e}")
         return False
 
 # Function to wait for Cloudflare
@@ -760,13 +685,106 @@ async def wait_for_cloudflare(page, max_wait=60):
     logger.warning(f"Cloudflare wait timeout after {max_wait} seconds")
     return not cf_detected
 
-# Async scraper function with FlareSolverr fallback
+# Function to detect chapter changes and manage session - AGRESSIVE RESET
+def should_reset_driver_for_chapter(url):
+    """Reset driver for every new chapter to ensure clean state."""
+    global last_chapter_url
+    
+    # Only apply to chapter URLs
+    if '/capitulo/' not in url:
+        return False, "Not a chapter URL"
+        
+    # Use the full URL as the chapter identifier for simplicity and robustness
+    current_chapter_url = url
+    
+    if last_chapter_url is None:
+        # First chapter request - reset for clean start
+        last_chapter_url = current_chapter_url
+        return True, "First chapter request - clean start"
+    
+    if current_chapter_url != last_chapter_url:
+        logger.info(f"New chapter detected. Old: {last_chapter_url}, New: {current_chapter_url}")
+        last_chapter_url = current_chapter_url
+        return True, f"New chapter detected: {current_chapter_url}"
+    
+    # IMPORTANTE: Sempre resetar mesmo para o mesmo capítulo (rentry)
+    # Isso garante que cada tentativa tenha um browser limpo
+    return True, "Same chapter URL - resetting for clean retry"
+
+# Function to clear browser cache and cookies
+async def clear_browser_session(page):
+    """Clear browser cache, cookies, and localStorage for clean session"""
+    try:
+        logger.info("🧹 Cleaning browser session...")
+        
+        # Clear localStorage and sessionStorage
+        await page.evaluate("""
+            (() => {
+                try {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    console.log('Storage cleared');
+                } catch (e) {
+                    console.log('Error clearing storage:', e);
+                }
+            })()
+        """)
+        
+        # Clear cookies via JavaScript
+        await page.evaluate("""
+            (() => {
+                try {
+                    document.cookie.split(";").forEach(c => {
+                        const eqPos = c.indexOf("=");
+                        const name = eqPos > -1 ? c.substr(0, eqPos) : c;
+                        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+                    });
+                    console.log('Cookies cleared via JavaScript');
+                } catch (e) {
+                    console.log('Error clearing cookies:', e);
+                }
+            })()
+        """)
+        
+        # Clear browser cache if supported
+        try:
+            await page.evaluate("""
+                (() => {
+                    if ('caches' in window) {
+                        caches.keys().then(names => {
+                            names.forEach(name => {
+                                caches.delete(name);
+                            });
+                        });
+                        console.log('Cache cleared');
+                    }
+                })()
+            """)
+        except:
+            pass
+        
+        logger.info("✅ Browser session cleaned")
+        await asyncio.sleep(1)  # Small delay for cleanup to complete
+        
+    except Exception as e:
+        logger.warning(f"⚠️ Error cleaning browser session: {e}")
+        # Not critical, continue anyway
+
+# Async scraper function with FlareSolverr fallback and chapter session management
 async def scraper(url, max_retries=3):
     global driver
     retry_count = 0
     
     while retry_count < max_retries:
         try:
+            # Check if we need to reset the driver for a new chapter
+            should_reset, reset_reason = should_reset_driver_for_chapter(url)
+            if should_reset:
+                logger.info(f"🔄 Resetting driver: {reset_reason}")
+                if driver:
+                    await driver.stop()
+                driver = None
+            
             # Ensure that the driver is started
             await start_driver()
 
@@ -774,29 +792,203 @@ async def scraper(url, max_retries=3):
             logger.info(f"Navigating to: {url}")
             page = await driver.get(url)
             
-            # Lidar com termos e Turnstile usando abordagem simplificada
-            await handle_turnstile_and_terms(page, url)
+            # Clear session for new chapters (if not reset driver) - LESS FREQUENT
+            if not should_reset and '/capitulo/' in url and chapter_session_count % 5 == 0:
+                await clear_browser_session(page)
             
-            # Try to scroll to trigger lazy loading
+            # First, handle the SussyToons specific terms modal
+            await handle_sussytoons_terms(page)
+
+            # Wait for Cloudflare and handle challenges
+            logger.info("🛡️ Waiting for Cloudflare and handling challenges...")
+            await wait_for_cloudflare(page, max_wait=90)
+            
+            # ===== DELAY CRÍTICO: Aguardar página carregar completamente =====
+            logger.info("⏳ Aguardando página carregar completamente após bypass...")
+            await asyncio.sleep(2)  # Reduced delay for synchronization
+            
+            # Verificar se a página carregou o conteúdo (com tratamento de erro)
             try:
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                await asyncio.sleep(1)
-                await page.evaluate("window.scrollTo(0, 0)")
-                logger.info("Scrolled page to trigger content loading")
-            except:
-                pass
+                content_loaded = await page.evaluate("""
+                    (() => {
+                        try {
+                            const images = document.querySelectorAll('img');
+                            const bodyContent = document.body ? document.body.innerHTML.length : 0;
+                            return {
+                                imageCount: images.length,
+                                bodyLength: bodyContent,
+                                hasContent: bodyContent > 5000
+                            };
+                        } catch (e) {
+                            console.log('Erro na verificação de conteúdo:', e);
+                            return {
+                                imageCount: 0,
+                                bodyLength: 0,
+                                hasContent: false
+                            };
+                        }
+                    })()
+                """)
+                
+                # Verificar se content_loaded é válido
+                if content_loaded and isinstance(content_loaded, dict):
+                    logger.info(f"📊 Conteúdo carregado: {content_loaded.get('imageCount', 0)} imagens, {content_loaded.get('bodyLength', 0)} chars")
+                    
+                    # Se não carregou, aguardar mais
+                    if not content_loaded.get('hasContent', False):
+                        logger.info("⏳ Conteúdo insuficiente, aguardando mais 5s...")
+                        await asyncio.sleep(5)
+                else:
+                    logger.warning("⚠️ content_loaded é None ou inválido, continuando com valores padrão")
+                    content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
+                    logger.info("⏳ Aguardando 5s por precaução...")
+                    await asyncio.sleep(5)
+            
+            except Exception as e:
+                logger.error(f"🔴 Erro na verificação de conteúdo: {e}")
+                content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
+                logger.info("⏳ Aguardando 5s após erro...")
+                await asyncio.sleep(5)
+            
+            # Scroll inteligente inspirado no TypeScript
+            try:
+                logger.info("📜 Iniciando scroll inteligente para carregamento lazy...")
+                
+                # Primeira verificação: quantas imagens já temos?
+                initial_images = await page.evaluate("""
+                    () => {
+                        const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                        return images.length;
+                    }
+                """)
+                
+                logger.info(f"🖼️ Imagens iniciais detectadas: {initial_images}")
+                
+                # Se já temos imagens, scroll suave
+                if initial_images and initial_images > 0:
+                    logger.info("✅ Imagens já carregadas, fazendo scroll suave...")
+                    # Scroll suave para baixo
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: document.body.scrollHeight,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(2)  # Tempo para smooth scroll
+                    
+                    # Scroll suave para cima
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(1)  # Tempo para estabilizar
+                    
+                else:
+                    logger.info("⚠️ Nenhuma imagem inicial, fazendo scroll progressivo...")
+                    # Scroll progressivo para forçar carregamento
+                    
+                    # Primeiro: scroll por etapas
+                    steps = 5
+                    for i in range(steps):
+                        scroll_position = (i + 1) * (100 / steps)
+                        await page.evaluate(f"""
+                            () => {{
+                                const maxScroll = document.body.scrollHeight;
+                                const targetScroll = maxScroll * {scroll_position / 100};
+                                window.scrollTo(0, targetScroll);
+                            }}
+                        """)
+                        await asyncio.sleep(0.5)  # Pausa pequena entre etapas
+                        
+                        # Verificar se carregou imagens
+                        current_images = await page.evaluate("""
+                            () => {
+                                const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                                return images.length;
+                            }
+                        """)
+                        
+                        if current_images > 0:
+                            logger.info(f"🖼️ {current_images} imagens carregadas na etapa {i+1}")
+                            break
+                    
+                    # Volta ao topo suavemente
+                    await page.evaluate("""
+                        () => {
+                            window.scrollTo({
+                                top: 0,
+                                behavior: 'smooth'
+                            });
+                        }
+                    """)
+                    await asyncio.sleep(1)
+                
+                # Verificação final
+                final_images = await page.evaluate("""
+                    () => {
+                        const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                        return images.length;
+                    }
+                """)
+                
+                logger.info(f"✅ Scroll concluído. Imagens finais: {final_images}")
+                
+            except Exception as e:
+                logger.warning(f"⚠️ Erro no scroll inteligente: {e}")
+                # Fallback para scroll simples
+                try:
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    await asyncio.sleep(2)
+                    await page.evaluate("window.scrollTo(0, 0)")
+                    await asyncio.sleep(1)
+                    logger.info("✅ Fallback scroll simples executado")
+                except:
+                    logger.error("🔴 Falha completa no scroll")
+                    pass
             
             # Wait for specific content if on chapter page
             if '/capitulo/' in url:
                 logger.info("Chapter page detected, waiting for images...")
                 try:
-                    # Wait for at least one image to load
-                    await page.wait_for('img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]', timeout=20)  # Timeout aumentado de 10 para 20
+                    # Wait for at least one image to load (inspirado no app.py)
+                    await page.wait_for('img[src*=".jpg"], img[src*=".png"], img[src*=".webp"], img.chakra-image', timeout=20)
                     logger.info("Images detected on page")
+                    
+                    # Aguardar um pouco mais para garantir que todas as imagens carregaram
+                    await asyncio.sleep(2)
+                    
+                    # Verificar quantas imagens temos agora
+                    image_count = await page.evaluate("""
+                        () => {
+                            const images = document.querySelectorAll('img.chakra-image.css-8atqhb, img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]');
+                            return images.length;
+                        }
+                    """)
+                    
+                    logger.info(f"📸 Total de imagens detectadas: {image_count}")
+                    
                 except:
                     logger.warning("Timeout waiting for images")
                     # Aguardar mais um pouco mesmo se não encontrar imagens
                     await asyncio.sleep(5)
+                    
+                    # Fazer uma verificação final
+                    try:
+                        final_count = await page.evaluate("""
+                            () => {
+                                const images = document.querySelectorAll('img.chakra-image.css-8atqhb, img[src*=".jpg"], img[src*=".png"], img[src*=".webp"]');
+                                return images.length;
+                            }
+                        """)
+                        logger.info(f"🔍 Verificação final: {final_count} imagens encontradas")
+                    except:
+                        logger.warning("Erro na verificação final de imagens")
             
             # Get the full-page HTML    
             html_content = await page.get_content()
@@ -818,15 +1010,16 @@ async def scraper(url, max_retries=3):
             except:
                 pass
             
+            # Don't reset driver after successful request anymore - let chapter management handle it
             # Reset driver after successful request to avoid session issues
-            try:
-                if driver:
-                    await driver.stop()
-                    driver = None
-                    logger.info("Driver reset after successful request")
-            except Exception as reset_error:
-                logger.debug(f"Error resetting driver: {reset_error}")
-                driver = None
+            # try:
+            #     if driver:
+            #         await driver.stop()
+            #         driver = None
+            #         logger.info("Driver reset after successful request")
+            # except Exception as reset_error:
+            #     logger.debug(f"Error resetting driver: {reset_error}")
+            #     driver = None
             
             return html_content
             
@@ -847,16 +1040,16 @@ async def scraper(url, max_retries=3):
                 driver = None
             else:
                 # Try FlareSolverr as fallback if primary method fails completely
-                logger.info("Primary method failed completely, trying FlareSolverr fallback...")
+                logger.info("Primary method failed completamente, tentando fallback do FlareSolverr...")
                 try:
                     fallback_result = await try_flaresolverr_fallback(url)
                     if fallback_result:
-                        logger.info("FlareSolverr fallback successful!")
+                        logger.info("Fallback do FlareSolverr bem-sucedido!")
                         return fallback_result
                     else:
-                        logger.error("FlareSolverr fallback also failed")
+                        logger.error("Fallback do FlareSolverr também falhou")
                 except Exception as fallback_error:
-                    logger.error(f"FlareSolverr fallback error: {fallback_error}")
+                    logger.error(f"Erro no fallback do FlareSolverr: {fallback_error}")
                 raise
 
 # FlareSolverr fallback function
@@ -911,12 +1104,49 @@ def run_async(func, *args):
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
+    global last_request_time, request_count, error_count
+    
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "URL is required"}), 400
 
+    # Rate limiting - força intervalo mínimo entre requests
+    current_time = datetime.now()
+    if last_request_time:
+        time_since_last = (current_time - last_request_time).total_seconds()
+        if time_since_last < min_request_interval:
+            sleep_time = min_request_interval - time_since_last
+            logger.info(f"⏳ Rate limiting: aguardando {sleep_time:.1f}s")
+            time.sleep(sleep_time)
+    
+    last_request_time = datetime.now()
+    request_count += 1
+
+    # Concurrency control to ensure one request at a time
+    with request_lock:
+        # Check if this URL is already being processed
+        if url in active_requests:
+            return jsonify({
+                "error": "Request already in progress",
+                "details": f"URL {url} is being processed",
+                "url": url,
+                "success": False
+            }), 429
+        
+        # Check concurrent request limit
+        if len(active_requests) >= max_concurrent_requests:
+            return jsonify({
+                "error": "Too many concurrent requests",
+                "details": f"Maximum {max_concurrent_requests} concurrent requests allowed",
+                "url": url,
+                "success": False
+            }), 429
+        
+        # Mark this URL as active
+        active_requests[url] = True
+
     try:
-        logger.info(f"Scraping URL: {url}")
+        logger.info(f"Scraping URL: {url} (Active: {len(active_requests)})")
         html_content = run_async(scraper, url)
         
         if html_content:
@@ -930,20 +1160,48 @@ def scrape():
             raise Exception("Scraper returned empty content")
             
     except Exception as e:
+        error_count += 1
         logger.error(f"Scraping failed: {str(e)}")
+        
+        # Force reset driver on critical errors
+        if "nodriver" in str(e).lower() or "chrome" in str(e).lower():
+            logger.warning("🔄 Critical driver error detected, forcing reset...")
+            try:
+                if driver:
+                    run_async(driver.stop)
+                driver = None
+            except:
+                pass
+        
         return jsonify({
             "error": "Scraping failed",
             "details": str(e),
             "url": url,
-            "success": False
+            "success": False,
+            "error_count": error_count
         }), 500
+    finally:
+        # Always remove from active requests
+        with request_lock:
+            if url in active_requests:
+                del active_requests[url]
 
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint"""
+    """Health check endpoint com monitoramento avançado"""
+    uptime = datetime.now() - server_start_time
+    
     return jsonify({
         "status": "healthy",
-        "driver": "active" if driver else "inactive"
+        "driver": "active" if driver else "inactive",
+        "uptime_seconds": int(uptime.total_seconds()),
+        "total_requests": request_count,
+        "error_count": error_count,
+        "success_rate": f"{((request_count - error_count) / max(request_count, 1) * 100):.1f}%",
+        "active_requests": len(active_requests),
+        "queue_size": request_queue.qsize() if hasattr(request_queue, 'qsize') else 0,
+        "memory_usage": "monitoring_available",
+        "last_request": last_request_time.isoformat() if last_request_time else None
     })
 
 @app.route('/reset', methods=['POST'])
@@ -968,5 +1226,159 @@ def reset_browser_mode():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/session-status', methods=['GET'])
+def session_status():
+    """Get current session status"""
+    global last_chapter_url, chapter_session_count, MAX_CHAPTER_SESSION
+    return jsonify({
+        "last_chapter_url": last_chapter_url,
+        "chapter_session_count": chapter_session_count,
+        "max_chapter_session": MAX_CHAPTER_SESSION,
+        "driver_active": driver is not None
+    })
+
+@app.route('/reset-session', methods=['POST'])
+def reset_session():
+    """Reset chapter session tracking"""
+    global last_chapter_url, chapter_session_count
+    try:
+        last_chapter_url = None
+        chapter_session_count = 0
+        return jsonify({"status": "Chapter session tracking reset"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/force-reset', methods=['POST'])
+def force_reset_driver():
+    """Force reset the driver for retry attempts"""
+    global driver, last_chapter_url
+    try:
+        logger.info("🔄 Force resetting driver for retry...")
+        if driver:
+            run_async(driver.stop)
+        driver = None
+        last_chapter_url = None  # Reset chapter tracking
+        
+        return jsonify({
+            "status": "Driver force reset successfully",
+            "message": "Browser instance restarted for clean retry",
+            "success": True
+        })
+    except Exception as e:
+        logger.error(f"Error force resetting driver: {str(e)}")
+        return jsonify({
+            "error": f"Failed to force reset driver: {str(e)}",
+            "success": False
+        }), 500
+
+# Endpoint para emergency restart
+@app.route('/emergency-restart', methods=['POST'])
+def emergency_restart():
+    """Emergency restart - força reset completo do driver"""
+    global driver, browser_mode_selected, last_chapter_url, chapter_session_count, error_count
+    try:
+        logger.warning("🚨 EMERGENCY RESTART - Resetando tudo...")
+        
+        # Reset driver
+        if driver:
+            run_async(driver.stop)
+        driver = None
+        
+        # Reset session state  
+        browser_mode_selected = None
+        last_chapter_url = None
+        chapter_session_count = 0
+        error_count = 0
+        
+        # Clear active requests
+        with request_lock:
+            active_requests.clear()
+            
+        logger.info("✅ Emergency restart concluído")
+        return jsonify({
+            "status": "Emergency restart completed",
+            "driver": "reset",
+            "session": "cleared"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in emergency restart: {str(e)}")
+        return jsonify({
+            "error": f"Emergency restart failed: {str(e)}"
+        }), 500
+
+# Endpoint para limpeza de arquivos temporários
+@app.route('/cleanup-temp', methods=['POST'])
+def cleanup_temp_files():
+    """Limpa arquivos temporários do Python e coordena com TypeScript"""
+    try:
+        logger.info("🧹 Iniciando limpeza de arquivos temporários...")
+        
+        temp_dir = tempfile.gettempdir()
+        cleaned_count = 0
+        total_size = 0
+        
+        # Padrões de arquivos temporários para limpar
+        patterns = [
+            'nodriver_*',
+            'chrome_*',
+            'tmp*Cap*',
+            '*Arquiteto*',
+            '*.png',
+            '*.jpg'
+        ]
+        
+        for pattern in patterns:
+            matching_files = glob.glob(os.path.join(temp_dir, pattern))
+            for file_path in matching_files:
+                try:
+                    if os.path.isfile(file_path):
+                        file_size = os.path.getsize(file_path)
+                        os.unlink(file_path)
+                        total_size += file_size
+                        cleaned_count += 1
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path, ignore_errors=True)
+                        cleaned_count += 1
+                except Exception as e:
+                    logger.warning(f"Não foi possível limpar {file_path}: {e}")
+        
+        size_mb = total_size / (1024 * 1024)
+        logger.info(f"✅ Limpeza Python concluída: {cleaned_count} itens ({size_mb:.2f}MB)")
+        
+        # Tentar coordenar com TypeScript (chamar endpoint de limpeza)
+        try:
+            result = subprocess.run([
+                'npx', 'ts-node', '--transpileOnly', '-e',
+                'import { cleanTempFiles } from "./src/utils/folder"; cleanTempFiles();'
+            ], capture_output=True, text=True, timeout=30, cwd=os.path.dirname(__file__))
+            
+            if result.returncode == 0:
+                logger.info("✅ Coordenação com TypeScript bem-sucedida")
+            else:
+                logger.warning(f"⚠️ Erro na coordenação TypeScript: {result.stderr}")
+        except Exception as coord_error:
+            logger.warning(f"⚠️ Falha na coordenação TypeScript: {coord_error}")
+        
+        return jsonify({
+            "status": "Cleanup completed",
+            "python_cleaned": cleaned_count,
+            "size_mb": round(size_mb, 2),
+            "success": True
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in cleanup: {str(e)}")
+        return jsonify({
+            "error": f"Cleanup failed: {str(e)}",
+            "success": False
+        }), 500
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=3333)
+    try:
+        logger.info("🚀 Iniciando servidor com melhorias anti-travamento...")
+        app.run(debug=True, host='0.0.0.0', port=3333, threaded=True)
+    except KeyboardInterrupt:
+        logger.info("🛑 Servidor interrompido pelo usuário")
+    except Exception as e:
+        logger.error(f"💥 Erro crítico no servidor: {str(e)}")

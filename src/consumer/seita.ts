@@ -3,7 +3,8 @@ import Bluebird from 'bluebird';
 import { downloadImage } from '../download/images';
 import { promptUser } from '../utils/prompt';
 import { SeitaCelestialProvider } from '../providers/scans/seitacelestial';
-import path from 'path'
+import path from 'path';
+import { getMangaBasePath, cleanTempFiles } from '../utils/folder';
 
 async function downloadManga() {
     const provider = new SeitaCelestialProvider();
@@ -68,7 +69,7 @@ async function downloadManga() {
                 try {
                     // Criar o diretório para o capítulo
                     const sanitizedName = manga.name?.replace(`Capítulo`, ``).replace(/[\\\/:*?"<>|]/g, '-');  // substitui caracteres inválidos por '-'
-                    const dirPath = path.join('manga', path.normalize(sanitizedName), chapter.number.toString());
+                    const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
         
                     // Verificar se o diretório existe, se não, criar
                     if (!fs.existsSync(dirPath)) {
@@ -89,6 +90,8 @@ async function downloadManga() {
             // Registrar o sucesso ou falha do capítulo
             if (chapterSuccess) {
                 fs.appendFileSync(reportFile, `Capítulo ${chapter.number} baixado com sucesso.\n`);
+                // Limpar arquivos temporários após sucesso
+                cleanTempFiles();
             } else {
                 fs.appendFileSync(reportFile, `Falha no download do capítulo ${chapter.number}.\n`);
             }

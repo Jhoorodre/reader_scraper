@@ -14,6 +14,10 @@ export async function downloadImage(imageUrl, filePath) {
         });
 
         if (!response.ok) {
+            // Detectar se é erro 404 (imagem não encontrada no CDN)
+            if (response.status === 404) {
+                throw new Error(`Failed to fetch ${imageUrl}: Not Found`);
+            }
             throw new Error(`Failed to fetch ${imageUrl}: ${response.statusText}`);
         }
 

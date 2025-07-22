@@ -56,7 +56,7 @@ export abstract class WordPressMadara {
         return chapters.reverse();
     }
 
-    async getPages(chapter: Chapter): Promise<Pages> {
+    async getPages(chapter: Chapter, attemptNumber: number = 1): Promise<Pages> {
         let uri = new URL(chapter.id, this.url!).toString();
         uri = this.addQueryParams(uri, { style: 'list' });
         let response = await this.http.getInstance().get(uri, { timeout: this.timeout });

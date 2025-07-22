@@ -18,7 +18,7 @@ export abstract class Base implements ProviderRepository {
     abstract getChapters(id: string): Promise<Chapter[]>;
 
     // Método abstrato para obter as páginas de um capítulo (deve ser implementado pelas classes filhas)
-    abstract getPages(ch: Chapter): Promise<Pages>;
+    abstract getPages(ch: Chapter, attemptNumber?: number): Promise<Pages>;
 
     // Método concreto para realizar o download das páginas
     async download(pages: Pages, fn: any, headers?: any, cookies?: any): Promise<void> {
