@@ -1,0 +1,14 @@
+# BuzzHeavier Sync API Dependencies
+
+# Web framework
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# HTTP client
+requests==2.31.0
+
+# Image processing (opcional para validação)
+Pillow>=10.2.0
+
+# Utilitários de compatibilidade
+dataclasses; python_version < "3.7"

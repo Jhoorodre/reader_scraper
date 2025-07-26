@@ -3,3 +3,5 @@ nodriver
 undetected-chromedriver
 bs4
 requests
+Pillow
+aiohttp

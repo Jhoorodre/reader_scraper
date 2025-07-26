@@ -24,6 +24,10 @@ export class TimeoutManager {
     private responseTimeHistory: Map<string, number[]> = new Map();
     private lastProxyHealth: 'good' | 'poor' | 'critical' = 'good';
     
+    // Circuit breaker para rate limiting extremo
+    private circuitBreakerTriggered: boolean = false;
+    private circuitBreakerUntil: number = 0;
+    
     // Multiplicadores adaptativos baseados em contexto
     private readonly ADAPTIVE_MULTIPLIERS = {
         [ErrorType.ANTI_BOT]: 2.5,
@@ -45,8 +49,8 @@ export class TimeoutManager {
     // Rate limiting específico para erro 429
     private rateLimitHistory: Map<string, number[]> = new Map();
     private readonly MAX_RATE_LIMIT_DELAYS = 3;
-    private readonly RATE_LIMIT_BASE_DELAY = 15000; // 15s base (reduzido)
-    private readonly RATE_LIMIT_MULTIPLIER = 1.5; // Reduzido multiplicador
+    private readonly RATE_LIMIT_BASE_DELAY = 15000; // 15s base
+    private readonly RATE_LIMIT_MULTIPLIER = 1.5;
     
     private constructor() {
         this.resetToDefaults();
@@ -243,7 +247,59 @@ export class TimeoutManager {
         
         console.log(`⏳ Rate limit detectado (${recentRateLimits.length}/3) - aguardando ${delay/1000}s`);
         
+        // FORÇA RESET DO PROXY PYTHON EM RATE LIMITS SEVEROS
+        if (recentRateLimits.length >= 2) {
+            console.log(`🔄 Rate limit severo detectado - forçando reset do proxy Python...`);
+            this.forceProxyReset().catch(err => {
+                console.warn(`⚠️ Falha ao resetar proxy: ${err.message}`);
+            });
+        }
+        
         return delay;
+    }
+    
+    /**
+     * Ativa o circuit breaker para pausar operações
+     */
+    private triggerCircuitBreaker(): void {
+        this.circuitBreakerTriggered = true;
+        this.circuitBreakerUntil = Date.now() + 900000; // 15 minutos
+        console.log(`🔥 Circuit breaker ativado até ${new Date(this.circuitBreakerUntil).toLocaleTimeString()}`);
+    }
+    
+    /**
+     * Verifica se o circuit breaker está ativo
+     */
+    public isCircuitBreakerActive(): boolean {
+        if (this.circuitBreakerTriggered && Date.now() > this.circuitBreakerUntil) {
+            this.circuitBreakerTriggered = false;
+            console.log(`✅ Circuit breaker desativado - sistema retomado`);
+            return false;
+        }
+        return this.circuitBreakerTriggered;
+    }
+    
+    /**
+     * Obtém tempo restante do circuit breaker
+     */
+    public getCircuitBreakerTimeRemaining(): number {
+        if (!this.circuitBreakerTriggered) return 0;
+        return Math.max(0, this.circuitBreakerUntil - Date.now());
+    }
+    
+    /**
+     * Reseta manualmente o circuit breaker
+     */
+    public resetCircuitBreaker(): void {
+        if (this.circuitBreakerTriggered) {
+            this.circuitBreakerTriggered = false;
+            this.circuitBreakerUntil = 0;
+            console.log(`🔄 Circuit breaker resetado manualmente`);
+            
+            // Limpar histórico de rate limits também
+            this.rateLimitHistory.clear();
+            console.log(`🧹 Histórico de rate limits limpo`);
+        }
     }
     
     /**
@@ -257,7 +313,7 @@ export class TimeoutManager {
         const recentRateLimits = history.filter(time => now - time < 120000); // 2min
         
         if (recentRateLimits.length >= 2) {
-            return 10000; // 10s de pausa preventiva (reduzido)
+            return 10000; // 10s de pausa preventiva
         }
         
         if (recentRateLimits.length >= 1) {
@@ -304,6 +360,48 @@ export class TimeoutManager {
         if (this.lastProxyHealth !== health) {
             console.log(`🔄 Saúde do proxy atualizada: ${this.lastProxyHealth} → ${health}`);
             this.lastProxyHealth = health;
+        }
+    }
+
+    /**
+     * Força reset do proxy Python via API
+     */
+    private async forceProxyReset(): Promise<void> {
+        try {
+            const axios = require('axios');
+            
+            console.log('🔄 Tentando resetar proxy Python...');
+            
+            // Primeiro tentar force-reset
+            try {
+                const response = await axios.post('http://localhost:3333/force-reset', {}, {
+                    timeout: 5000
+                });
+                console.log('✅ Proxy Python resetado com sucesso');
+                return;
+            } catch (forceError) {
+                console.log('⚠️ Force-reset falhou, tentando reset normal...');
+            }
+            
+            // Fallback para reset normal
+            try {
+                await axios.post('http://localhost:3333/reset', {}, {
+                    timeout: 5000
+                });
+                console.log('✅ Reset normal do proxy Python executado');
+            } catch (resetError) {
+                console.log('⚠️ Reset normal falhou, tentando emergency-restart...');
+                
+                // Último recurso: emergency restart
+                await axios.post('http://localhost:3333/emergency-restart', {}, {
+                    timeout: 10000
+                });
+                console.log('✅ Emergency restart do proxy Python executado');
+            }
+            
+        } catch (error) {
+            console.warn(`❌ Todas as tentativas de reset falharam: ${error.message}`);
+            throw error;
         }
     }
 

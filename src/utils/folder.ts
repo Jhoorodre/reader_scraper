@@ -1,6 +1,74 @@
 const fs = require('fs');
 const path = require('path');
 
+// Storage monitoring e tracking melhorado
+let cleanupCount = 0;
+let lastCleanupSize = 0;
+let totalCleaned = 0;
+let totalCleanedSize = 0;
+
+interface StorageInfo {
+    total: number;
+    free: number;
+    used: number;
+    freePercent: number;
+}
+
+function getStorageInfo(): StorageInfo | null {
+    try {
+        const { execSync } = require('child_process');
+        const os = require('os');
+        
+        // Detectar plataforma e usar comando apropriado
+        if (os.platform() === 'win32') {
+            // Windows: usar PowerShell para obter info de disco
+            const drive = process.cwd().charAt(0); // C, D, etc
+            const psCommand = `Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='${drive}:'" | Select-Object Size,FreeSpace | ConvertTo-Json`;
+            const output = execSync(`powershell -Command "${psCommand}"`, { encoding: 'utf8' });
+            
+            const diskInfo = JSON.parse(output);
+            const total = parseInt(diskInfo.Size);
+            const free = parseInt(diskInfo.FreeSpace);
+            const used = total - free;
+            const freePercent = (free / total) * 100;
+            
+            return { total, free, used, freePercent };
+        } else {
+            // Linux/WSL: usar df command
+            const output = execSync('df -h . | tail -1', { encoding: 'utf8' });
+            const parts = output.trim().split(/\s+/);
+            
+            if (parts.length >= 4) {
+                const total = parseSize(parts[1]);
+                const used = parseSize(parts[2]);
+                const free = parseSize(parts[3]);
+                const freePercent = (free / total) * 100;
+                
+                return { total, free, used, freePercent };
+            }
+        }
+    } catch (error) {
+        // Fallback silencioso - não mostrar erro
+        return null;
+    }
+    return null;
+}
+
+function parseSize(sizeStr: string): number {
+    const num = parseFloat(sizeStr);
+    const unit = sizeStr.slice(-1).toLowerCase();
+    const multipliers = { 'k': 1024, 'm': 1024**2, 'g': 1024**3, 't': 1024**4 };
+    return num * (multipliers[unit] || 1);
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 export function deleteFolder(dirPath) {
     if (fs.existsSync(dirPath)) {
         fs.rmSync(dirPath, { recursive: true, force: true });
@@ -23,31 +91,87 @@ export function getMangaBasePath(): string {
     return mangaPath;
 }
 
+function getCorrectTempDir(): string {
+    const os = require('os');
+    const path = require('path');
+    
+    // Se estivermos no WSL, tentar usar o diretório temp do Windows
+    if (process.platform === 'linux' && process.env.WSL_DISTRO_NAME) {
+        const windowsTempPaths = [
+            '/mnt/c/Users/Admin/AppData/Local/Temp',
+            '/mnt/c/Windows/Temp',
+            process.env.TEMP && process.env.TEMP.replace(/\\/g, '/').replace(/^([A-Z]):/, '/mnt/$1').toLowerCase(),
+            process.env.TMP && process.env.TMP.replace(/\\/g, '/').replace(/^([A-Z]):/, '/mnt/$1').toLowerCase()
+        ].filter(Boolean);
+        
+        for (const tempPath of windowsTempPaths) {
+            try {
+                const fs = require('fs');
+                if (fs.existsSync(tempPath)) {
+                    return tempPath;
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+    }
+    
+    // Fallback para o padrão do OS
+    return os.tmpdir();
+}
+
 export function cleanTempFiles(): void {
     try {
-        const os = require('os');
-        const tempDir = os.tmpdir();
+        const tempDir = getCorrectTempDir();
         
-        // Padrões expandidos para incluir arquivos de imagem temporários
+        console.log(`🧹 [CLEANUP] Iniciando limpeza em: ${tempDir}`);
+        
+        // Primeiro, limpar arquivos temporários de download órfãos
+        try {
+            const { cleanupOrphanedTempFiles } = require('../download/images');
+            const orphanResult = cleanupOrphanedTempFiles();
+            if (orphanResult.cleaned > 0) {
+                console.log(`🗑️ [CLEANUP] Arquivos órfãos de download: ${orphanResult.cleaned} (${formatBytes(orphanResult.totalSize)})`);
+                totalCleaned += orphanResult.cleaned;
+                totalCleanedSize += orphanResult.totalSize;
+            }
+        } catch (importError) {
+            console.warn('⚠️ [CLEANUP] Não foi possível importar limpeza de orphaned files:', importError.message);
+        }
+        
+        // Padrões expandidos e mais agressivos
         const patterns = [
             'node-compile-cache',
             'chrome_*',
             'puppeteer_*',
             'nodriver_*',
-            // Novos padrões para arquivos de imagem temporários
-            '*Cap*',           // Arquivos com "Cap" no nome
-            '*.png',           // Imagens PNG temporárias
-            '*.jpg',           // Imagens JPG temporárias
-            '*.jpeg',          // Imagens JPEG temporárias
-            '*Arquiteto*',     // Padrão específico para manga "Arquiteto de Dungeons"
-            '*_Cap*',          // Arquivos com prefixo + "Cap"
-            'tmp*',            // Arquivos temporários genéricos
-            'temp*',           // Arquivos temporários genéricos
-            // Novos padrões para arquivos .tmp bloqueados
-            '*.tmp',           // Todos os arquivos .tmp
-            '*-*-*-*-*.tmp',   // UUIDs .tmp (formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.tmp)
-            '*guid*.tmp',      // Arquivos GUID temporários
-            '*uuid*.tmp'       // Arquivos UUID temporários
+            // Padrões de imagem temporários
+            '*Cap*',           
+            '*.png',           
+            '*.jpg',           
+            '*.jpeg',          
+            '*.webp',          // Adicionar WebP
+            '*Arquiteto*',     
+            '*_Cap*',          
+            'tmp*',            
+            'temp*',           
+            // Padrões .tmp mais abrangentes
+            '*.tmp',           
+            '*-*-*-*-*.tmp',   // UUIDs
+            '*guid*.tmp',      
+            '*uuid*.tmp',
+            'download_*.jpg',  // Nossos downloads temporários (temp dir)
+            'download_*.png',  
+            'download_*.jpeg',
+            'download_*.webp',
+            '.tmp_download_*', // Nossos downloads temporários (target dir)
+            // Padrões do browser
+            'scoped_dir*',
+            'chrome-driver*',
+            'chromium*',
+            // Cache patterns
+            '*cache*',
+            '*Cache*'
         ];
         
         const items = fs.readdirSync(tempDir);
@@ -55,6 +179,22 @@ export function cleanTempFiles(): void {
         let totalSize = 0;
         
         items.forEach(item => {
+            // Ignorar arquivos específicos do sistema
+            const systemFiles = [
+                'is-SBUAT.tmp',           // VSCode update files
+                'CodeSetup-stable-',      // VSCode installers
+                'node-compile-cache',     // Node.js cache em uso
+                'vscode-',                // Outros arquivos VSCode
+                'electron-',              // Electron apps
+                'Microsoft',              // Arquivos Microsoft
+                'Windows'                 // Arquivos Windows
+            ];
+            
+            const isSystemFile = systemFiles.some(sysFile => item.includes(sysFile));
+            if (isSystemFile) {
+                return; // Pular arquivos do sistema sem tentar limpar
+            }
+            
             const shouldClean = patterns.some(pattern => {
                 if (pattern.includes('*')) {
                     // Usar regex para patterns com wildcard
@@ -83,32 +223,51 @@ export function cleanTempFiles(): void {
                     cleaned++;
                 } catch (e) {
                     // Para arquivos .tmp bloqueados, ignorar silenciosamente
-                    if (item.endsWith('.tmp') && (e.code === 'EBUSY' || e.code === 'ENOTEMPTY')) {
+                    if (item.endsWith('.tmp') && (e.code === 'EBUSY' || e.code === 'ENOTEMPTY' || e.code === 'EPERM')) {
                         // Não reportar arquivos .tmp em uso (muito comum no Windows)
                     } else {
-                        // Reportar outros erros de permissão
+                        // Reportar apenas erros inesperados
                         console.log(`⚠️ Não foi possível limpar: ${item} (${e.message})`);
                     }
                 }
             }
         });
         
+        // Atualizar contadores globais
+        cleanupCount++;
+        lastCleanupSize = totalSize;
+        totalCleaned += cleaned;
+        totalCleanedSize += totalSize;
+        
         if (cleaned > 0) {
-            const sizeMB = (totalSize / 1024 / 1024).toFixed(2);
-            console.log(`🧹 Limpeza completa: ${cleaned} itens removidos (${sizeMB}MB liberados)`);
+            console.log(`✅ [CLEANUP] Limpeza #${cleanupCount}: ${cleaned} itens (${formatBytes(totalSize)})`);
         }
+        
+        // Mostrar estatísticas totais periodicamente
+        if (cleanupCount % 10 === 0) {
+            console.log(`📊 [STATS] Total geral: ${totalCleaned} arquivos, ${formatBytes(totalCleanedSize)} liberados`);
+        }
+        
     } catch (e) {
         console.log('⚠️ Erro na limpeza de temp files:', e.message);
     }
 }
 
+// Função para obter estatísticas de limpeza
+export function getCleanupStats() {
+    return {
+        cleanupCount,
+        lastCleanupSize: formatBytes(lastCleanupSize),
+        totalCleaned,
+        totalCleanedSize: formatBytes(totalCleanedSize)
+    };
+}
+
 // Nova função para limpeza de emergência (força remoção de todos os temp files)
 export function emergencyCleanTempFiles(): void {
     try {
-        const os = require('os');
-        const tempDir = os.tmpdir();
-        
-        console.log('🚨 Iniciando limpeza de emergência...');
+        console.log('🚨 [EMERGENCY] Iniciando limpeza de emergência...');
+        const tempDir = getCorrectTempDir();
         
         const items = fs.readdirSync(tempDir);
         let cleaned = 0;
@@ -192,19 +351,78 @@ export function setupCleanupHandlers(): void {
     console.log('✅ Handlers de limpeza configurados');
 }
 
+// Limpeza leve e rápida após cada capítulo (foco em browser/Chrome)
+export function cleanupAfterChapter(): void {
+    try {
+        const tempDir = getCorrectTempDir();
+        const fs = require('fs');
+        let cleaned = 0;
+        let totalSize = 0;
+        
+        // Padrões críticos para limpeza imediata após capítulo
+        const criticalPatterns = [
+            'uc_*',           // Chrome undetected instances (maior problema)
+            'chrome_*',       // Chrome temporários
+            'nodriver_*',     // nodriver temporários
+            '*.tmp',          // Arquivos .tmp genéricos
+            '.tmp_download_*' // Nossos downloads temporários
+        ];
+        
+        const items = fs.readdirSync(tempDir);
+        
+        items.forEach(item => {
+            const shouldClean = criticalPatterns.some(pattern => {
+                const regex = new RegExp(pattern.replace(/\*/g, '.*'), 'i');
+                return regex.test(item);
+            });
+            
+            if (shouldClean) {
+                try {
+                    const itemPath = path.join(tempDir, item);
+                    const stats = fs.statSync(itemPath);
+                    
+                    if (stats.isFile()) {
+                        totalSize += stats.size;
+                        fs.unlinkSync(itemPath);
+                        cleaned++;
+                    } else if (stats.isDirectory()) {
+                        // Para diretórios uc_*, remover completamente
+                        if (item.startsWith('uc_')) {
+                            fs.rmSync(itemPath, { recursive: true, force: true });
+                            cleaned++;
+                        }
+                    }
+                } catch (e) {
+                    // Ignorar arquivos em uso silenciosamente
+                }
+            }
+        });
+        
+        if (cleaned > 0) {
+            console.log(`🧹 [CAPÍTULO] Limpeza pós-capítulo: ${cleaned} itens (${formatBytes(totalSize)})`);
+        }
+        
+    } catch (error) {
+        // Limpeza silenciosa - não interromper download por erro de limpeza
+    }
+}
+
 // Função para limpeza periódica (executar a cada N downloads)
 let downloadCount = 0;
 export function periodicCleanup(): void {
     downloadCount++;
     
-    // Limpar a cada 5 downloads
-    if (downloadCount % 5 === 0) {
+    // Limpeza leve a cada capítulo (sempre)
+    cleanupAfterChapter();
+    
+    // Limpar a cada 3 downloads (reduzido de 5)
+    if (downloadCount % 3 === 0) {
         console.log(`🔄 Limpeza periódica (${downloadCount} downloads)...`);
         cleanTempFiles();
     }
     
-    // Limpeza de emergência a cada 20 downloads
-    if (downloadCount % 20 === 0) {
+    // Limpeza de emergência a cada 10 downloads (reduzido de 20)
+    if (downloadCount % 10 === 0) {
         console.log(`🚨 Limpeza de emergência programada (${downloadCount} downloads)...`);
         emergencyCleanTempFiles();
     }

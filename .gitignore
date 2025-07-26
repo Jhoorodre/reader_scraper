@@ -10,3 +10,5 @@ __pycache__
 .claude
 .venv
 logs
+api\host\config.ini
+api/host/config.ini

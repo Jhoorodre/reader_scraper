@@ -215,6 +215,7 @@ export class NewSussyToonsProvider  {
 
     private async getPagesWithPuppeteer(url: string, attemptNumber: number = 1): Promise<string> {
         return await this.antiBotBreaker.executeWithBreaker(async () => {
+            
             // Força reset do driver para cada tentativa (especialmente importante para rentry)
             if (attemptNumber > 1) {
                 try {
@@ -265,14 +266,14 @@ export class NewSussyToonsProvider  {
                     )
                 ]);
 
-                // Auto-recovery para servidor Python inativo
+                // Auto-recovery para servidor Python inativo ou com problemas
                 if (!response.ok && response.status >= 500) {
                     console.log('🚨 Servidor Python com erro 500+, tentando emergency restart...');
                     try {
                         await fetch('http://localhost:3333/emergency-restart', { method: 'POST' });
                         console.log('✅ Emergency restart executado');
-                        // Aguardar 3s para o servidor se recuperar
-                        await this.delay(3000);
+                        // Aguardar 5s para o servidor se recuperar
+                        await this.delay(5000);
                     } catch (e) {
                         console.log('⚠️ Emergency restart falhou, servidor pode estar completamente parado');
                     }
@@ -359,14 +360,34 @@ export class NewSussyToonsProvider  {
             } catch (error) {
                 console.error("Erro ao consumir a API:", error);
                 
-                // Registrar tipo de erro
+                // Registrar tipo de erro e tentar recovery para ECONNREFUSED
                 if (error.message.includes('Timeout')) {
                     timeoutManager.recordError('scrape', ErrorType.TIMEOUT);
                 } else if (error.message.includes('anti-bot')) {
                     timeoutManager.recordError('scrape', ErrorType.ANTI_BOT);
                 } else if (error.message.includes('ECONNREFUSED') || error.message.includes('ECONNRESET')) {
                     console.error('🚨 Servidor Python (localhost:3333) não está respondendo!');
-                    console.error('🔄 Certifique-se de que o comando "python app.py" está rodando.');
+                    console.error('💡 Tentando restart automático do servidor...');
+                    
+                    // Tentar restart automático
+                    try {
+                        await this.delay(2000); // Aguardar 2s
+                        const restartResponse = await fetch('http://localhost:3333/emergency-restart', { 
+                            method: 'POST',
+                            timeout: 10000 
+                        });
+                        
+                        if (restartResponse.ok) {
+                            console.log('✅ Restart automático realizado com sucesso');
+                            await this.delay(5000); // Aguardar servidor estabilizar
+                        } else {
+                            console.log('⚠️ Restart retornou erro:', restartResponse.status);
+                        }
+                    } catch (restartError) {
+                        console.error('❌ Restart automático falhou:', restartError.message);
+                        console.error('🔄 Certifique-se de que o comando "python app.py" está rodando.');
+                    }
+                    
                     timeoutManager.recordError('scrape', ErrorType.NETWORK);
                 } else {
                     timeoutManager.recordError('scrape', ErrorType.NETWORK);
@@ -381,9 +402,23 @@ export class NewSussyToonsProvider  {
         return new Promise(resolve => setTimeout(resolve, ms));
       }
 
+    // Tracker para múltiplos 0 páginas consecutivos
+    private consecutive0Pages = 0;
+    
     public async getPages(ch: Chapter, attemptNumber: number = 1): Promise<Pages> {
         try {
             let list: string[] = [];
+            
+            // Reset driver preventivo se muitos 0 páginas consecutivos
+            if (this.consecutive0Pages >= 3 && attemptNumber === 1) {
+                console.log(`🔄 ${this.consecutive0Pages} capítulos com 0 páginas detectados - resetando driver preventivamente`);
+                try {
+                    await this.forceResetDriver();
+                    this.consecutive0Pages = 0; // Reset counter
+                } catch (error) {
+                    console.log('⚠️ Erro no reset preventivo:', error.message);
+                }
+            }
             
             const html = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
             const dom = new JSDOM(html);
@@ -392,23 +427,46 @@ export class NewSussyToonsProvider  {
             
             if (images && images.length > 0) {
                 list.push(...images);
+                console.log(`✅ ${images.length} páginas encontradas na tentativa ${attemptNumber}`);
             } else {
                 console.log(`⚠️ Tentativa ${attemptNumber}/5: 0 páginas encontradas, aguardando bypass Cloudflare...`);
                 
-                // Aguarda mais tempo para o bypass Cloudflare processar completamente
-                const delay = 10000 * attemptNumber; // 10s, 20s, 30s, 40s, 50s
+                // Estratégia de retry mais eficiente
+                const delay = Math.min(5000 + (attemptNumber * 2000), 15000); // 7s, 9s, 11s, 13s, 15s (max)
                 console.log(`⏳ Aguardando ${delay/1000}s para bypass Cloudflare completar...`);
                 await this.delay(delay);
                 
-                // Tentar novamente após delay
-                const retryHtml = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber);
-                const retryDom = new JSDOM(retryHtml);
-                //@ts-ignore
-                const retryImages = [...retryDom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
-                
-                if (retryImages && retryImages.length > 0) {
-                    list.push(...retryImages);
+                // Tentar novamente após delay com retry do HTML
+                try {
+                    const retryHtml = await this.getPagesWithPuppeteer(`${this.webBase}/capitulo/${ch.id[1]}`, attemptNumber + 1);
+                    const retryDom = new JSDOM(retryHtml);
+                    //@ts-ignore
+                    const retryImages = [...retryDom.window.document.querySelectorAll('img.chakra-image.css-8atqhb')].map(img => img.src);
+                    
+                    if (retryImages && retryImages.length > 0) {
+                        list.push(...retryImages);
+                        console.log(`✅ ${retryImages.length} páginas encontradas no retry da tentativa ${attemptNumber}`);
+                    } else {
+                        // Tentar seletores alternativos para imagens lazy loading
+                        //@ts-ignore
+                        const altImages = [...retryDom.window.document.querySelectorAll('img[src*="cdn.sussytoons"], img[data-src*="sussytoons"], img[src*="scans"]')].map(img => img.src || img.getAttribute('data-src'));
+                        
+                        if (altImages && altImages.length > 0) {
+                            list.push(...altImages.filter(src => src && src.includes('/')));
+                            console.log(`✅ ${altImages.length} páginas encontradas com seletores alternativos`);
+                        }
+                    }
+                } catch (retryError) {
+                    console.log(`⚠️ Erro no retry da tentativa ${attemptNumber}: ${retryError.message}`);
                 }
+            }
+
+            // Update consecutive 0 pages counter
+            if (list.length === 0) {
+                this.consecutive0Pages++;
+                console.log(`📊 Capítulo com 0 páginas - contador: ${this.consecutive0Pages}/3`);
+            } else {
+                this.consecutive0Pages = 0; // Reset counter on success
             }
 
             return new Pages(ch.id, ch.number, ch.name, list);

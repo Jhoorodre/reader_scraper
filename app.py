@@ -33,6 +33,11 @@ last_chapter_url = None
 chapter_session_count = 0
 MAX_CHAPTER_SESSION = 3  # Reset driver after 3 chapters
 
+# Health monitoring for hanging detection
+last_successful_request = None
+consecutive_timeouts = 0
+MAX_CONSECUTIVE_TIMEOUTS = 3
+
 # Concurrency control aprimorado
 import threading
 import queue
@@ -130,8 +135,27 @@ async def start_driver():
                     '--window-size=1920,1080' # Tela cheia como fallback
                 ]
             
+            # Detectar Chrome automaticamente no Windows
+            chrome_path = None
+            if platform.system() == "Windows":
+                chrome_paths = [
+                    r"C:\Program Files\Google\Chrome\Application\chrome.exe",
+                    r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
+                    os.path.expanduser(r"~\AppData\Local\Google\Chrome\Application\chrome.exe")
+                ]
+                
+                for path in chrome_paths:
+                    if os.path.exists(path):
+                        chrome_path = path
+                        logger.info(f"🔍 Chrome encontrado em: {chrome_path}")
+                        break
+                
+                if not chrome_path:
+                    logger.warning("⚠️ Chrome não encontrado nos caminhos padrão")
+            
             driver = await uc.start(
                 headless=headless_mode,
+                browser_executable_path=chrome_path,
                 browser_args=[
                     '--disable-blink-features=AutomationControlled',  # Anti-detecção BOT
                     '--no-sandbox',  # Necessário para VPS
@@ -602,114 +626,87 @@ async def handle_legacy_turnstile_challenge(page):
         logger.error(f"Error in legacy Turnstile handling: {e}")
         return False
 
-# Function to wait for Cloudflare
+# Simplified Function to wait for Cloudflare - ANTI-HANGING VERSION
 async def wait_for_cloudflare(page, max_wait=60):
-    """Wait for Cloudflare challenge to complete with enhanced Turnstile support"""
+    """Simplified Cloudflare wait to prevent hanging"""
     logger.info("Checking for Cloudflare challenge...")
     
     start_time = time.time()
-    cf_detected = False
-    turnstile_attempts = 0
-    max_turnstile_attempts = 3
+    check_count = 0
+    max_checks = max_wait // 3  # Max checks every 3 seconds
     
-    while time.time() - start_time < max_wait:
+    while time.time() - start_time < max_wait and check_count < max_checks:
         try:
-            # Check page title
-            title = await page.evaluate("document.title")
+            check_count += 1
+            logger.debug(f"Cloudflare check {check_count}/{max_checks}")
             
-            # Check for Cloudflare indicators
-            if any(indicator in title.lower() for indicator in ['just a moment', 'cloudflare', 'checking']):
-                cf_detected = True
-                logger.info(f"Cloudflare detected in title: {title}")
-                
-            # Check page content for Cloudflare and Turnstile
-            content = await page.evaluate("document.body ? document.body.innerText : ''")
-            if any(indicator in content.lower() for indicator in ['checking your browser', 'please wait', 'cloudflare', 'turnstile']):
-                cf_detected = True
-                logger.info("Cloudflare/Turnstile detected in content")
-                
-            # Check for Turnstile-specific elements
-            has_turnstile = await page.evaluate("""
-                (() => {
-                    const turnstileSelectors = [
-                        'iframe[src*="challenges.cloudflare.com"]',
-                        'iframe[src*="turnstile"]',
-                        '.cf-turnstile',
-                        '[data-sitekey]'
-                    ];
-                    
-                    for (const selector of turnstileSelectors) {
-                        if (document.querySelector(selector)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                })()
-            """)
+            # Simple checks with timeouts
+            try:
+                title = await asyncio.wait_for(page.evaluate("document.title"), timeout=3)
+                content_length = await asyncio.wait_for(
+                    page.evaluate("document.body ? document.body.innerHTML.length : 0"), 
+                    timeout=3
+                )
+            except asyncio.TimeoutError:
+                logger.warning("⚠️ Timeout checking page state - assuming not ready")
+                await asyncio.sleep(3)
+                continue
             
-            if has_turnstile and turnstile_attempts < max_turnstile_attempts:
-                logger.info(f"Turnstile detected, attempting new interaction (attempt {turnstile_attempts + 1})")
-                
-                # Try new enhanced method first
-                success = await handle_turnstile_challenge(page)
-                if not success:
-                    logger.info("Enhanced method failed, trying legacy method...")
-                    success = await handle_legacy_turnstile_challenge(page)
-                
-                turnstile_attempts += 1
-                cf_detected = True
-                
-            # If no Cloudflare detected and page has content, we're done
-            if not cf_detected:
-                body_html = await page.evaluate("document.body ? document.body.innerHTML.length : 0")
-                if body_html > 1000:  # Page has substantial content
-                    logger.info("Page loaded successfully, no Cloudflare detected")
-                    return True
-                    
-            # If Cloudflare was detected, wait for it to clear
-            if cf_detected:
-                current_url = await page.evaluate("window.location.href")
-                if 'challenge' not in current_url and 'cloudflare' not in title.lower():
-                    # Check if page has real content now
-                    body_html = await page.evaluate("document.body ? document.body.innerHTML.length : 0")
-                    if body_html > 1000:
-                        logger.info("Cloudflare challenge completed")
-                        return True
-                        
-            await asyncio.sleep(2)
+            # Simple detection logic
+            is_cf_page = any(indicator in title.lower() for indicator in ['just a moment', 'cloudflare', 'checking'])
+            has_content = content_length > 2000
             
+            if is_cf_page:
+                logger.info(f"Cloudflare detected: {title}")
+                await asyncio.sleep(5)  # Wait longer for CF to resolve
+                continue
+            elif has_content:
+                logger.info("Page has sufficient content - assuming ready")
+                return True
+            else:
+                logger.debug(f"Page loading... (content: {content_length} chars)")
+                await asyncio.sleep(3)
+                
         except Exception as e:
-            logger.debug(f"Error checking Cloudflare status: {e}")
-            await asyncio.sleep(2)
+            logger.warning(f"Error in Cloudflare check: {e}")
+            await asyncio.sleep(3)
             
-    logger.warning(f"Cloudflare wait timeout after {max_wait} seconds")
-    return not cf_detected
+    logger.info(f"Cloudflare wait completed after {time.time() - start_time:.1f}s")
+    return True  # Assume success to avoid hanging
 
-# Function to detect chapter changes and manage session - AGRESSIVE RESET
+# Function to detect chapter changes and manage session - OTIMIZADO
 def should_reset_driver_for_chapter(url):
-    """Reset driver for every new chapter to ensure clean state."""
-    global last_chapter_url
+    """Reset driver only when necessary to balance performance and reliability."""
+    global last_chapter_url, chapter_session_count
     
     # Only apply to chapter URLs
     if '/capitulo/' not in url:
         return False, "Not a chapter URL"
         
-    # Use the full URL as the chapter identifier for simplicity and robustness
+    # Use the full URL as the chapter identifier
     current_chapter_url = url
     
     if last_chapter_url is None:
         # First chapter request - reset for clean start
         last_chapter_url = current_chapter_url
+        chapter_session_count = 1
         return True, "First chapter request - clean start"
     
     if current_chapter_url != last_chapter_url:
         logger.info(f"New chapter detected. Old: {last_chapter_url}, New: {current_chapter_url}")
         last_chapter_url = current_chapter_url
+        chapter_session_count = 1
         return True, f"New chapter detected: {current_chapter_url}"
     
-    # IMPORTANTE: Sempre resetar mesmo para o mesmo capítulo (rentry)
-    # Isso garante que cada tentativa tenha um browser limpo
-    return True, "Same chapter URL - resetting for clean retry"
+    # Para o mesmo capítulo, resetar apenas a cada N tentativas para otimizar performance
+    chapter_session_count += 1
+    if chapter_session_count >= MAX_CHAPTER_SESSION:
+        logger.info(f"Session limit reached ({chapter_session_count}/{MAX_CHAPTER_SESSION}) - resetting for cleanup")
+        chapter_session_count = 0
+        return True, f"Session limit reached - cleanup reset"
+    
+    # Não resetar para mesma URL se ainda não atingiu o limite
+    return False, f"Reusing session ({chapter_session_count}/{MAX_CHAPTER_SESSION})"
 
 # Function to clear browser cache and cookies
 async def clear_browser_session(page):
@@ -788,9 +785,17 @@ async def scraper(url, max_retries=3):
             # Ensure that the driver is started
             await start_driver()
 
-            # Navigate to the URL
+            # Navigate to the URL with timeout
             logger.info(f"Navigating to: {url}")
-            page = await driver.get(url)
+            try:
+                page = await asyncio.wait_for(driver.get(url), timeout=30)
+                logger.info("✅ Navigation completed successfully")
+            except asyncio.TimeoutError:
+                logger.error("❌ Navigation timed out after 30s - forcing driver reset")
+                if driver:
+                    await driver.stop()
+                driver = None
+                raise Exception("Navigation timeout - browser stuck")
             
             # Clear session for new chapters (if not reset driver) - LESS FREQUENT
             if not should_reset and '/capitulo/' in url and chapter_session_count % 5 == 0:
@@ -799,36 +804,48 @@ async def scraper(url, max_retries=3):
             # First, handle the SussyToons specific terms modal
             await handle_sussytoons_terms(page)
 
-            # Wait for Cloudflare and handle challenges
+            # Wait for Cloudflare and handle challenges with timeout
             logger.info("🛡️ Waiting for Cloudflare and handling challenges...")
-            await wait_for_cloudflare(page, max_wait=90)
+            try:
+                await asyncio.wait_for(
+                    wait_for_cloudflare(page, max_wait=60), 
+                    timeout=70  # Timeout maior que max_wait interno
+                )
+                logger.info("✅ Cloudflare wait completed successfully")
+            except asyncio.TimeoutError:
+                logger.error("❌ Cloudflare wait timed out after 70s - possible infinite loop")
+                # Continue anyway but flag as potential issue
+                pass
             
             # ===== DELAY CRÍTICO: Aguardar página carregar completamente =====
             logger.info("⏳ Aguardando página carregar completamente após bypass...")
             await asyncio.sleep(2)  # Reduced delay for synchronization
             
-            # Verificar se a página carregou o conteúdo (com tratamento de erro)
+            # Verificar se a página carregou o conteúdo (com timeout)
             try:
-                content_loaded = await page.evaluate("""
-                    (() => {
-                        try {
-                            const images = document.querySelectorAll('img');
-                            const bodyContent = document.body ? document.body.innerHTML.length : 0;
-                            return {
-                                imageCount: images.length,
-                                bodyLength: bodyContent,
-                                hasContent: bodyContent > 5000
-                            };
-                        } catch (e) {
-                            console.log('Erro na verificação de conteúdo:', e);
-                            return {
-                                imageCount: 0,
-                                bodyLength: 0,
-                                hasContent: false
-                            };
-                        }
-                    })()
-                """)
+                content_loaded = await asyncio.wait_for(
+                    page.evaluate("""
+                        (() => {
+                            try {
+                                const images = document.querySelectorAll('img');
+                                const bodyContent = document.body ? document.body.innerHTML.length : 0;
+                                return {
+                                    imageCount: images.length,
+                                    bodyLength: bodyContent,
+                                    hasContent: bodyContent > 5000
+                                };
+                            } catch (e) {
+                                console.log('Erro na verificação de conteúdo:', e);
+                                return {
+                                    imageCount: 0,
+                                    bodyLength: 0,
+                                    hasContent: false
+                                };
+                            }
+                        })()
+                    """), 
+                    timeout=10  # Timeout de 10s para JavaScript evaluation
+                )
                 
                 # Verificar se content_loaded é válido
                 if content_loaded and isinstance(content_loaded, dict):
@@ -844,23 +861,35 @@ async def scraper(url, max_retries=3):
                     logger.info("⏳ Aguardando 5s por precaução...")
                     await asyncio.sleep(5)
             
+            except asyncio.TimeoutError:
+                logger.warning("⚠️ Timeout na verificação de conteúdo (10s) - possível travamento JavaScript")
+                content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
+                logger.info("⏳ Aguardando 3s após timeout...")
+                await asyncio.sleep(3)
             except Exception as e:
                 logger.error(f"🔴 Erro na verificação de conteúdo: {e}")
                 content_loaded = {'hasContent': False, 'imageCount': 0, 'bodyLength': 0}
-                logger.info("⏳ Aguardando 5s após erro...")
-                await asyncio.sleep(5)
+                logger.info("⏳ Aguardando 3s após erro...")
+                await asyncio.sleep(3)
             
             # Scroll inteligente inspirado no TypeScript
             try:
                 logger.info("📜 Iniciando scroll inteligente para carregamento lazy...")
                 
-                # Primeira verificação: quantas imagens já temos?
-                initial_images = await page.evaluate("""
-                    () => {
-                        const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
-                        return images.length;
-                    }
-                """)
+                # Primeira verificação: quantas imagens já temos? (com timeout)
+                try:
+                    initial_images = await asyncio.wait_for(
+                        page.evaluate("""
+                            () => {
+                                const images = document.querySelectorAll('img.chakra-image.css-8atqhb');
+                                return images.length;
+                            }
+                        """), 
+                        timeout=5
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("⚠️ Timeout ao verificar imagens iniciais")
+                    initial_images = 0
                 
                 logger.info(f"🖼️ Imagens iniciais detectadas: {initial_images}")
                 
@@ -1092,19 +1121,26 @@ async def try_flaresolverr_fallback(url):
         logger.error(f"Error in FlareSolverr fallback: {e}")
         return None
 
-# Helper function to run async functions in a thread
-def run_async(func, *args):
+# Helper function to run async functions in a thread with timeout
+def run_async(func, *args, timeout=30):
+    """Run async function with timeout to prevent hanging"""
     try:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        return loop.run_until_complete(func(*args))
+        
+        # Add timeout to prevent hanging
+        future = asyncio.ensure_future(func(*args), loop=loop)
+        return loop.run_until_complete(asyncio.wait_for(future, timeout=timeout))
+    except asyncio.TimeoutError:
+        logger.error(f"Timeout after {timeout}s in run_async for {func.__name__}")
+        raise Exception(f"Operation timed out after {timeout} seconds")
     except Exception as e:
         logger.error(f"Error in run_async: {str(e)}")
         raise
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
-    global last_request_time, request_count, error_count
+    global last_request_time, request_count, error_count, last_successful_request, consecutive_timeouts
     
     url = request.args.get('url')
     if not url:
@@ -1147,9 +1183,20 @@ def scrape():
 
     try:
         logger.info(f"Scraping URL: {url} (Active: {len(active_requests)})")
-        html_content = run_async(scraper, url)
+        # Use timeout mais longo para scraping completo mas detecta travamento
+        html_content = run_async(scraper, url, timeout=120)  # 2 minutos timeout
         
         if html_content:
+            # Reset timeout counter on success
+            consecutive_timeouts = 0
+            last_successful_request = datetime.now()
+            
+            # Limpeza automática após scraping bem-sucedido
+            try:
+                cleanup_temp_files_internal()
+            except Exception as cleanup_error:
+                logger.warning(f"⚠️ Erro na limpeza automática: {cleanup_error}")
+            
             return jsonify({
                 "url": url, 
                 "html": html_content,
@@ -1163,12 +1210,27 @@ def scrape():
         error_count += 1
         logger.error(f"Scraping failed: {str(e)}")
         
+        # Track consecutive timeouts for hanging detection
+        if "timeout" in str(e).lower():
+            consecutive_timeouts += 1
+            logger.warning(f"⏰ Consecutive timeouts: {consecutive_timeouts}/{MAX_CONSECUTIVE_TIMEOUTS}")
+            
+            # Force emergency restart if too many consecutive timeouts
+            if consecutive_timeouts >= MAX_CONSECUTIVE_TIMEOUTS:
+                logger.error("🚨 Too many consecutive timeouts - forcing emergency restart!")
+                try:
+                    # Emergency restart internally
+                    emergency_restart()
+                    consecutive_timeouts = 0  # Reset counter
+                except Exception as restart_error:
+                    logger.error(f"Emergency restart failed: {restart_error}")
+        
         # Force reset driver on critical errors
         if "nodriver" in str(e).lower() or "chrome" in str(e).lower():
             logger.warning("🔄 Critical driver error detected, forcing reset...")
             try:
                 if driver:
-                    run_async(driver.stop)
+                    run_async(driver.stop, timeout=5)
                 driver = None
             except:
                 pass
@@ -1188,8 +1250,25 @@ def scrape():
 
 @app.route('/health', methods=['GET'])
 def health():
-    """Health check endpoint com monitoramento avançado"""
+    """Health check endpoint com monitoramento avançado incluindo storage"""
     uptime = datetime.now() - server_start_time
+    
+    # Remover informações de storage para simplificar
+    storage_info = None
+        
+    # Obter informações de temp directory
+    temp_info = None
+    try:
+        temp_dir = tempfile.gettempdir()
+        temp_files = len([f for f in os.listdir(temp_dir) 
+                         if any(pattern in f.lower() for pattern in 
+                               ['chrome', 'nodriver', 'cap', 'arquiteto', 'download_'])])
+        temp_info = {
+            "temp_dir": temp_dir,
+            "suspicious_files": temp_files
+        }
+    except Exception as e:
+        logger.debug(f"Erro ao obter info de temp: {e}")
     
     return jsonify({
         "status": "healthy",
@@ -1201,7 +1280,9 @@ def health():
         "active_requests": len(active_requests),
         "queue_size": request_queue.qsize() if hasattr(request_queue, 'qsize') else 0,
         "memory_usage": "monitoring_available",
-        "last_request": last_request_time.isoformat() if last_request_time else None
+        "last_request": last_request_time.isoformat() if last_request_time else None,
+        "storage": storage_info,
+        "temp_files": temp_info
     })
 
 @app.route('/reset', methods=['POST'])
@@ -1209,8 +1290,11 @@ def reset_driver():
     """Reset the driver instance"""
     global driver
     try:
-        if driver:
-            run_async(driver.stop)
+        if driver is not None:
+            try:
+                run_async(driver.stop, timeout=10)  # ✅ CORRIGIDO - com timeout de 10s
+            except Exception as stop_error:
+                logger.warning(f"Erro ao parar driver: {stop_error}")
         driver = None
         return jsonify({"status": "Driver reset successfully"})
     except Exception as e:
@@ -1254,8 +1338,11 @@ def force_reset_driver():
     global driver, last_chapter_url
     try:
         logger.info("🔄 Force resetting driver for retry...")
-        if driver:
-            run_async(driver.stop)
+        if driver is not None:
+            try:
+                run_async(driver.stop, timeout=10)  # ✅ CORRIGIDO - com timeout de 10s
+            except Exception as stop_error:
+                logger.warning(f"Erro ao parar driver durante force reset: {stop_error}")
         driver = None
         last_chapter_url = None  # Reset chapter tracking
         
@@ -1279,9 +1366,35 @@ def emergency_restart():
     try:
         logger.warning("🚨 EMERGENCY RESTART - Resetando tudo...")
         
-        # Reset driver
-        if driver:
-            run_async(driver.stop)
+        # Force kill any hanging Chrome processes first
+        try:
+            import psutil
+            for proc in psutil.process_iter(['pid', 'name']):
+                if 'chrome' in proc.info['name'].lower():
+                    try:
+                        proc.kill()
+                        logger.info(f"🔪 Killed hanging Chrome process: {proc.info['pid']}")
+                    except:
+                        pass
+        except ImportError:
+            # psutil not available, try system commands
+            try:
+                if platform.system() == "Windows":
+                    subprocess.run("taskkill /f /im chrome.exe", shell=True, capture_output=True)
+                    logger.info("🔪 Killed Chrome processes via taskkill")
+                else:
+                    subprocess.run("pkill -f chrome", shell=True, capture_output=True)
+                    logger.info("🔪 Killed Chrome processes via pkill")
+            except:
+                logger.debug("Couldn't kill Chrome processes")
+        
+        # Reset driver with force timeout
+        if driver is not None:
+            try:
+                run_async(driver.stop, timeout=5)  # Reduced timeout for emergency
+            except Exception as stop_error:
+                logger.warning(f"Erro ao parar driver durante emergency restart: {stop_error}")
+                # Force None anyway
         driver = None
         
         # Reset session state  
@@ -1307,29 +1420,39 @@ def emergency_restart():
             "error": f"Emergency restart failed: {str(e)}"
         }), 500
 
-# Endpoint para limpeza de arquivos temporários
-@app.route('/cleanup-temp', methods=['POST'])
-def cleanup_temp_files():
-    """Limpa arquivos temporários do Python e coordena com TypeScript"""
+# Função interna de limpeza (sem endpoint)
+def cleanup_temp_files_internal():
+    """Limpeza automática interna após cada scraping"""
     try:
-        logger.info("🧹 Iniciando limpeza de arquivos temporários...")
+        # Detectar diretório temp correto para WSL/Windows
+        def get_correct_temp_dir():
+            import platform
+            if platform.system() == 'Linux' and os.environ.get('WSL_DISTRO_NAME'):
+                # WSL - tentar usar temp do Windows
+                windows_temp_paths = [
+                    '/mnt/c/Users/Admin/AppData/Local/Temp',
+                    '/mnt/c/Windows/Temp'
+                ]
+                for temp_path in windows_temp_paths:
+                    if os.path.exists(temp_path):
+                        return temp_path
+            return tempfile.gettempdir()
         
-        temp_dir = tempfile.gettempdir()
+        temp_dir = get_correct_temp_dir()
         cleaned_count = 0
         total_size = 0
         
-        # Padrões de arquivos temporários para limpar
-        patterns = [
-            'nodriver_*',
-            'chrome_*',
-            'tmp*Cap*',
-            '*Arquiteto*',
-            '*.png',
-            '*.jpg'
+        # Padrões críticos para limpeza rápida após scraping
+        critical_patterns = [
+            'uc_*',           # Chrome undetected instances (maior problema)
+            'nodriver_*',     # nodriver temporários
+            'chrome_*',       # Chrome temporários  
+            '*.tmp'           # Arquivos .tmp genéricos
         ]
         
-        for pattern in patterns:
+        for pattern in critical_patterns:
             matching_files = glob.glob(os.path.join(temp_dir, pattern))
+            
             for file_path in matching_files:
                 try:
                     if os.path.isfile(file_path):
@@ -1338,37 +1461,158 @@ def cleanup_temp_files():
                         total_size += file_size
                         cleaned_count += 1
                     elif os.path.isdir(file_path):
-                        shutil.rmtree(file_path, ignore_errors=True)
+                        # Para diretórios uc_*, remover completamente
+                        if os.path.basename(file_path).startswith('uc_'):
+                            shutil.rmtree(file_path, ignore_errors=True)
+                            cleaned_count += 1
+                except Exception:
+                    # Ignorar arquivos em uso silenciosamente
+                    pass
+        
+        if cleaned_count > 0:
+            size_mb = total_size / (1024 * 1024)
+            logger.info(f"🧹 [AUTO-CLEANUP] Limpeza automática: {cleaned_count} itens ({size_mb:.1f}MB)")
+        
+        return cleaned_count, total_size
+    except Exception:
+        # Limpeza silenciosa - não interromper scraping por erro de limpeza
+        return 0, 0
+
+# Endpoint para limpeza de arquivos temporários MELHORADO
+@app.route('/cleanup-temp', methods=['POST'])
+def cleanup_temp_files():
+    """Limpa arquivos temporários do Python e coordena com TypeScript"""
+    try:
+        logger.info("🧹 [PYTHON] Iniciando limpeza de arquivos temporários...")
+        
+        # Detectar diretório temp correto para WSL/Windows
+        def get_correct_temp_dir():
+            import platform
+            if platform.system() == 'Linux' and os.environ.get('WSL_DISTRO_NAME'):
+                # WSL - tentar usar temp do Windows
+                windows_temp_paths = [
+                    '/mnt/c/Users/Admin/AppData/Local/Temp',
+                    '/mnt/c/Windows/Temp'
+                ]
+                for temp_path in windows_temp_paths:
+                    if os.path.exists(temp_path):
+                        return temp_path
+            return tempfile.gettempdir()
+        
+        temp_dir = get_correct_temp_dir()
+        cleaned_count = 0
+        total_size = 0
+        
+        # Padrões expandidos e mais agressivos
+        patterns = [
+            'nodriver_*',
+            'chrome_*', 
+            'chromium*',
+            'tmp*Cap*',
+            '*Arquiteto*',
+            '*.png',
+            '*.jpg',
+            '*.jpeg', 
+            '*.webp',
+            'download_*.jpg',
+            'download_*.png', 
+            'download_*.jpeg',
+            'download_*.webp',
+            '*cache*',
+            '*Cache*',
+            'scoped_dir*',
+            'chrome-driver*',
+            '*guid*.tmp',
+            '*uuid*.tmp'
+        ]
+        
+        # Primeiro, listar o que encontramos
+        logger.info(f"🔍 [PYTHON] Verificando diretório: {temp_dir}")
+        all_items = os.listdir(temp_dir)
+        logger.info(f"📁 [PYTHON] Total de itens no temp: {len(all_items)}")
+        
+        for pattern in patterns:
+            matching_files = glob.glob(os.path.join(temp_dir, pattern))
+            logger.info(f"🎯 [PYTHON] Pattern '{pattern}': {len(matching_files)} matches")
+            
+            for file_path in matching_files:
+                try:
+                    if os.path.isfile(file_path):
+                        file_size = os.path.getsize(file_path)
+                        os.unlink(file_path)
+                        total_size += file_size
                         cleaned_count += 1
+                    elif os.path.isdir(file_path):
+                        # Calcular tamanho do diretório antes de remover
+                        dir_size = sum(os.path.getsize(os.path.join(dirpath, filename))
+                                     for dirpath, dirnames, filenames in os.walk(file_path)
+                                     for filename in filenames)
+                        shutil.rmtree(file_path, ignore_errors=True)
+                        total_size += dir_size
+                        cleaned_count += 1
+                        
                 except Exception as e:
-                    logger.warning(f"Não foi possível limpar {file_path}: {e}")
+                    if not (str(e).find('being used by another process') != -1 or 
+                           str(e).find('EBUSY') != -1):
+                        logger.warning(f"⚠️ [PYTHON] Não foi possível limpar {file_path}: {e}")
         
         size_mb = total_size / (1024 * 1024)
-        logger.info(f"✅ Limpeza Python concluída: {cleaned_count} itens ({size_mb:.2f}MB)")
+        logger.info(f"✅ [PYTHON] Limpeza concluída: {cleaned_count} itens ({size_mb:.2f}MB)")
         
-        # Tentar coordenar com TypeScript (chamar endpoint de limpeza)
+        # Coordenação melhorada com TypeScript
+        typescript_result = {"success": False, "details": "Not attempted"}
         try:
-            result = subprocess.run([
-                'npx', 'ts-node', '--transpileOnly', '-e',
-                'import { cleanTempFiles } from "./src/utils/folder"; cleanTempFiles();'
-            ], capture_output=True, text=True, timeout=30, cwd=os.path.dirname(__file__))
+            logger.info("🔗 [PYTHON] Coordenando com TypeScript...")
             
-            if result.returncode == 0:
-                logger.info("✅ Coordenação com TypeScript bem-sucedida")
-            else:
-                logger.warning(f"⚠️ Erro na coordenação TypeScript: {result.stderr}")
+            # Tentar múltiplas estratégias de coordenação
+            strategies = [
+                # Estratégia 1: Chamar diretamente a função
+                ['npx', 'ts-node', '--transpileOnly', '-e', 
+                 'import { cleanTempFiles, getCleanupStats } from "./src/utils/folder"; cleanTempFiles(); console.log("Cleanup stats:", JSON.stringify(getCleanupStats()));'],
+                
+                # Estratégia 2: Fallback simples
+                ['npx', 'ts-node', '--transpileOnly', '-e', 
+                 'const { cleanTempFiles } = require("./src/utils/folder"); cleanTempFiles();']
+            ]
+            
+            for i, cmd in enumerate(strategies):
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, 
+                                          timeout=45, cwd=os.path.dirname(__file__))
+                    
+                    if result.returncode == 0:
+                        logger.info(f"✅ [PYTHON] Coordenação TypeScript (estratégia {i+1}) bem-sucedida")
+                        if result.stdout:
+                            logger.info(f"📊 [TYPESCRIPT] Output: {result.stdout.strip()}")
+                        typescript_result = {"success": True, "strategy": i+1, "output": result.stdout}
+                        break
+                    else:
+                        logger.warning(f"⚠️ [PYTHON] Estratégia {i+1} falhou: {result.stderr.strip()}")
+                        
+                except subprocess.TimeoutExpired:
+                    logger.warning(f"⏰ [PYTHON] Estratégia {i+1} timeout")
+                except Exception as strategy_error:
+                    logger.warning(f"⚠️ [PYTHON] Estratégia {i+1} erro: {strategy_error}")
+                    
         except Exception as coord_error:
-            logger.warning(f"⚠️ Falha na coordenação TypeScript: {coord_error}")
+            logger.warning(f"⚠️ [PYTHON] Falha geral na coordenação: {coord_error}")
         
+        # Retornar estatísticas detalhadas
         return jsonify({
-            "status": "Cleanup completed",
-            "python_cleaned": cleaned_count,
-            "size_mb": round(size_mb, 2),
-            "success": True
+            "status": "Cleanup completed", 
+            "python": {
+                "cleaned": cleaned_count,
+                "size_mb": round(size_mb, 2),
+                "temp_dir": temp_dir,
+                "patterns_checked": len(patterns)
+            },
+            "typescript": typescript_result,
+            "success": True,
+            "total_freed_mb": round(size_mb, 2)
         })
         
     except Exception as e:
-        logger.error(f"Error in cleanup: {str(e)}")
+        logger.error(f"💥 [PYTHON] Error in cleanup: {str(e)}")
         return jsonify({
             "error": f"Cleanup failed: {str(e)}",
             "success": False

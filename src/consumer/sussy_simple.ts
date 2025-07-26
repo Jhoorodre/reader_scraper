@@ -6,7 +6,7 @@ import { promptUser } from '../utils/prompt';
 import path from 'path';
 import { ChapterLogger } from '../utils/chapter_logger';
 import { TimeoutManager } from '../services/timeout_manager';
-import { getMangaBasePath, cleanTempFiles, setupCleanupHandlers, periodicCleanup } from '../utils/folder';
+import { getMangaBasePath, cleanTempFiles, setupCleanupHandlers, periodicCleanup, cleanupAfterChapter } from '../utils/folder';
 
 async function executeAutoRentry(): Promise<void> {
     const chapterLogger = new ChapterLogger();
@@ -115,7 +115,8 @@ async function executeAutoRentry(): Promise<void> {
                     const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
                     chapterLogger.saveChapterSuccess(workName, failedChapter.workId, failedChapter.chapterNumber, failedChapter.chapterId, pages.pages.length, downloadPath);
                     
-                    // Limpar arquivos temporários após sucesso
+                    // Limpeza imediata e específica após capítulo baixado
+                    cleanupAfterChapter();
                     cleanTempFiles();
                     
                     reprocessSuccess = true;
@@ -355,7 +356,8 @@ async function downloadManga() {
                                 const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
                                 chapterLogger.saveChapterSuccess(manga.name, workId, chapter.number, chapter.id[1], pages.pages.length, downloadPath);
                                 
-                                // Limpar arquivos temporários após sucesso
+                                // Limpeza imediata e específica após capítulo baixado
+                                cleanupAfterChapter();
                                 cleanTempFiles();
                                 
                                 chapterSuccess = true;

@@ -4,7 +4,7 @@ import { downloadImage } from '../download/images';
 import { promptUser } from '../utils/prompt';
 import { SeitaCelestialProvider } from '../providers/scans/seitacelestial';
 import path from 'path';
-import { getMangaBasePath, cleanTempFiles } from '../utils/folder';
+import { getMangaBasePath, cleanTempFiles, cleanupAfterChapter } from '../utils/folder';
 
 async function downloadManga() {
     const provider = new SeitaCelestialProvider();
@@ -90,7 +90,9 @@ async function downloadManga() {
             // Registrar o sucesso ou falha do capítulo
             if (chapterSuccess) {
                 fs.appendFileSync(reportFile, `Capítulo ${chapter.number} baixado com sucesso.\n`);
-                // Limpar arquivos temporários após sucesso
+                
+                // Limpeza imediata e específica após capítulo baixado
+                cleanupAfterChapter();
                 cleanTempFiles();
             } else {
                 fs.appendFileSync(reportFile, `Falha no download do capítulo ${chapter.number}.\n`);
