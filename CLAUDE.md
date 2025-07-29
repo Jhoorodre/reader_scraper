@@ -46,9 +46,28 @@ npx ts-node --transpileOnly src/consumer/generic_wp.ts
 # Executar todos os testes
 npx jest
 
-# Executar teste específico
+# Executar teste específico com pattern
 npx jest --testPathPattern=provider_repository.test.ts
 npx jest --testPathPattern=base.test.ts
+
+# Executar teste específico por nome do arquivo
+npx jest src/__tests__/providers/base/base.test.ts
+npx jest src/__tests__/services/proxy_manager.test.ts
+
+# Watch mode para desenvolvimento
+npx jest --watch
+```
+
+### Build e Linting
+```bash
+# Compilar TypeScript
+npx tsc
+
+# Verificar tipos sem compilar
+npx tsc --noEmit
+
+# Executar o linter (se configurado)
+npx eslint src/**/*.ts
 ```
 
 ### Scripts NPM
@@ -64,6 +83,24 @@ npm run debug
 
 # Download específico do MangaDex
 npm run dex
+```
+
+### Servidor Python (PM2)
+```bash
+# Iniciar servidor proxy com PM2 (recomendado)
+pm2 start app.py --name "manga-proxy" --interpreter python
+
+# Status do servidor
+pm2 status
+
+# Logs em tempo real
+pm2 logs manga-proxy -f
+
+# Reiniciar servidor
+pm2 restart manga-proxy
+
+# Parar servidor
+pm2 stop manga-proxy
 ```
 
 ### Docker
@@ -190,9 +227,74 @@ logs/
 - Estatísticas de progresso por obra
 - Recovery baseado em estado persistido
 
+## API Host Service
+
+### Estrutura da API
+A pasta `api/host/` contém um serviço Flask separado para sincronização com BuzzHeavier:
+
+```
+api/host/
+├── app.py                 # Aplicação Flask principal
+├── sync_cli.py           # Interface CLI para sincronização
+├── install.py            # Script de instalação
+├── models/               # Modelos de dados
+├── routes/               # Rotas da API (files, sync)
+├── services/             # Serviços de negócio
+│   ├── buzzheavier/      # Cliente BuzzHeavier
+│   ├── file/             # Escaneamento e validação
+│   └── sync/             # Gerenciamento de sync
+├── cli/                  # Interface de linha de comando
+└── utils/                # Utilitários (config, progress)
+```
+
+### Comandos da API Host
+```bash
+# Instalar dependências específicas da API
+cd api/host && pip install -r requirements.txt
+
+# Executar servidor da API
+cd api/host && python app.py
+
+# Sincronização via CLI
+cd api/host && python sync_cli.py
+
+# Modo interativo
+cd api/host && python cli/interactive.py
+```
+
+## Configuração do Ambiente
+
+### Variáveis de Ambiente (.env)
+```bash
+# Configuração de Paths
+MANGA_BASE_PATH=/path/to/manga/downloads
+LOG_FILE_SUCCESS=./logs/success
+LOG_FILE_FAILED=./logs/failed
+
+# Configuração de Proxy
+PROXY_URL=your_proxy_url
+PROXY_USERNAME=username
+PROXY_PASSWORD=password
+
+# Configuração de Timeouts (milissegundos)
+REQUEST_TIMEOUT=15000
+DOWNLOAD_TIMEOUT=30000
+PROXY_TIMEOUT=600000
+
+# Configuração de Concorrência
+DOWNLOAD_CONCURRENCY=5
+CHAPTER_CONCURRENCY=2
+
+# Configuração do Servidor
+PROXY_SERVER_PORT=3333
+WEB_INTERFACE_PORT=8080
+```
+
 ## Observações Importantes
-- **ALWAYS** start Python proxy (`python app.py`) before TypeScript consumers
+- **ALWAYS** start Python proxy (`python app.py` ou PM2) before TypeScript consumers
 - Proxy deve estar na porta 3333 antes de executar downloaders
 - Sistema usa logs para evitar re-downloads desnecessários
 - Suporte a Docker para deployment
 - Arquivos de log servem como estado de aplicação
+- Para development, use PM2 para auto-restart do servidor Python
+- TypeScript usa ts-node com --transpileOnly para builds rápidos

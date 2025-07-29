@@ -42,6 +42,9 @@ def start_sync():
         "config": {
             "max_concurrent_uploads": 5,
             "retry_attempts": 3,
+            "conversion_mode": "original|webp|pdf",
+            "webp_quality": 85,
+            "pdf_page_size": "A4|Letter",
             ...
         }
     }

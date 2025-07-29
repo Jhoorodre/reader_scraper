@@ -78,6 +78,9 @@ class SyncConfig:
     timeout_seconds: int = 30
     chunk_size: int = 8192
     auto_consolidate: bool = False
+    conversion_mode: str = 'original'  # 'original', 'webp', 'pdf'
+    webp_quality: int = 85
+    pdf_page_size: str = 'A4'  # 'A4', 'Letter'
     
     @classmethod
     def from_dict(cls, config_dict: dict) -> 'SyncConfig':
@@ -88,5 +91,8 @@ class SyncConfig:
             retry_attempts=config_dict.get('retry_attempts', 3),
             timeout_seconds=config_dict.get('timeout_seconds', 30),
             chunk_size=config_dict.get('chunk_size', 8192),
-            auto_consolidate=config_dict.get('auto_consolidate', False)
+            auto_consolidate=config_dict.get('auto_consolidate', False),
+            conversion_mode=config_dict.get('conversion_mode', 'original'),
+            webp_quality=config_dict.get('webp_quality', 85),
+            pdf_page_size=config_dict.get('pdf_page_size', 'A4')
         )

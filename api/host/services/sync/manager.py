@@ -17,6 +17,7 @@ from utils.progress import ProgressBar, StatusDisplay
 from utils.config import state_manager
 from services.buzzheavier import BuzzHeavierClient, AuthManager, FileUploader, BatchUploader
 from services.file import FileScanner, FileValidator, HierarchyAnalyzer
+from services.conversion import ConversionService
 from .state import SyncStateManager
 from .stats import SyncStatsManager
 
@@ -40,6 +41,16 @@ class SyncManager:
         
         self.state_manager = SyncStateManager()
         self.stats_manager = SyncStatsManager()
+        
+        # Serviço de conversão (apenas se não for modo original)
+        self.conversion_service = None
+        if config.conversion_mode != 'original':
+            try:
+                self.conversion_service = ConversionService(config)
+                self.logger.info(f"Serviço de conversão inicializado: {config.conversion_mode}")
+            except ImportError as e:
+                self.logger.warning(f"Conversão desabilitada: {e}")
+                self.config.conversion_mode = 'original'
         
         # Estado de execução
         self._is_running = False
@@ -104,17 +115,26 @@ class SyncManager:
             if not space_check['sufficient']:
                 return {'success': False, 'error': 'Espaço insuficiente', 'details': space_check}
             
-            # Fase 4: Agrupamento e preparação
+            # Fase 4: Conversão (se habilitada)
+            if self.conversion_service:
+                self._current_operation = f"Convertendo arquivos ({self.config.conversion_mode})"
+                if progress_callback:
+                    progress_callback(self._current_operation, 3, 6)
+                
+                estruturas = self.conversion_service.prepare_for_upload(estruturas)
+                self.logger.info(f"Conversão {self.config.conversion_mode} aplicada a {len(estruturas)} arquivos")
+            
+            # Fase 5: Agrupamento e preparação
             self._current_operation = "Preparando upload"
             if progress_callback:
-                progress_callback(self._current_operation, 3, 5)
+                progress_callback(self._current_operation, 4, 6)
             
             upload_groups = self._prepare_upload_groups(estruturas)
             
-            # Fase 5: Upload
+            # Fase 6: Upload
             self._current_operation = "Realizando upload"
             if progress_callback:
-                progress_callback(self._current_operation, 4, 5)
+                progress_callback(self._current_operation, 5, 6)
             
             upload_result = self._execute_uploads(upload_groups, progress_callback)
             
@@ -132,6 +152,13 @@ class SyncManager:
             return {'success': False, 'error': f'Erro inesperado: {e}'}
         
         finally:
+            # Limpa arquivos temporários de conversão
+            if self.conversion_service:
+                try:
+                    self.conversion_service.cleanup_temp_files()
+                except Exception as e:
+                    self.logger.warning(f"Erro na limpeza de arquivos temporários: {e}")
+            
             with self._lock:
                 self._is_running = False
                 self._current_operation = None
