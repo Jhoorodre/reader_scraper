@@ -2,86 +2,98 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Pré-requisitos
+## Prerequisites
 - Python 3.x
-- Node.js (22) e npm/yarn
-- Chrome (para o undetected-chromedriver)
+- Node.js (22) and npm/yarn
+- Chrome (for undetected-chromedriver)
+- PM2 (for Python server auto-restart)
 
-## Configuração e Execução
+## Setup and Execution
 
-### 1. Configuração do Proxy (Python)
+### 1. Install Dependencies
 ```bash
-# Instalar dependências Python
+# Install Python dependencies
 pip install -r requirements.txt
 
-# Iniciar o servidor proxy (porta 3333)
-python app.py
+# Install Node.js dependencies
+npm install
+
+# Install PM2 for process management (recommended)
+npm install -g pm2
 ```
 
-### 2. Configuração do Downloader (TypeScript)
+### 2. Python Proxy Service Setup
 ```bash
-# Instalar dependências Node.js
-npm install  # ou yarn install
+# Start Python proxy server with PM2 (recommended - auto-restart)
+pm2 start app.py --name "manga-proxy" --interpreter python
 
-# Executar o downloader em diferentes modos:
+# Alternative: Start directly (no auto-restart)
+python app.py
 
-# Modo normal (uma obra)
+# Check server status
+pm2 status
+pm2 logs manga-proxy -f
+```
+
+### 3. TypeScript Downloader Execution
+```bash
+# Single manga download
 npx ts-node --transpileOnly src/consumer/sussy.ts
 
-# Modo batch (múltiplas obras do arquivo obra_urls.txt)
+# Batch mode (multiple mangas from obra_urls.txt)
 npx ts-node --transpileOnly src/consumer/sussy.ts urls
 
-# Modo rentry (reprocessar falhas)
+# Rentry mode (reprocess failures)
 npx ts-node --transpileOnly src/consumer/sussy.ts rentry
 
-# Outros providers
+# Other providers
 npx ts-node --transpileOnly src/consumer/seita.ts
 npx ts-node --transpileOnly src/consumer/generic_wp.ts
 ```
 
-## Comandos de Desenvolvimento
+## Development Commands
 
-### Testes
+### Testing
 ```bash
-# Executar todos os testes
+# Run all tests
 npx jest
 
-# Executar teste específico com pattern
+# Run specific test by pattern
 npx jest --testPathPattern=provider_repository.test.ts
 npx jest --testPathPattern=base.test.ts
 
-# Executar teste específico por nome do arquivo
+# Run specific test by file path
 npx jest src/__tests__/providers/base/base.test.ts
 npx jest src/__tests__/services/proxy_manager.test.ts
 
-# Watch mode para desenvolvimento
+# Watch mode for development
 npx jest --watch
 ```
 
-### Build e Linting
+### Build and Type Checking
 ```bash
-# Compilar TypeScript
+# Compile TypeScript
 npx tsc
 
-# Verificar tipos sem compilar
+# Type check without compilation
 npx tsc --noEmit
 
-# Executar o linter (se configurado)
+# Run linter (ESLint if configured)
 npx eslint src/**/*.ts
 ```
 
-### Scripts NPM
+### NPM Scripts
 ```bash
-# Modo desenvolvimento com logging formatado
+# Development mode with formatted logging (server.ts)
 npm run dev
 
-# Modo produção
+# Production mode (server.ts with HTTPS)
 npm run prod
 
-# Modo debug com inspector
+# Debug mode with inspector
 npm run debug
 
-# Download específico do MangaDex
+# MangaDex specific download
 npm run dex
 ```
 
@@ -227,74 +239,114 @@ logs/
 - Estatísticas de progresso por obra
 - Recovery baseado em estado persistido
 
-## API Host Service
+## API Host Service - BuzzHeavier Sync
 
-### Estrutura da API
-A pasta `api/host/` contém um serviço Flask separado para sincronização com BuzzHeavier:
+### Overview
+The `api/host/` directory contains a modular Flask service for BuzzHeavier synchronization with dual **REST API + CLI** architecture.
 
+### Service Structure
 ```
 api/host/
-├── app.py                 # Aplicação Flask principal
-├── sync_cli.py           # Interface CLI para sincronização
-├── install.py            # Script de instalação
-├── models/               # Modelos de dados
-├── routes/               # Rotas da API (files, sync)
-├── services/             # Serviços de negócio
-│   ├── buzzheavier/      # Cliente BuzzHeavier
-│   ├── file/             # Escaneamento e validação
-│   └── sync/             # Gerenciamento de sync
-├── cli/                  # Interface de linha de comando
-└── utils/                # Utilitários (config, progress)
+├── app.py                 # Flask application
+├── sync_cli.py           # CLI synchronization interface  
+├── install.py            # Installation script
+├── models/               # Data models (sync stats, file models)
+├── routes/               # REST API endpoints (/sync, /files)
+├── services/             # Business logic services
+│   ├── buzzheavier/      # BuzzHeavier client (auth, upload)
+│   ├── file/             # File scanning and validation
+│   └── sync/             # Sync management and state
+├── cli/                  # Command line interface
+└── utils/                # Utilities (config, progress)
 ```
 
-### Comandos da API Host
+### Setup and Usage
 ```bash
-# Instalar dependências específicas da API
+# Install API-specific dependencies
 cd api/host && pip install -r requirements.txt
 
-# Executar servidor da API
-cd api/host && python app.py
+# Automated installation
+python install.py
 
-# Sincronização via CLI
-cd api/host && python sync_cli.py
+# Interactive CLI (original mode)
+python sync_cli.py
 
-# Modo interativo
-cd api/host && python cli/interactive.py
+# Direct CLI commands
+python sync_cli.py sync /path/to/manga --token YOUR_TOKEN
+python sync_cli.py scan /path/to/manga --json
+
+# REST API server
+python app.py --port 5000
 ```
 
-## Configuração do Ambiente
-
-### Variáveis de Ambiente (.env)
+### Key REST Endpoints
 ```bash
-# Configuração de Paths
-MANGA_BASE_PATH=/path/to/manga/downloads
-LOG_FILE_SUCCESS=./logs/success
-LOG_FILE_FAILED=./logs/failed
+# Sync operations
+POST /sync/start          # Start synchronization
+GET  /sync/status         # Current status
+GET  /sync/stats          # Detailed statistics
+POST /sync/retry-failed   # Reprocess failures
 
-# Configuração de Proxy
-PROXY_URL=your_proxy_url
+# File operations  
+POST /files/scan          # Scan directory
+POST /files/validate      # Validate files
+POST /files/hierarchy     # Analyze hierarchy
+```
+
+## Environment Configuration
+
+### Environment Variables (.env)
+Copy `.env.example` and configure:
+```bash
+# Download Configuration
+MANGA_BASE_PATH=/path/to/manga/downloads
+DOWNLOAD_CONCURRENCY=5
+CHAPTER_CONCURRENCY=2
+
+# Proxy Configuration
+PROXY_URL=https://proxy.webshare.io/api/v2/proxy/list/download/[TOKEN]/-/any/username/direct/-/
 PROXY_USERNAME=username
 PROXY_PASSWORD=password
 
-# Configuração de Timeouts (milissegundos)
+# Server Configuration
+PROXY_SERVER_PORT=3333
+WEB_INTERFACE_PORT=8080
+
+# Logging Configuration
+LOG_LEVEL=info
+LOG_FILE_SUCCESS=./logs/success
+LOG_FILE_FAILED=./logs/failed
+
+# Timeout Configuration (milliseconds)
 REQUEST_TIMEOUT=15000
 DOWNLOAD_TIMEOUT=30000
 PROXY_TIMEOUT=600000
 
-# Configuração de Concorrência
-DOWNLOAD_CONCURRENCY=5
-CHAPTER_CONCURRENCY=2
-
-# Configuração do Servidor
-PROXY_SERVER_PORT=3333
-WEB_INTERFACE_PORT=8080
+# Chrome/Browser Configuration
+CHROME_PATH=/usr/bin/google-chrome
+HEADLESS=false
 ```
 
-## Observações Importantes
-- **ALWAYS** start Python proxy (`python app.py` ou PM2) before TypeScript consumers
-- Proxy deve estar na porta 3333 antes de executar downloaders
-- Sistema usa logs para evitar re-downloads desnecessários
-- Suporte a Docker para deployment
-- Arquivos de log servem como estado de aplicação
-- Para development, use PM2 para auto-restart do servidor Python
-- TypeScript usa ts-node com --transpileOnly para builds rápidos
+## Critical Workflow Notes
+
+### Startup Sequence
+1. **ALWAYS** start Python proxy service first: `pm2 start app.py --name "manga-proxy" --interpreter python`
+2. Verify proxy is running on port 3333: `curl http://localhost:3333/health`
+3. Then run TypeScript consumers: `npx ts-node --transpileOnly src/consumer/sussy.ts`
+
+### State Management
+- Log files serve as application state (avoid unnecessary re-downloads)
+- `logs/success/` and `logs/failed/` directories track chapter completion
+- `url_fails.txt` stores failed URLs for rentry mode
+- `obra_urls.txt` contains batch mode manga URLs
+
+### Performance Notes
+- Use PM2 for Python server auto-restart in development
+- TypeScript uses `ts-node --transpileOnly` for fast builds without type checking
+- System supports Docker deployment via `docker-compose.yml`
+- Multi-layer retry strategy: chapter-level → work-level → cyclic recovery (up to 10 cycles)
+
+### API Integration
+- BuzzHeavier sync service in `api/host/` is independent of main scraper
+- Can run REST API server (`python app.py`) or use CLI (`python sync_cli.py`)
+- Both maintain 100% compatibility with original CLI workflow
