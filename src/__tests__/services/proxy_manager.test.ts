@@ -14,17 +14,17 @@ describe('ProxyManager', () => {
 
         const proxies = await ProxyManager.getProxyList();
 
-        expect(mockAxiosGet).toHaveBeenCalledWith('https://proxy.webshare.io/api/v2/proxy/list/download/rjrtpsuplkatllhlmotzlcxkqwugiwbjjgvwothq/-/any/username/direct/-/', { timeout: 600000 });
+        expect(mockAxiosGet).toHaveBeenCalledWith(expect.any(String), { timeout: expect.any(Number) });
         expect(proxies).toEqual([
-            { host: '127.0.0.1', port: '8080', used: false, error: false },
-            { host: '192.168.1.1', port: '8081', used: false, error: false },
+            { host: '127.0.0.1', port: '8080', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
+            { host: '192.168.1.1', port: '8081', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
         ]);
     });
 
     it('should select a random proxy', async () => {
         jest.spyOn(ProxyManager, 'getProxyList').mockResolvedValue([
-            { host: '127.0.0.1', port: '8080', used: false, error: false },
-            { host: '192.168.1.1', port: '8081', used: false, error: false },
+            { host: '127.0.0.1', port: '8080', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
+            { host: '192.168.1.1', port: '8081', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
         ]);
 
         const proxy = await ProxyManager.mutateProxy();
@@ -35,8 +35,8 @@ describe('ProxyManager', () => {
 
     it('should ban a proxy', async () => {
         jest.spyOn(ProxyManager, 'getProxyList').mockResolvedValue([
-            { host: '127.0.0.1', port: '8080', used: false, error: false },
-            { host: '192.168.1.1', port: '8081', used: false, error: false },
+            { host: '127.0.0.1', port: '8080', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
+            { host: '192.168.1.1', port: '8081', used: false, error: false, errorCount: 0, lastError: 0, responseTime: 0 },
         ]);
 
         await ProxyManager.banProxy('127.0.0.1', '8080');

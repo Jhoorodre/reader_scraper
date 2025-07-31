@@ -169,9 +169,15 @@ Sistema orientado a **Provider Pattern** com as seguintes camadas:
   - Headers anti-detecção
   - Timeout management progressivo
 - **proxy_manager.ts**: Gerenciamento de proxies
-  - Cache LRU para listas de proxy
+  - Redis cache distribuído para listas de proxy (Phase 1)
   - Rotação automática e banimento de proxies falhos
   - Retry com backoff exponencial
+  - Graceful fallback quando Redis não disponível
+- **redis_client.ts**: Cliente Redis wrapper (Phase 1)
+  - Singleton pattern com configuração flexível
+  - Operações de cache com namespace
+  - Health checks e monitoramento
+  - Tratamento de erro e reconexão automática
 - **timeout_manager.ts**: Singleton para timeouts progressivos
   - Escalação de 50% por ciclo de retry
   - Coordenação global de timeouts (axios, proxy, download, request)
@@ -345,6 +351,7 @@ HEADLESS=false
 - TypeScript uses `ts-node --transpileOnly` for fast builds without type checking
 - System supports Docker deployment via `docker-compose.yml`
 - Multi-layer retry strategy: chapter-level → work-level → cyclic recovery (up to 10 cycles)
+- **Redis Integration**: Phase 1 implemented - ProxyManager now uses Redis for distributed caching with graceful fallback
 
 ### API Integration
 - BuzzHeavier sync service in `api/host/` is independent of main scraper

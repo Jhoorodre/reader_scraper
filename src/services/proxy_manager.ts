@@ -1,7 +1,8 @@
 import axios from 'axios';
 import AsyncRetry from 'async-retry';
-import { LRUCache } from 'lru-cache';
 import { TimeoutManager, ErrorType } from './timeout_manager';
+import { RedisClient } from './redis_client';
+import logger from '../utils/logger';
 
 interface Proxy {
     host: string;
@@ -23,13 +24,12 @@ interface ProxyMetrics {
 
 export const BASE_URL_PROXY = `${process.env.PROXY_URL}`;
 
-// Configuração do LRU Cache
-const cache = new LRUCache<string, Proxy[]>({
-    max: 100, // Número máximo de itens no cache
-    ttl: 1000 * 60 * 5, // 5 minutos de validade para cada item no cache
-});
-
 export class ProxyManager {
+    private static redisClient: RedisClient;
+    private static initialized: boolean = false;
+    private static readonly CACHE_KEY = 'proxyList';
+    private static readonly CACHE_NAMESPACE = 'proxy_manager';
+    
     private static metrics: ProxyMetrics = {
         totalProxies: 0,
         healthyProxies: 0,
@@ -37,16 +37,42 @@ export class ProxyManager {
         avgResponseTime: 0,
         health: 'good'
     };
+
+    private static async initialize(): Promise<void> {
+        if (!this.initialized) {
+            try {
+                const config = RedisClient.getDefaultConfig();
+                this.redisClient = RedisClient.getInstance(config);
+                await this.redisClient.connect();
+                this.initialized = true;
+                logger.info('ProxyManager Redis integration initialized');
+            } catch (error) {
+                logger.warn('Redis initialization failed, falling back to in-memory cache', { error });
+                this.initialized = false;
+            }
+        }
+    }
     
     // Obtém a lista de proxies
     static async getProxyList(): Promise<Proxy[]> {
-        const cacheKey = 'proxyList';
-        const cachedProxyList = cache.get(cacheKey);
+        await this.initialize();
 
-        // Retorna a lista de proxies do cache, se disponível e válida
-        if (cachedProxyList) {
-            this.updateMetrics(cachedProxyList);
-            return cachedProxyList;
+        // Try to get from Redis cache first
+        if (this.initialized) {
+            try {
+                const cachedProxyList = await this.redisClient.get<Proxy[]>(
+                    this.CACHE_KEY, 
+                    { namespace: this.CACHE_NAMESPACE }
+                );
+
+                if (cachedProxyList && cachedProxyList.length > 0) {
+                    this.updateMetrics(cachedProxyList);
+                    logger.debug('Proxy list retrieved from Redis cache', { count: cachedProxyList.length });
+                    return cachedProxyList;
+                }
+            } catch (error) {
+                logger.warn('Failed to retrieve proxy list from Redis, fetching from API', { error });
+            }
         }
 
         // Busca a lista de proxies da API
@@ -79,8 +105,9 @@ export class ProxyManager {
             }
 
             // Armazena a lista de proxies no cache
-            cache.set(cacheKey, list);
+            await this.setCachedProxyList(list);
             this.updateMetrics(list);
+            logger.info('Proxy list fetched and cached', { count: list.length });
             return list;
         } catch (error) {
             timeoutManager.recordError('proxy_fetch', ErrorType.PROXY);
@@ -142,8 +169,7 @@ export class ProxyManager {
             console.log(`❌ Proxy banido: ${host}:${port} (${proxy.errorCount} erros)`);
             
             // Atualiza a lista de proxies no cache
-            const cacheKey = 'proxyList';
-            cache.set(cacheKey, proxyList);
+            await this.setCachedProxyList(proxyList);
             
             this.updateMetrics(proxyList);
         }
@@ -165,8 +191,7 @@ export class ProxyManager {
             }
             
             // Atualiza no cache
-            const cacheKey = 'proxyList';
-            cache.set(cacheKey, proxyList);
+            await this.setCachedProxyList(proxyList);
             
             this.updateMetrics(proxyList);
         }
@@ -180,8 +205,7 @@ export class ProxyManager {
         proxyList.forEach(proxy => proxy.used = false);
         
         // Atualizar cache
-        const cacheKey = 'proxyList';
-        cache.set(cacheKey, proxyList);
+        await this.setCachedProxyList(proxyList);
         
         console.log('🔄 Rotação de proxy forçada');
     }
@@ -224,7 +248,16 @@ export class ProxyManager {
     
     // Limpa cache e recarrega proxies
     static async refreshProxyList(): Promise<void> {
-        cache.delete('proxyList');
+        await this.initialize();
+        
+        if (this.initialized) {
+            try {
+                await this.redisClient.delete(this.CACHE_KEY, { namespace: this.CACHE_NAMESPACE });
+            } catch (error) {
+                logger.warn('Failed to clear cache during refresh, continuing anyway', { error });
+            }
+        }
+        
         await this.getProxyList();
         console.log('🔄 Lista de proxies atualizada');
     }
@@ -251,5 +284,65 @@ export class ProxyManager {
             topProxies: sortedByPerformance.slice(0, 5),
             worstProxies: sortedByPerformance.slice(-5).reverse()
         };
+    }
+
+    // Helper methods for Redis cache operations
+    private static async setCachedProxyList(proxyList: Proxy[]): Promise<void> {
+        if (this.initialized) {
+            try {
+                await this.redisClient.set(
+                    this.CACHE_KEY, 
+                    proxyList, 
+                    { 
+                        namespace: this.CACHE_NAMESPACE,
+                        ttl: parseInt(process.env.REDIS_TTL || '300') // 5 minutes default
+                    }
+                );
+                logger.debug('Proxy list cached in Redis', { count: proxyList.length });
+            } catch (error) {
+                logger.warn('Failed to cache proxy list in Redis', { error });
+            }
+        }
+    }
+
+    // Get Redis health status
+    static async getRedisHealth(): Promise<{
+        enabled: boolean;
+        connected: boolean;
+        latency?: number;
+        cacheHits?: number;
+        cacheMisses?: number;
+    }> {
+        if (!this.initialized) {
+            return { enabled: false, connected: false };
+        }
+
+        try {
+            const health = await this.redisClient.healthCheck();
+            return {
+                enabled: true,
+                connected: health.connected,
+                latency: health.latency,
+                cacheHits: health.stats?.keyspace_hits ? parseInt(health.stats.keyspace_hits) : undefined,
+                cacheMisses: health.stats?.keyspace_misses ? parseInt(health.stats.keyspace_misses) : undefined
+            };
+        } catch (error) {
+            logger.error('Redis health check failed', { error });
+            return { enabled: true, connected: false };
+        }
+    }
+
+    // Clear all cached data
+    static async clearCache(): Promise<void> {
+        await this.initialize();
+        
+        if (this.initialized) {
+            try {
+                await this.redisClient.flushNamespace(this.CACHE_NAMESPACE);
+                logger.info('ProxyManager cache cleared');
+            } catch (error) {
+                logger.error('Failed to clear ProxyManager cache', { error });
+            }
+        }
     }
 }

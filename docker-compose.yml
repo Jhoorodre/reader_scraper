@@ -1,4 +1,14 @@
 services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    container_name: manga-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
   scrap2:
     build:
       context: .
@@ -11,3 +21,8 @@ services:
     command: python /app/app.py
     ports:
       - 8889:8889
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
