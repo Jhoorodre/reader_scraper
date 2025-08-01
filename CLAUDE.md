@@ -85,8 +85,7 @@ npx tsc
 # Type check without compilation
 npx tsc --noEmit
 
-# Run linter (ESLint if configured)
-npx eslint src/**/*.ts
+# No ESLint configured - use TypeScript compiler for type checking
 ```
 
 ### NPM Scripts
@@ -416,3 +415,16 @@ REDIS_TTL=300
 - BuzzHeavier sync service in `api/host/` is independent of main scraper
 - Can run REST API server (`python app.py`) or use CLI (`python sync_cli.py`)
 - Both maintain 100% compatibility with original CLI workflow
+
+## Testing Strategy
+- Uses Jest with ts-jest preset for TypeScript testing
+- Test files follow `**/*.test.ts` pattern
+- Run individual tests: `npx jest path/to/test.ts`
+- Integration tests available in `src/__tests__/integration/`
+- Provider tests focus on base classes and repository patterns
+
+## Build Configuration
+- TypeScript configured for ES2020 target with CommonJS modules
+- Output directory: `./dist` (from `./src`)
+- Uses `ts-node --transpileOnly` for development (faster compilation)
+- No ESLint configuration - relies on TypeScript compiler for code quality
