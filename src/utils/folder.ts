@@ -91,6 +91,28 @@ export function getMangaBasePath(): string {
     return mangaPath;
 }
 
+export function getMangaPathForSite(siteName: string, mangaName: string, publisher?: string): string {
+    const basePath = getMangaBasePath();
+    const sanitizedSiteName = siteName.replace(/[\\/:*?"<>|\.]/g, '-');
+    const sanitizedMangaName = mangaName.replace(/[\\/:*?"<>|]/g, '-');
+    
+    const path = require('path');
+    
+    // Determinar publisher baseado no site se não fornecido
+    const sitePublisherMap = {
+        'ManhAstro': 'Gikamura',
+        'Sussy Toons': 'Gikamura', 
+        'SussyToons': 'Gikamura',
+        'MangaLivre': 'Gikamura',
+        'Seita Celestial': 'Gikamura'
+    };
+    
+    const finalPublisher = publisher || sitePublisherMap[siteName] || 'Outros';
+    const sanitizedPublisher = finalPublisher.replace(/[\\/:*?"<>|\.]/g, '-');
+    
+    return path.join(basePath, sanitizedPublisher, sanitizedSiteName, sanitizedMangaName);
+}
+
 function getCorrectTempDir(): string {
     const os = require('os');
     const path = require('path');

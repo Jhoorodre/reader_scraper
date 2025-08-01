@@ -1,0 +1,340 @@
+INFO:__main__:🚀 Iniciando servidor com melhorias anti-travamento...
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:3333
+ * Running on http://172.18.182.249:3333
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:🚀 Iniciando servidor com melhorias anti-travamento...
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 467-079-212
+INFO:werkzeug:127.0.0.1 - - [31/Jul/2025 23:34:09] "GET /health HTTP/1.1" 200 -
+INFO:__main__:🔄 [LAZY] Iniciando scraping com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:📜 [LAZY] Parâmetros: scroll_count=3, wait_time=1000ms
+DEBUG:asyncio:Using selector: EpollSelector
+INFO:__main__:🚀 [LAZY] Carregando página com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:🔧 [LAZY] Criando novo driver...
+ERROR:__main__:❌ [LAZY] Erro no scraping com lazy loading: name 'get_or_create_driver' is not defined
+INFO:__main__:🔄 [LAZY] Tentando fallback sem lazy loading...
+ERROR:__main__:❌ [LAZY] Fallback também falhou: 'NoneType' object has no attribute 'get'
+ERROR:__main__:❌ [LAZY] Erro no scraping: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+INFO:werkzeug:127.0.0.1 - - [31/Jul/2025 23:34:18] "[35m[1mGET /scrape_lazy?url=https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/&scroll_count=3&wait_time=1000 HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/mnt/c/Projetos/Projetos-code/Meu PC/MOE/reader_scraper/app.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:🚀 Iniciando servidor com melhorias anti-travamento...
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 467-079-212
+INFO:werkzeug: * Detected change in '/mnt/c/Projetos/Projetos-code/Meu PC/MOE/reader_scraper/app.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:🚀 Iniciando servidor com melhorias anti-travamento...
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 467-079-212
+INFO:__main__:🔄 [LAZY] Iniciando scraping com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:📜 [LAZY] Parâmetros: scroll_count=2, wait_time=1000ms
+DEBUG:asyncio:Using selector: EpollSelector
+INFO:__main__:🚀 [LAZY] Carregando página com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:🔧 [LAZY] Criando novo driver...
+ERROR:__main__:❌ [LAZY] Erro no scraping com lazy loading: name 'create_driver' is not defined
+INFO:__main__:🔄 [LAZY] Tentando fallback sem lazy loading...
+ERROR:__main__:❌ [LAZY] Fallback também falhou: 'NoneType' object has no attribute 'get'
+INFO:werkzeug:127.0.0.1 - - [31/Jul/2025 23:34:38] "[35m[1mGET /scrape_lazy?url=https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/&scroll_count=2&wait_time=1000 HTTP/1.1[0m" 500 -
+INFO:werkzeug: * Detected change in '/mnt/c/Projetos/Projetos-code/Meu PC/MOE/reader_scraper/app.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:🚀 Iniciando servidor com melhorias anti-travamento...
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 467-079-212
+INFO:__main__:🔄 [LAZY] Iniciando scraping com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:📜 [LAZY] Parâmetros: scroll_count=1, wait_time=500ms
+DEBUG:asyncio:Using selector: EpollSelector
+INFO:__main__:🚀 [LAZY] Carregando página com lazy loading: https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/
+INFO:__main__:🔧 [LAZY] Criando novo driver...
+INFO:__main__:Starting driver...
+INFO:__main__:💾 Modo carregado do .env: 2
+INFO:__main__:🔽 Modo MINIMIZADO ativado
+INFO:__main__:Starting driver in visual mode...
+DEBUG:nodriver.core.config:/home/pog/.local/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.local/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.local/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.local/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.local/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/sbin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/sbin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/sbin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/sbin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/sbin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/sbin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/sbin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/sbin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/sbin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/sbin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/sbin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/sbin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/sbin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/sbin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/sbin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/games/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/games/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/games/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/games/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/games/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/games/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/games/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/games/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/games/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/local/games/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/lib/wsl/lib/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/lib/wsl/lib/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/lib/wsl/lib/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/lib/wsl/lib/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/usr/lib/wsl/lib/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Eclipse Adoptium/jdk-21.0.7.6-hotspot/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/system32/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/system32/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/system32/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/system32/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/system32/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/Wbem/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/Wbem/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/Wbem/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/Wbem/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/Wbem/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/WindowsPowerShell/v1.0//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/OpenSSH//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/OpenSSH//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/OpenSSH//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/OpenSSH//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/WINDOWS/System32/OpenSSH//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Tesseract-OCR/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Tesseract-OCR/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Tesseract-OCR/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Tesseract-OCR/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Tesseract-OCR/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/nodejs//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/nodejs//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/nodejs//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/nodejs//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/nodejs//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Git/cmd/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Git/cmd/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Git/cmd/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Git/cmd/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Git/cmd/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/cursor/resources/app/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/GitHub CLI//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/GitHub CLI//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/GitHub CLI//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/GitHub CLI//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/GitHub CLI//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/dotnet//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/dotnet//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/dotnet//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/dotnet//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/dotnet//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Google/Chrome/Application/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Docker/Docker/resources/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Docker/Docker/resources/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Docker/Docker/resources/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Docker/Docker/resources/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Program Files/Docker/Docker/resources/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313/Scripts//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Python/Python313//google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Microsoft/WindowsApps/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Local/Programs/Microsoft VS Code/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/npm/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.fly/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.vscode/extensions/ms-python.debugpy-2025.10.0-win32-x64/bundled/scripts/noConfigScripts/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.vscode/extensions/ms-python.debugpy-2025.10.0-win32-x64/bundled/scripts/noConfigScripts/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.vscode/extensions/ms-python.debugpy-2025.10.0-win32-x64/bundled/scripts/noConfigScripts/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.vscode/extensions/ms-python.debugpy-2025.10.0-win32-x64/bundled/scripts/noConfigScripts/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/.vscode/extensions/ms-python.debugpy-2025.10.0-win32-x64/bundled/scripts/noConfigScripts/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/mnt/c/Users/Admin/AppData/Roaming/Code/User/globalStorage/github.copilot-chat/debugCommand/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/snap/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/snap/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/snap/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/snap/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/snap/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:Unknown command/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config: bin
+
+To see a list of supported npm commands, run/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:
+  npm help/google-chrome-stable is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/google-chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chromium is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chromium-browser is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/chrome is not a valid candidate because don't exist or not executable 
+DEBUG:nodriver.core.config:/home/pog/.nvm/versions/node/v22.17.0/bin/google-chrome-stable is not a valid candidate because don't exist or not executable 
+ERROR:__main__:Error starting driver: could not find a valid chrome browser binary. please make sure chrome is installed.or use the keyword argument 'browser_executable_path=/path/to/your/browser' 
+ERROR:__main__:❌ [LAZY] Erro no scraping com lazy loading: could not find a valid chrome browser binary. please make sure chrome is installed.or use the keyword argument 'browser_executable_path=/path/to/your/browser' 
+INFO:__main__:🔄 [LAZY] Tentando fallback sem lazy loading...
+ERROR:__main__:❌ [LAZY] Fallback também falhou: 'NoneType' object has no attribute 'get'
+INFO:werkzeug:127.0.0.1 - - [31/Jul/2025 23:34:58] "[35m[1mGET /scrape_lazy?url=https://manhastro.net/lermanga/isekai-ryouridou/capitulo-1/&scroll_count=1&wait_time=500 HTTP/1.1[0m" 500 -

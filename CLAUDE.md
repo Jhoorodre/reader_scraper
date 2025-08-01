@@ -49,6 +49,10 @@ npx ts-node --transpileOnly src/consumer/sussy.ts rentry
 # Other providers
 npx ts-node --transpileOnly src/consumer/seita.ts
 npx ts-node --transpileOnly src/consumer/generic_wp.ts
+
+# New sites (WordPress Madara)
+npx ts-node --transpileOnly src/consumer/manhastro.ts    # ManhAstro.net with on-demand discovery
+npx ts-node --transpileOnly src/consumer/mangalivre.ts   # MangaLivre.tv
 ```
 
 ## Development Commands
@@ -65,6 +69,9 @@ npx jest --testPathPattern=base.test.ts
 # Run specific test by file path
 npx jest src/__tests__/providers/base/base.test.ts
 npx jest src/__tests__/services/proxy_manager.test.ts
+
+# Run integration tests (Redis Phase 1)
+npx jest src/__tests__/integration/redis_phase1.test.ts
 
 # Watch mode for development
 npx jest --watch
@@ -208,9 +215,40 @@ Sistema orientado a **Provider Pattern** com as seguintes camadas:
 
 ## Organização de Arquivos
 
-### Estrutura de Download
+### Estrutura de Download Hierárquica
 ```
-manga/[nome-sanitizado]/[numero-capitulo]/[pagina].jpg
+MANGA_BASE_PATH/
+├── [Publisher]/
+│   ├── [Site]/
+│   │   ├── [Obra]/
+│   │   │   ├── Capítulo [numero]/
+│   │   │   │   ├── 01.jpg
+│   │   │   │   ├── 02.jpg
+│   │   │   │   └── ...
+│   │   │   └── Capítulo [numero+1]/
+│   │   └── [Outra Obra]/
+│   └── [Outro Site]/
+└── [Outro Publisher]/
+```
+
+### Exemplo Real
+```
+D:\MOE\Obras\
+└── Gikamura\
+    ├── Sussy Toons\
+    │   ├── Arquiteto de Dungeons\
+    │   │   ├── Capítulo 01\
+    │   │   │   ├── 01.jpg
+    │   │   │   ├── 02.jpg
+    │   │   │   └── ...
+    │   │   └── Capítulo 02\
+    │   └── Outra Obra\
+    ├── ManhAstro\
+    │   └── Boundless Necromancer\
+    ├── MangaLivre\
+    │   └── [obras do MangaLivre]
+    └── Seita Celestial\
+        └── [obras da Seita]
 ```
 
 ### Estrutura de Logs
@@ -291,12 +329,23 @@ python app.py --port 5000
 POST /sync/start          # Start synchronization
 GET  /sync/status         # Current status
 GET  /sync/stats          # Detailed statistics
+POST /sync/stop           # Stop synchronization
 POST /sync/retry-failed   # Reprocess failures
+GET  /sync/history        # Sync history
+GET/PUT /sync/config      # Configuration management
+POST /sync/clear-state    # Clear state
 
 # File operations  
 POST /files/scan          # Scan directory
 POST /files/validate      # Validate files
 POST /files/hierarchy     # Analyze hierarchy
+POST /files/duplicates    # Find duplicates
+POST /files/storage-check # Check storage space
+POST /files/info          # File information
+POST /files/clear-cache   # Clear cache
+
+# Health and monitoring
+GET  /health              # API health check
 ```
 
 ## Environment Configuration
@@ -308,6 +357,7 @@ Copy `.env.example` and configure:
 MANGA_BASE_PATH=/path/to/manga/downloads
 DOWNLOAD_CONCURRENCY=5
 CHAPTER_CONCURRENCY=2
+URL_FILE_BATCH_PATH=./obra_urls.txt
 
 # Proxy Configuration
 PROXY_URL=https://proxy.webshare.io/api/v2/proxy/list/download/[TOKEN]/-/any/username/direct/-/
@@ -317,6 +367,7 @@ PROXY_PASSWORD=password
 # Server Configuration
 PROXY_SERVER_PORT=3333
 WEB_INTERFACE_PORT=8080
+API_URL=http://localhost:3333
 
 # Logging Configuration
 LOG_LEVEL=info
@@ -331,6 +382,14 @@ PROXY_TIMEOUT=600000
 # Chrome/Browser Configuration
 CHROME_PATH=/usr/bin/google-chrome
 HEADLESS=false
+PUPPETEER_NO_SANDBOX=1
+
+# Redis Configuration (Phase 1)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_DB=0
+REDIS_TTL=300
 ```
 
 ## Critical Workflow Notes

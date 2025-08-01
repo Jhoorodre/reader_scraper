@@ -1618,6 +1618,218 @@ def cleanup_temp_files():
             "success": False
         }), 500
 
+@app.route('/scrape_lazy', methods=['GET'])
+def scrape_lazy():
+    """Endpoint para scraping com simulação de scroll para lazy loading"""
+    url = request.args.get('url')
+    scroll_count = int(request.args.get('scroll_count', 5))
+    wait_time = int(request.args.get('wait_time', 2000))
+    
+    if not url:
+        return jsonify({"error": "URL parameter is required"}), 400
+    
+    logger.info(f"🔄 [LAZY] Iniciando scraping com lazy loading: {url}")
+    logger.info(f"📜 [LAZY] Parâmetros: scroll_count={scroll_count}, wait_time={wait_time}ms")
+    
+    def run_lazy_scrape():
+        try:
+            with app.app_context():  # Adicionar contexto da aplicação Flask
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                return loop.run_until_complete(scrape_with_lazy_loading(url, scroll_count, wait_time))
+        except Exception as e:
+            logger.error(f"❌ [LAZY] Erro no scraping: {str(e)}")
+            return None
+        finally:
+            try:
+                loop.close()
+            except:
+                pass
+    
+    # Executar em thread separada para evitar bloqueio
+    import concurrent.futures
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        try:
+            future = executor.submit(run_lazy_scrape)
+            result = future.result(timeout=120)  # 2 minutos timeout
+            
+            if result is None:
+                return jsonify({"error": "Failed to scrape content"}), 500
+                
+            return result
+            
+        except concurrent.futures.TimeoutError:
+            logger.error("⏰ [LAZY] Timeout no scraping lazy")
+            return jsonify({"error": "Scraping timeout"}), 504
+        except Exception as e:
+            logger.error(f"❌ [LAZY] Erro na execução: {str(e)}")
+            return jsonify({"error": f"Execution error: {str(e)}"}), 500
+
+async def scrape_with_lazy_loading(url, scroll_count=5, wait_time=2000):
+    """Implementa scraping com scroll simulado para carregar lazy loading"""
+    global driver, browser_mode_selected
+    
+    logger.info(f"🚀 [LAZY] Carregando página com lazy loading: {url}")
+    
+    try:
+        # Garantir que temos um driver
+        if driver is None:
+            logger.info("🔧 [LAZY] Criando novo driver...")
+            await start_driver()
+        
+        # Abrir nova aba ou reutilizar
+        page = await driver.get(url, new_tab=True)
+        logger.info(f"✅ [LAZY] Página carregada: {url}")
+        
+        # Aguardar carregamento inicial
+        await asyncio.sleep(3)
+        
+        # Verificar se precisa lidar com proteções
+        protection_status = await detect_protection(page)
+        if protection_status.get('hasTerms') or protection_status.get('hasTurnstile'):
+            logger.info("🛡️ [LAZY] Detectada proteção, tratando...")
+            
+            if protection_status.get('hasTerms'):
+                await handle_terms(page)
+            
+            if protection_status.get('hasTurnstile'):
+                await handle_turnstile(page)
+                
+            # Aguardar após tratar proteções
+            await asyncio.sleep(3)
+        
+        # SIMULAÇÃO DE SCROLL PARA LAZY LOADING
+        logger.info(f"📜 [LAZY] Iniciando scroll simulado ({scroll_count} scrolls, {wait_time}ms cada)")
+        
+        for scroll_num in range(scroll_count):
+            try:
+                # Scroll progressivo para baixo
+                scroll_position = (scroll_num + 1) * (100 / scroll_count)
+                
+                await page.evaluate(f"""
+                    (() => {{
+                        // Scroll suave para {scroll_position}% da página
+                        const scrollHeight = document.body.scrollHeight;
+                        const targetPosition = scrollHeight * {scroll_position / 100};
+                        
+                        window.scrollTo({{
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        }});
+                        
+                        // Disparar eventos de scroll para ativar lazy loading
+                        window.dispatchEvent(new Event('scroll'));
+                        document.dispatchEvent(new Event('scroll'));
+                        
+                        // Simular interação do usuário
+                        window.dispatchEvent(new Event('resize'));
+                        
+                        console.log(`Scroll {scroll_num + 1}/{scroll_count}: posição {{targetPosition}}`);
+                    }})()
+                """)
+                
+                # Aguardar tempo especificado para lazy loading carregar
+                await asyncio.sleep(wait_time / 1000.0)
+                
+                # Verificar quantas imagens foram carregadas
+                try:
+                    image_count = await page.evaluate("""
+                        () => {
+                            const images = document.querySelectorAll('img[src], img[data-src]');
+                            const loaded = Array.from(images).filter(img => 
+                                img.src && !img.src.includes('data:image') && 
+                                (img.complete || img.naturalHeight > 0)
+                            );
+                            return {
+                                total: images.length,
+                                loaded: loaded.length
+                            };
+                        }
+                    """)
+                    
+                    if image_count:
+                        logger.info(f"📊 [LAZY] Scroll {scroll_num + 1}: {image_count['loaded']}/{image_count['total']} imagens carregadas")
+                
+                except Exception as e:
+                    logger.warning(f"⚠️ [LAZY] Erro ao verificar imagens no scroll {scroll_num + 1}: {e}")
+                
+            except Exception as scroll_error:
+                logger.warning(f"⚠️ [LAZY] Erro no scroll {scroll_num + 1}: {scroll_error}")
+                continue
+        
+        # Scroll final para o topo para garantir que tudo está visível
+        await page.evaluate("""
+            () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Disparar eventos finais
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('scroll'));
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }, 1000);
+            }
+        """)
+        
+        # Aguardar processamento final
+        await asyncio.sleep(2)
+        
+        # Obter HTML final com todas as imagens carregadas
+        html_content = await page.get_content()
+        
+        # Estatísticas finais
+        try:
+            final_stats = await page.evaluate("""
+                () => {
+                    const allImages = document.querySelectorAll('img');
+                    const loadedImages = Array.from(allImages).filter(img => 
+                        img.src && !img.src.includes('data:image') && 
+                        (img.complete || img.naturalHeight > 0)
+                    );
+                    
+                    const lazyImages = document.querySelectorAll('img[data-src], img[data-lazy-src]');
+                    
+                    return {
+                        totalImages: allImages.length,
+                        loadedImages: loadedImages.length,
+                        lazyImages: lazyImages.length,
+                        bodyLength: document.body.innerHTML.length
+                    };
+                }
+            """)
+            
+            logger.info(f"📊 [LAZY] Resultado final: {final_stats['loadedImages']}/{final_stats['totalImages']} imagens carregadas")
+            logger.info(f"📊 [LAZY] Lazy images detectadas: {final_stats['lazyImages']}")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ [LAZY] Erro ao obter estatísticas finais: {e}")
+            final_stats = {"totalImages": 0, "loadedImages": 0, "lazyImages": 0, "bodyLength": len(html_content)}
+        
+        # Fechar aba
+        await page.close()
+        
+        logger.info(f"✅ [LAZY] Scraping com lazy loading concluído para: {url}")
+        
+        return html_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+        
+    except Exception as e:
+        logger.error(f"❌ [LAZY] Erro no scraping com lazy loading: {str(e)}")
+        try:
+            if page:
+                await page.close()
+        except:
+            pass
+        
+        # Tentar fallback sem lazy loading
+        try:
+            logger.info("🔄 [LAZY] Tentando fallback sem lazy loading...")
+            simple_page = await driver.get(url, new_tab=True)
+            await asyncio.sleep(5)
+            fallback_content = await simple_page.get_content()
+            await simple_page.close()
+            return fallback_content, 200, {'Content-Type': 'text/html; charset=utf-8'}
+        except Exception as fallback_error:
+            logger.error(f"❌ [LAZY] Fallback também falhou: {fallback_error}")
+            return jsonify({"error": f"Lazy loading failed: {str(e)}"}), 500
+
 if __name__ == '__main__':
     try:
         logger.info("🚀 Iniciando servidor com melhorias anti-travamento...")

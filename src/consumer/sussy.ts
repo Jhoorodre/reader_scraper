@@ -6,7 +6,7 @@ import { promptUser } from '../utils/prompt';
 import path from 'path';
 import { ChapterLogger } from '../utils/chapter_logger';
 import { TimeoutManager } from '../services/timeout_manager';
-import { getMangaBasePath, cleanTempFiles, setupCleanupHandlers, periodicCleanup, cleanupAfterChapter } from '../utils/folder';
+import { getMangaBasePath, getMangaPathForSite, cleanTempFiles, setupCleanupHandlers, periodicCleanup, cleanupAfterChapter } from '../utils/folder';
 
 async function executeAutoRentry(): Promise<void> {
     const chapterLogger = new ChapterLogger();
@@ -98,7 +98,8 @@ async function executeAutoRentry(): Promise<void> {
                         const capitulo = (pageIndex + 1) <= 9 ? `0${pageIndex + 1}` : `${pageIndex + 1}`;
                         console.log(`📥 Baixando Página ${capitulo}: ${pageUrl}`);
                         
-                        const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
+                        const mangaDir = getMangaPathForSite('Sussy Toons', sanitizedName);
+                        const dirPath = path.join(mangaDir, `Capítulo ${failedChapter.chapterNumber}`);
                         
                         if (!fs.existsSync(dirPath)) {
                             fs.mkdirSync(dirPath, { recursive: true });
@@ -112,7 +113,8 @@ async function executeAutoRentry(): Promise<void> {
                     fs.appendFileSync(reportFile, `RENTRY SUCESSO: ${failedChapter.chapterNumber} - tentativa ${attempt}\n`);
                     
                     // Salvar como sucesso e remover das falhas
-                    const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), failedChapter.chapterNumber.toString());
+                    const mangaDir = getMangaPathForSite('Sussy Toons', sanitizedName);
+                    const downloadPath = path.join(mangaDir, `Capítulo ${failedChapter.chapterNumber}`);
                     chapterLogger.saveChapterSuccess(workName, failedChapter.workId, failedChapter.chapterNumber, failedChapter.chapterId, pages.pages.length, downloadPath);
                     
                     // Limpar arquivos temporários após sucesso
@@ -299,7 +301,8 @@ async function downloadManga() {
                         }
                         
                         // Verificação secundária na pasta física (apenas como backup)
-                        const chapterDir = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
+                        const mangaDir = getMangaPathForSite('Sussy Toons', sanitizedName);
+                        const chapterDir = path.join(mangaDir, `Capítulo ${chapter.number}`);
                         
                         if (fs.existsSync(chapterDir)) {
                             const existingFiles = fs.readdirSync(chapterDir);
@@ -338,7 +341,8 @@ async function downloadManga() {
                                     console.log(`Baixando Página ${capitulo}: ${pageUrl}`);
                             
                                     // Criar o diretório para o capítulo
-                                    const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
+                                    const mangaDir = getMangaPathForSite('Sussy Toons', sanitizedName);
+                                    const dirPath = path.join(mangaDir, `Capítulo ${chapter.number}`);
                             
                                     // Verificar se o diretório existe, se não, criar
                                     if (!fs.existsSync(dirPath)) {
@@ -356,7 +360,8 @@ async function downloadManga() {
                                 fs.appendFileSync(reportFile, `Capítulo ${chapter.number} baixado com sucesso.\n`);
                                 
                                 // Salvar log individual do capítulo
-                                const downloadPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
+                                const mangaDir = getMangaPathForSite('Sussy Toons', sanitizedName);
+                                const downloadPath = path.join(mangaDir, `Capítulo ${chapter.number}`);
                                 chapterLogger.saveChapterSuccess(manga.name, workId, chapter.number, chapter.id[1], pages.pages.length, downloadPath);
                                 
                                 // Limpeza imediata e específica após capítulo baixado

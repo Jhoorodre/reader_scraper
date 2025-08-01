@@ -4,7 +4,7 @@ import { downloadImage } from '../download/images';
 import { promptUser } from '../utils/prompt';
 import { SeitaCelestialProvider } from '../providers/scans/seitacelestial';
 import path from 'path';
-import { getMangaBasePath, cleanTempFiles, cleanupAfterChapter } from '../utils/folder';
+import { getMangaPathForSite, cleanTempFiles, cleanupAfterChapter } from '../utils/folder';
 
 async function downloadManga() {
     const provider = new SeitaCelestialProvider();
@@ -69,7 +69,8 @@ async function downloadManga() {
                 try {
                     // Criar o diretório para o capítulo
                     const sanitizedName = manga.name?.replace(`Capítulo`, ``).replace(/[\\\/:*?"<>|]/g, '-');  // substitui caracteres inválidos por '-'
-                    const dirPath = path.join(getMangaBasePath(), path.normalize(sanitizedName), chapter.number.toString());
+                    const mangaDir = getMangaPathForSite('Seita Celestial', manga.name);
+                    const dirPath = path.join(mangaDir, `Capítulo ${chapter.number}`);
         
                     // Verificar se o diretório existe, se não, criar
                     if (!fs.existsSync(dirPath)) {
