@@ -80,6 +80,8 @@ npx ts-node --transpileOnly src/consumer/sussy.ts rentry
 # Outros providers
 npx ts-node --transpileOnly src/consumer/seita.ts
 npx ts-node --transpileOnly src/consumer/generic_wp.ts
+npx ts-node --transpileOnly src/consumer/manhastro.ts
+npx ts-node --transpileOnly src/consumer/mangalivre.ts
 ```
 
 ## Funcionalidades Principais

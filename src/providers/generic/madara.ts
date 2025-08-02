@@ -51,13 +51,13 @@ export abstract class WordPressMadara {
 
         const chapters = data.map(el => {
             //@ts-ignore
-            return new Chapter(this.getRootRelativeOrAbsoluteLink(el as HTMLAnchorElement, uri), el.textContent!.trim(), title);
+            return new Chapter([this.getRootRelativeOrAbsoluteLink(el as HTMLAnchorElement, uri)], el.textContent!.trim(), title);
         });
         return chapters.reverse();
     }
 
     async getPages(chapter: Chapter, attemptNumber: number = 1): Promise<Pages> {
-        let uri = new URL(chapter.id, this.url!).toString();
+        let uri = new URL(chapter.id[0], this.url!).toString();
         uri = this.addQueryParams(uri, { style: 'list' });
         let response = await this.http.getInstance().get(uri, { timeout: this.timeout });
         let dom = new JSDOM(response.data);

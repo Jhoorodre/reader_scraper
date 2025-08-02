@@ -1698,37 +1698,64 @@ async def scrape_with_lazy_loading(url, scroll_count=5, wait_time=2000):
             # Aguardar após tratar proteções
             await asyncio.sleep(3)
         
-        # SIMULAÇÃO DE SCROLL PARA LAZY LOADING
-        logger.info(f"📜 [LAZY] Iniciando scroll simulado ({scroll_count} scrolls, {wait_time}ms cada)")
+        # SCROLL INTELIGENTE PARA LAZY LOADING - vai até o final real da página
+        logger.info(f"📜 [LAZY] Iniciando scroll inteligente ({scroll_count} tentativas, {wait_time}ms cada)")
         
+        previous_height = 0
         for scroll_num in range(scroll_count):
             try:
-                # Scroll progressivo para baixo
-                scroll_position = (scroll_num + 1) * (100 / scroll_count)
+                # Obter altura atual da página
+                current_height = await page.evaluate("() => document.body.scrollHeight")
                 
+                # Se a altura não mudou nas últimas 3 tentativas, provavelmente chegamos ao fim
+                if scroll_num > 3 and current_height == previous_height:
+                    logger.info(f"📊 [LAZY] Página estável na altura {current_height}px após {scroll_num} scrolls")
+                    # Fazer um último scroll forçado para garantir
+                    await page.evaluate(f"() => window.scrollTo(0, {current_height})")
+                    await asyncio.sleep(wait_time / 1000.0)
+                    break
+                
+                # Scroll até o final ATUAL da página (que pode expandir)
                 await page.evaluate(f"""
                     (() => {{
-                        // Scroll suave para {scroll_position}% da página
-                        const scrollHeight = document.body.scrollHeight;
-                        const targetPosition = scrollHeight * {scroll_position / 100};
+                        const currentScrollHeight = document.body.scrollHeight;
+                        const windowHeight = window.innerHeight;
+                        const scrollStep = Math.max(windowHeight, 500); // Pelo menos 500px por vez
+                        const currentScroll = window.pageYOffset;
+                        
+                        // Scroll incremental para baixo
+                        const newPosition = Math.min(currentScroll + scrollStep, currentScrollHeight);
                         
                         window.scrollTo({{
-                            top: targetPosition,
+                            top: newPosition,
                             behavior: 'smooth'
                         }});
                         
-                        // Disparar eventos de scroll para ativar lazy loading
+                        // Se chegou no final, tentar scroll até o fim absoluto
+                        if (newPosition >= currentScrollHeight - windowHeight) {{
+                            setTimeout(() => {{
+                                window.scrollTo(0, document.body.scrollHeight);
+                            }}, 500);
+                        }}
+                        
+                        // Disparar eventos de scroll
                         window.dispatchEvent(new Event('scroll'));
                         document.dispatchEvent(new Event('scroll'));
                         
-                        // Simular interação do usuário
-                        window.dispatchEvent(new Event('resize'));
+                        console.log(`Scroll {scroll_num + 1}: {{currentScroll}} → {{newPosition}} (altura: {{currentScrollHeight}})`);
                         
-                        console.log(`Scroll {scroll_num + 1}/{scroll_count}: posição {{targetPosition}}`);
+                        return {{
+                            currentScroll: currentScroll,
+                            newPosition: newPosition,
+                            scrollHeight: currentScrollHeight,
+                            atBottom: newPosition >= currentScrollHeight - windowHeight
+                        }};
                     }})()
                 """)
                 
-                # Aguardar tempo especificado para lazy loading carregar
+                previous_height = current_height
+                
+                # Aguardar o carregamento
                 await asyncio.sleep(wait_time / 1000.0)
                 
                 # Verificar quantas imagens foram carregadas
@@ -1757,15 +1784,36 @@ async def scrape_with_lazy_loading(url, scroll_count=5, wait_time=2000):
                 logger.warning(f"⚠️ [LAZY] Erro no scroll {scroll_num + 1}: {scroll_error}")
                 continue
         
-        # Scroll final para o topo para garantir que tudo está visível
+        # Scroll final garantido até o final absoluto da página
+        logger.info("🔄 [LAZY] Fazendo scroll final até o final absoluto...")
         await page.evaluate("""
             () => {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                // Disparar eventos finais
-                setTimeout(() => {
-                    window.dispatchEvent(new Event('scroll'));
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                }, 1000);
+                return new Promise((resolve) => {
+                    // Scroll para o final absoluto múltiplas vezes
+                    let attempts = 0;
+                    const maxAttempts = 5;
+                    
+                    function scrollToEnd() {
+                        const currentHeight = document.body.scrollHeight;
+                        window.scrollTo(0, currentHeight);
+                        window.dispatchEvent(new Event('scroll'));
+                        
+                        attempts++;
+                        console.log(`Scroll final ${attempts}/${maxAttempts}: altura ${currentHeight}px`);
+                        
+                        if (attempts < maxAttempts) {
+                            setTimeout(scrollToEnd, 800);
+                        } else {
+                            // Um último scroll com delay para garantir
+                            setTimeout(() => {
+                                window.scrollTo(0, document.body.scrollHeight);
+                                resolve();
+                            }, 1000);
+                        }
+                    }
+                    
+                    scrollToEnd();
+                });
             }
         """)
         

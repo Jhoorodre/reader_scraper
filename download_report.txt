@@ -1,9 +1,4 @@
-Relatório de Download - MangaLivre.tv
-Manga: Day Walker - MangaLivre
-URL: https://mangalivre.tv/manga/day-walker/
+Relatório de Download - ManhAstro.net
+Manga: Sono Bisque Doll wa Koi wo Suru
+URL: https://manhastro.net/lermanga/sono-bisque-doll-wa-koi-wo-suru/
 
-
---- RELATÓRIO FINAL ---
-Sucessos: 48
-Falhas: 0
-Pasta: D:\MOE\Obras\Gikamura\MangaLivre\Day Walker - MangaLivre

@@ -1,6 +1,8 @@
 import { Pages, Manga, Chapter } from "../../base/entities";
 import { WordPressMadara } from "../../generic/madara";
 import { JSDOM } from 'jsdom';
+import fs from 'fs';
+import path from 'path';
 
 export class ManhAstroProvider extends WordPressMadara {
     constructor() {
@@ -20,109 +22,291 @@ export class ManhAstroProvider extends WordPressMadara {
     }
 
     async getPages(chapter, attemptNumber = 1) {
+        const maxRetries = 3;
         try {
-            console.log(`📖 [ManhAstro] Carregando páginas para ${chapter.name} (tentativa ${attemptNumber})`);
+            console.log(`📖 [ManhAstro] Carregando páginas para ${chapter.name} (tentativa ${attemptNumber}/${maxRetries})`);
             
-            const pageUrl = new URL(chapter.id, this.url).toString();
+            const pageUrl = new URL(chapter.id[0], this.url).toString();
+            
+            // USAR FETCH DIRETO POR ENQUANTO (proxy está travando)
+            console.log(`🔄 [ManhAstro] Usando fetch direto...`);
+            
             const response = await this.http.getInstance().get(pageUrl, { 
                 timeout: this.timeout 
             });
-            
             const htmlContent = response.data;
+            const usedProxy = false;
             
-            // ESTRATÉGIA SIMPLES E DIRETA: Buscar padrão img.manhastro.net no HTML bruto
-            const mangaImagePattern = /https?:\/\/img\.manhastro\.net\/manga_[^\/]+\/capitulo-[^\/]+\/(\d+)\.(webp|jpg|jpeg|png)/gi;
+            // ESTRATÉGIA PARA MANHASTRO: Buscar array JavaScript de imagens
+            console.log(`📖 Carregando páginas do capítulo...`);
+            
             const foundImages = new Set();
             
-            let match;
-            while ((match = mangaImagePattern.exec(htmlContent)) !== null) {
-                const url = match[0];
-                const pageNumber = parseInt(match[1]);
+            // 1. Buscar array "imageLinks" no JavaScript 
+            const imageLinksMatch = htmlContent.match(/var\s+imageLinks\s*=\s*\[(.*?)\]/s);
+            if (imageLinksMatch) {
                 
-                if (pageNumber && pageNumber > 0) {
-                    foundImages.add(url);
+                try {
+                    // Extrair URLs do array (estão em base64)
+                    const imageLinksStr = imageLinksMatch[1];
+                    const base64URLs = imageLinksStr.match(/"([^"]+)"/g);
+                    
+                    if (base64URLs) {
+                        base64URLs.forEach(base64Str => {
+                            try {
+                                const base64 = base64Str.replace(/"/g, '');
+                                const decodedUrl = Buffer.from(base64, 'base64').toString('utf-8');
+                                
+                                // Aceitar qualquer URL de manhastro que pareça ser imagem
+                                if ((decodedUrl.includes('manhastro.net') || decodedUrl.includes('manhastro.com')) && 
+                                    (decodedUrl.match(/\.(avif|jpg|jpeg|png|webp|gif|bmp|tiff|svg)(\.|$)/i) || 
+                                     decodedUrl.includes('/manga_') || 
+                                     decodedUrl.includes('capitulo-'))) {
+                                    // SUPORTE NATIVO AVIF: Priorizar formato AVIF se disponível
+                                    const hasAvif = decodedUrl.match(/\.avif(\.|$)/i);
+                                    if (hasAvif) {
+                                        console.log(`🎯 [ManhAstro] Imagem AVIF detectada: ${decodedUrl.substring(0, 50)}...`);
+                                    }
+                                    foundImages.add(decodedUrl);
+                                }
+                            } catch (decodeError) {
+                                // Ignorar erros de decode
+                            }
+                        });
+                        
+                    }
+                } catch (parseError) {
+                    console.log(`⚠️ Erro ao processar páginas: ${parseError.message}`);
                 }
             }
             
-            console.log(`🎯 [ManhAstro] Encontradas ${foundImages.size} páginas img.manhastro.net`);
-            
-            // Se encontrou páginas do manhastro, expandir a sequência
-            if (foundImages.size > 0) {
-                const firstImage = Array.from(foundImages)[0];
-                const basePattern = firstImage.replace(/\/\d+\.(webp|jpg|jpeg|png)$/i, '/');
+            // 2. Fallback: padrões regex tradicionais
+            if (foundImages.size === 0) {
+                console.log(`🔍 Método alternativo: busca por padrões...`);
                 
-                console.log(`🔍 [ManhAstro] Padrão base: ${basePattern}`);
+                const patterns = [
+                    // PRIORIZAR AVIF: Colocar AVIF primeiro na busca
+                    /https?:\/\/albums\.manhastro\.net\/[^"'\s]+\.avif/gi,
+                    /https?:\/\/img\.manhastro\.net\/[^"'\s]+\.avif/gi,
+                    /https?:\/\/albums\.manhastro\.net\/[^"'\s]+\.(webp|jpg|jpeg|png)/gi,
+                    /https?:\/\/img\.manhastro\.net\/[^"'\s]+\.(webp|jpg|jpeg|png)/gi
+                ];
                 
-                // Descobrir o número máximo de páginas testando
-                let maxPage = 0;
-                Array.from(foundImages).forEach(url => {
-                    const pageMatch = url.match(/\/(\d+)\.(webp|jpg|jpeg|png)$/i);
-                    if (pageMatch) {
-                        const num = parseInt(pageMatch[1]);
-                        if (num > maxPage) maxPage = num;
+                patterns.forEach(pattern => {
+                    let match;
+                    while ((match = pattern.exec(htmlContent)) !== null) {
+                        const url = match[0];
+                        if (!url.toLowerCase().includes('logo') && 
+                            !url.toLowerCase().includes('capa.manhastro') &&
+                            !url.includes('/wp-content/uploads/')) {
+                            foundImages.add(url);
+                        }
                     }
                 });
-                
-                console.log(`📊 [ManhAstro] Página máxima encontrada: ${maxPage}`);
-                
-                // Gerar sequência completa de 1 até max+5 (margem de segurança)
-                const allPages = [];
-                for (let i = 1; i <= Math.max(maxPage + 5, 30); i++) {
-                    allPages.push(`${basePattern}${i}.webp`);
-                }
-                
-                console.log(`📈 [ManhAstro] Gerada sequência de ${allPages.length} páginas`);
-                
-                // Retornar páginas em ordem
-                return new Pages(chapter.id, chapter.number, chapter.name, allPages);
             }
             
-            // FALLBACK: Se não encontrou img.manhastro.net, usar método original simples
-            console.log(`⚠️ [ManhAstro] Não encontrou img.manhastro.net, usando fallback...`);
+            if (foundImages.size > 0) {
+                // Ordenar numericamente baseado no número da página no nome do arquivo
+                const imageList = Array.from(foundImages).sort((a, b) => {
+                    // Extrair número da página (formato: 001.jpg, 024.jpg, etc.)
+                    const getPageNumber = (url) => {
+                        const match = url.match(/\/(\d+)\.(?:jpg|jpeg|png|webp|avif|gif|bmp|tiff|svg)/i);
+                        return match ? parseInt(match[1], 10) : 0;
+                    };
+                    
+                    return getPageNumber(a) - getPageNumber(b);
+                });
+                
+                console.log(`📋 Encontradas ${imageList.length} páginas`);
+                
+                // DESCOBERTA INTELIGENTE: Expandir sequência testando URLs incrementais
+                const expandedImages = await this.expandImageSequence(imageList as string[], usedProxy);
+                
+                if (expandedImages.length > imageList.length) {
+                    console.log(`🔍 Páginas adicionais encontradas: ${expandedImages.length} total`);
+                }
+                
+                
+                return new Pages(chapter.id, chapter.number, chapter.name, expandedImages);
+            }
             
-            const dom = new JSDOM(response.data);
+            // FALLBACK: Usar seletores específicos que funcionam
+            console.log(`⚠️ [ManhAstro] Usando fallback com seletores específicos...`);
+            
+            const dom = new JSDOM(htmlContent);
             const document = dom.window.document;
             
-            const images = Array.from(document.querySelectorAll('img[src], img[data-src]'))
-                .map(img => {
-                    return img.getAttribute('src') || 
-                           img.getAttribute('data-src') || 
-                           img.getAttribute('data-lazy-src') ||
-                           img.getAttribute('data-original');
-                })
-                .filter(Boolean)
+            // Usar seletores específicos que descobrimos que funcionam
+            const specificSelectors = [
+                'div.reading-content img[src]',
+                'div.page-break img[src]',
+                'img.wp-manga-chapter-img[src]'
+            ];
+            
+            const images = [];
+            specificSelectors.forEach(selector => {
+                const selectorImages = Array.from(document.querySelectorAll(selector))
+                    .map(img => img.getAttribute('src'))
+                    .filter(Boolean);
+                images.push(...selectorImages);
+            });
+            
+            // Filtrar e processar URLs com priorização AVIF
+            const processedImages = images
                 .filter(src => {
                     return src && 
-                           src.match(/\.(jpg|jpeg|png|webp)$/i) &&
+                           src.length > 10 &&
+                           src.match(/\.(jpg|jpeg|png|webp|avif)$/i) &&
                            !src.includes('data:image') &&
                            !src.toLowerCase().includes('logo') &&
-                           !src.toLowerCase().includes('aviso');
+                           !src.toLowerCase().includes('aviso') &&
+                           !src.toLowerCase().includes('capa.manhastro') &&
+                           !src.includes('/wp-content/uploads/'); // Exclui uploads (avisos/banners)
+                })
+                // SUPORTE NATIVO AVIF: Ordenar priorizando AVIF
+                .sort((a, b) => {
+                    const aIsAvif = a.match(/\.avif$/i);
+                    const bIsAvif = b.match(/\.avif$/i);
+                    if (aIsAvif && !bIsAvif) return -1;
+                    if (!aIsAvif && bIsAvif) return 1;
+                    return 0;
                 })
                 .map(src => {
                     if (src.startsWith('//')) return 'https:' + src;
                     if (src.startsWith('/')) return this.url + src;
                     return src;
-                });
+                })
+                .filter((src, index, array) => array.indexOf(src) === index); // Remove duplicatas
 
-            console.log(`📖 [ManhAstro] Fallback encontrou ${images.length} páginas`);
+            console.log(`📖 Encontradas ${processedImages.length} páginas (método alternativo)`);
             
+            // Se ainda não encontrou, tentar buscar no HTML bruto novamente com padrões mais amplos
             if (images.length === 0) {
+                console.log(`🔍 Busca ampla no HTML...`);
+                // SUPORTE NATIVO AVIF: Incluir AVIF na busca ampla
+                const broadImagePattern = /https?:\/\/[^"'\s]+\.(avif|jpg|jpeg|png|webp)/gi;
+                const foundUrls = new Set();
+                
+                let match;
+                while ((match = broadImagePattern.exec(htmlContent)) !== null) {
+                    const url = match[0];
+                    if (!url.toLowerCase().includes('logo') && 
+                        !url.toLowerCase().includes('aviso') &&
+                        !url.toLowerCase().includes('spinner') &&
+                        !url.toLowerCase().includes('loading')) {
+                        foundUrls.add(url);
+                    }
+                }
+                
+                const broadImages = Array.from(foundUrls);
+                console.log(`🎯 Busca ampla encontrou ${broadImages.length} imagens`);
+                
+                if (broadImages.length > 0) {
+                    return new Pages(chapter.id, chapter.number, chapter.name, broadImages as string[]);
+                }
+            }
+            
+            if (processedImages.length === 0) {
                 throw new Error(`Nenhuma página encontrada para o capítulo ${chapter.name}`);
             }
 
-            return new Pages(chapter.id, chapter.number, chapter.name, images);
+            return new Pages(chapter.id, chapter.number, chapter.name, processedImages);
             
         } catch (error) {
-            console.error(`❌ [ManhAstro] Erro ao obter páginas do capítulo ${chapter.name}:`, error.message);
+            // LOGGING DE ERROS DE PÁGINAS ESPECÍFICAS
+            this.logPageError(chapter, error, attemptNumber);
             
-            if (attemptNumber < 3) {
-                console.log(`🔄 [ManhAstro] Tentativa ${attemptNumber + 1} para ${chapter.name}`);
-                await new Promise(resolve => setTimeout(resolve, 2000 * attemptNumber));
+            if (attemptNumber < maxRetries) {
+                const delay = 2000 * attemptNumber; // Backoff exponencial
+                console.log(`🔄 Tentativa ${attemptNumber + 1}/${maxRetries} em ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
                 return this.getPages(chapter, attemptNumber + 1);
             }
             
             throw error;
         }
+    }
+
+    // Expandir sequência de imagens testando URLs incrementalmente
+    private async expandImageSequence(initialImages: string[], usedProxy: boolean): Promise<string[]> {
+        console.log(`🔍 Verificando páginas adicionais...`);
+        
+        if (initialImages.length === 0) return [];
+        
+        // Analisar padrão das URLs iniciais
+        const sampleUrl = initialImages[0];
+        const urlPattern = sampleUrl.match(/^(https?:\/\/[^\/]+\/[^\/]+\/[^\/]+\/[^\/]+\/)(\d+)\.(\w+)$/);
+        
+        if (!urlPattern) {
+            console.log(`⚠️ Padrão de URL não detectado, usando páginas encontradas`);
+            return initialImages;
+        }
+        
+        const [, baseUrl, , extension] = urlPattern;
+        // Descobrir números já existentes
+        const existingNumbers = new Set<number>();
+        initialImages.forEach(url => {
+            const match = url.match(/\/(\d+)\.\w+$/);
+            if (match) {
+                existingNumbers.add(parseInt(match[1]));
+            }
+        });
+        
+        const maxExisting = Math.max(...Array.from(existingNumbers));
+        
+        // Testar sequência expandida - MUITO mais agressivo 
+        const maxToTest = Math.max(50, maxExisting + 30); // Garantir mínimo de 50 páginas testadas
+        const foundUrls = new Set(initialImages);
+        let consecutiveNotFound = 0;
+        const maxConsecutiveNotFound = 10; // Mais tolerância a falhas
+        
+        
+        for (let i = 1; i <= maxToTest; i++) {
+            const testUrl = `${baseUrl}${i}.${extension}`;
+            
+            // Se já temos essa URL, apenas resetar contador
+            if (foundUrls.has(testUrl)) {
+                consecutiveNotFound = 0;
+                continue;
+            }
+            
+            try {
+                // HEAD request rápido para testar existência
+                const response = await this.http.getInstance().head(testUrl, { 
+                    timeout: 2000,
+                    validateStatus: (status) => status < 500 // Aceita 404, rejeita apenas erros de servidor
+                });
+                
+                if (response.status === 200) {
+                    foundUrls.add(testUrl);
+                    consecutiveNotFound = 0;
+                } else {
+                    consecutiveNotFound++;
+                }
+                
+            } catch (error) {
+                consecutiveNotFound++;
+            }
+            
+            // Parar se muitas páginas consecutivas não existem
+            if (consecutiveNotFound >= maxConsecutiveNotFound) {
+                break;
+            }
+            
+            // Pequena pausa para não sobrecarregar
+            if (i % 20 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+        }
+        
+        const finalImages = Array.from(foundUrls).sort((a, b) => {
+            const numA = parseInt(a.match(/\/(\d+)\.\w+$/)?.[1] || '0');
+            const numB = parseInt(b.match(/\/(\d+)\.\w+$/)?.[1] || '0');
+            return numA - numB;
+        });
+        
+        
+        return finalImages;
     }
 
     // Override para buscar apenas capítulos visíveis (descoberta sob demanda)
@@ -204,8 +388,16 @@ export class ManhAstroProvider extends WordPressMadara {
         const foundChapters: Chapter[] = [];
         
         if (strategy === 'all') {
-            // Estratégia: Descobrir e baixar TODOS os capítulos via navegação
-            return await this.discoverAllChaptersWithDownload(visibleChapters, downloadCallback);
+            // Descoberta completa com download simultâneo
+            console.log(`🚀 [ManhAstro] Iniciando descoberta completa com navegação sequencial...`);
+            
+            if (downloadCallback) {
+                // Usar método otimizado que baixa durante a descoberta
+                return await this.discoverAllChaptersWithDownload(visibleChapters, downloadCallback);
+            } else {
+                // Descoberta sem download
+                return await this.discoverAllChaptersSequentially(visibleChapters);
+            }
         } else if (strategy === 'range' && range) {
             // Estratégia: Descobrir faixa específica via navegação
             return await this.discoverRangeSequentially(visibleChapters, range.start, range.end);
@@ -214,7 +406,7 @@ export class ManhAstroProvider extends WordPressMadara {
         return foundChapters;
     }
 
-    // Descobrir e baixar todos os capítulos simultaneamente
+    // Descobrir e baixar todos os capítulos simultaneamente (ORDEM DECRESCENTE)
     private async discoverAllChaptersWithDownload(visibleChapters: Chapter[], downloadCallback?: (chapter: Chapter) => Promise<void>): Promise<Chapter[]> {
         console.log(`🔍 [ManhAstro] Descobrindo e baixando capítulos em tempo real...`);
         
@@ -228,23 +420,16 @@ export class ManhAstroProvider extends WordPressMadara {
         console.log(`🔍 [ManhAstro] Verificando se há capítulos após ${currentChapter.name}...`);
         const realLastChapter = await this.findRealLastChapter(currentChapter);
         
-        // Agora ir para o início navegando com "Previous" a partir do real último
-        const firstChapter = await this.findFirstChapter(realLastChapter);
-        if (!firstChapter) {
-            console.log(`❌ [ManhAstro] Não foi possível encontrar o primeiro capítulo`);
-            return visibleChapters; // Fallback para capítulos visíveis
-        }
-        
-        // Navegar sequencialmente com "Next" a partir do primeiro E BAIXAR CADA UM
-        currentChapter = firstChapter;
+        // NOVA ESTRATÉGIA: Começar do último e ir para trás (ORDEM DECRESCENTE)
+        currentChapter = realLastChapter;
         let chapterCount = 0;
         
-        console.log(`🚀 [ManhAstro] Iniciando download sequencial a partir de: ${currentChapter.name}`);
+        console.log(`🚀 [ManhAstro] Iniciando download decrescente a partir de: ${currentChapter.name}`);
         
-        while (currentChapter && chapterCount < 500) { // Limite de segurança
-            if (!processedUrls.has(currentChapter.id)) {
+        while (currentChapter && chapterCount < 100) { // Limite reduzido para segurança
+            if (!processedUrls.has(currentChapter.id[0])) {
                 allChapters.push(currentChapter);
-                processedUrls.add(currentChapter.id);
+                processedUrls.add(currentChapter.id[0]);
                 chapterCount++;
                 
                 console.log(`📖 [${chapterCount}] Descoberto: ${currentChapter.name}`);
@@ -260,14 +445,32 @@ export class ManhAstroProvider extends WordPressMadara {
                 }
             }
             
-            // Buscar próximo capítulo
-            const nextChapter = await this.findNextChapter(currentChapter);
-            if (!nextChapter) {
-                console.log(`🏁 [ManhAstro] Chegou ao final - último capítulo: ${currentChapter.name}`);
+            // Debug: mostrar estado atual
+            const currentNum = this.extractChapterNumber(currentChapter.id[0]);
+            console.log(`🔎 [ManhAstro] Capítulo atual: ${currentNum}, buscando anterior...`);
+            
+            // Buscar capítulo anterior (navegação reversa)
+            const prevChapter = await this.findPreviousChapter(currentChapter);
+            if (!prevChapter) {
+                console.log(`🏁 [ManhAstro] Chegou ao início - primeiro capítulo: ${currentChapter.name}`);
                 break;
             }
             
-            currentChapter = nextChapter;
+            // Debug: mostrar navegação
+            const prevNum = this.extractChapterNumber(prevChapter.id[0]);
+            console.log(`🔎 [ManhAstro] Encontrado anterior: ${prevNum}`);
+            
+            // SIMPLIFICADO: Se existe botão prev, é navegação válida!
+            // O site já garante que o prev é realmente anterior
+            console.log(`✅ [ManhAstro] Navegação válida: ${currentNum} → ${prevNum}`);
+            
+            // Proteção apenas contra loops infinitos (mesma URL)
+            if (processedUrls.has(prevChapter.id[0])) {
+                console.log(`🔄 [ManhAstro] Capítulo ${prevNum} já processado - parando para evitar loop`);
+                break;
+            }
+            
+            currentChapter = prevChapter;
             
             // Pequena pausa para ser respeitoso
             await new Promise(resolve => setTimeout(resolve, 200));
@@ -303,9 +506,9 @@ export class ManhAstroProvider extends WordPressMadara {
         let chapterCount = 0;
         
         while (currentChapter && chapterCount < 500) { // Limite de segurança
-            if (!processedUrls.has(currentChapter.id)) {
+            if (!processedUrls.has(currentChapter.id[0])) {
                 allChapters.push(currentChapter);
-                processedUrls.add(currentChapter.id);
+                processedUrls.add(currentChapter.id[0]);
                 chapterCount++;
                 
                 if (chapterCount % 10 === 0) {
@@ -339,7 +542,7 @@ export class ManhAstroProvider extends WordPressMadara {
         const foundChapters: Chapter[] = [];
         
         for (let i = start; i <= end; i++) {
-            const chapter = await this.testChapterExistsFast(visibleChapters[0].id.replace(/capitulo-\d+.*$/, ''), i, `Capítulo ${i}`);
+            const chapter = await this.testChapterExistsFast(visibleChapters[0].id[0].replace(/capitulo-\d+.*$/, ''), i, `Capítulo ${i}`);
             if (chapter) {
                 foundChapters.push(chapter);
                 console.log(`✅ Capítulo ${i} encontrado`);
@@ -354,110 +557,214 @@ export class ManhAstroProvider extends WordPressMadara {
         return foundChapters;
     }
 
-    // Encontrar o REAL último capítulo testando se há "Next"
+    // Encontrar o REAL último capítulo testando se há "Next" + busca direta
     private async findRealLastChapter(startChapter: Chapter): Promise<Chapter> {
         console.log(`➡️ [ManhAstro] Testando se há capítulos após ${startChapter.name}...`);
         
         let currentChapter = startChapter;
         let iterationCount = 0;
-        const maxIterations = 50; // Limite menor para busca forward
+        const maxIterations = 30; // Aumentado para buscar mais capítulos
+        const visitedUrls = new Set<string>();
         
+        // Primeira fase: Navegação via botões Next
         while (iterationCount < maxIterations) {
+            // Detectar loops infinitos
+            if (visitedUrls.has(currentChapter.id[0])) {
+                console.log(`🔄 [ManhAstro] Loop infinito detectado, parando em: ${currentChapter.name}`);
+                break;
+            }
+            visitedUrls.add(currentChapter.id[0]);
+            
             const nextChapter = await this.findNextChapter(currentChapter);
             if (!nextChapter) {
-                console.log(`🏁 [ManhAstro] Real último capítulo encontrado: ${currentChapter.name}`);
-                return currentChapter;
+                console.log(`🏁 [ManhAstro] Fim da navegação encontrado: ${currentChapter.name}`);
+                break;
             }
             
-            // Verificar se realmente avançou (evitar loop infinito)
-            if (nextChapter.id === currentChapter.id) {
-                console.log(`🔄 [ManhAstro] Detectado loop infinito, parando em: ${currentChapter.name}`);
-                return currentChapter;
-            }
-            
-            // Verificar se está voltando em vez de avançar (detectar se Next está errado)
-            const currentNum = this.extractChapterNumber(currentChapter.id);
-            const nextNum = this.extractChapterNumber(nextChapter.id);
+            // Verificar se está voltando em vez de avançar
+            const currentNum = this.extractChapterNumber(currentChapter.id[0]);
+            const nextNum = this.extractChapterNumber(nextChapter.id[0]);
             
             if (nextNum <= currentNum) {
-                console.log(`🏁 [ManhAstro] Capítulo "Next" (${nextNum}) é menor/igual ao atual (${currentNum}) - chegou ao final`);
-                return currentChapter;
+                console.log(`🏁 [ManhAstro] Capítulo "Next" (${nextNum}) é menor/igual ao atual (${currentNum}) - fim navegação`);
+                break;
             }
             
-            console.log(`✅ [ManhAstro] Encontrado capítulo posterior: ${nextChapter.name}`);
-            console.log(`   URL atual: ${currentChapter.id}`);
-            console.log(`   URL próximo: ${nextChapter.id}`);
+            console.log(`✅ [${iterationCount + 1}] ${currentChapter.name} → ${nextChapter.name}`);
             currentChapter = nextChapter;
             iterationCount++;
             
-            // Pausa para ser respeitoso
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
         
-        console.log(`⚠️ [ManhAstro] Limite atingido na busca forward, usando: ${currentChapter.name}`);
+        // Segunda fase: Teste direto de capítulos posteriores (VALIDAÇÃO RIGOROSA)
+        const lastFound = this.extractChapterNumber(currentChapter.id[0]);
+        console.log(`🔍 [ManhAstro] Testando capítulos após ${lastFound} diretamente...`);
+        
+        const baseUrl = currentChapter.id[0].replace(/capitulo-\d+.*$/, '');
+        let testChapter = lastFound + 1;
+        let consecutiveNotFound = 0;
+        
+        while (consecutiveNotFound < 3 && testChapter <= lastFound + 5) { // Reduzido drasticamente
+            const testUrl = `${baseUrl}capitulo-${testChapter}/`;
+            try {
+                // VALIDAÇÃO RIGOROSA: HEAD + conteúdo real
+                const headResponse = await this.http.getInstance().head(testUrl, { timeout: 2000 });
+                if (headResponse.status === 200) {
+                    // Verificar se o capítulo tem conteúdo real
+                    const contentValid = await this.validateChapterContent(testUrl);
+                    if (contentValid) {
+                        console.log(`🎯 [ManhAstro] Capítulo ${testChapter} encontrado e validado!`);
+                        currentChapter = new Chapter([testUrl], `Capítulo ${testChapter}`, currentChapter.name.split(' - ')[0]);
+                        consecutiveNotFound = 0;
+                    } else {
+                        console.log(`⚠️ [ManhAstro] Capítulo ${testChapter} existe mas sem conteúdo válido`);
+                        consecutiveNotFound++;
+                    }
+                } else {
+                    consecutiveNotFound++;
+                }
+            } catch {
+                consecutiveNotFound++;
+            }
+            testChapter++;
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        console.log(`🏁 [ManhAstro] Real último capítulo encontrado: ${currentChapter.name}`);
         return currentChapter;
     }
 
-    // Encontrar o primeiro capítulo navegando com "Previous"
+    // Encontrar o primeiro capítulo via navegação + busca direta agressiva
     private async findFirstChapter(startChapter: Chapter): Promise<Chapter | null> {
         console.log(`⏪ [ManhAstro] Buscando primeiro capítulo a partir de: ${startChapter.name}`);
         
         let currentChapter = startChapter;
         let iterationCount = 0;
-        const maxIterations = 100; // Limite de segurança
+        const maxIterations = 30; // Aumentado para buscar mais
+        const visitedUrls = new Set<string>();
         
+        // Primeira fase: Navegação via botões Previous
         while (iterationCount < maxIterations) {
+            // Detectar loops infinitos
+            if (visitedUrls.has(currentChapter.id[0])) {
+                console.log(`🔄 [ManhAstro] Loop infinito detectado, parando em: ${currentChapter.name}`);
+                break;
+            }
+            visitedUrls.add(currentChapter.id[0]);
+            
             const prevChapter = await this.findPreviousChapter(currentChapter);
             if (!prevChapter) {
-                console.log(`🎯 [ManhAstro] Primeiro capítulo encontrado: ${currentChapter.name}`);
-                return currentChapter;
+                console.log(`🏁 [ManhAstro] Fim da navegação encontrado: ${currentChapter.name}`);
+                break;
             }
             
+            // Verificar se está avançando em vez de voltar
+            const currentNum = this.extractChapterNumber(currentChapter.id[0]);
+            const prevNum = this.extractChapterNumber(prevChapter.id[0]);
+            
+            if (prevNum >= currentNum) {
+                console.log(`🔄 [ManhAstro] Capítulo "Prev" (${prevNum}) é maior/igual ao atual (${currentNum}) - fim navegação`);
+                break;
+            }
+            
+            console.log(`⏪ [${iterationCount + 1}] ${currentChapter.name} → ${prevChapter.name}`);
             currentChapter = prevChapter;
             iterationCount++;
             
-            // Pausa para ser respeitoso
-            await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 50));
         }
         
-        console.log(`⚠️ [ManhAstro] Limite de iterações atingido, usando: ${currentChapter.name}`);
+        // Segunda fase: Busca direta de capítulos anteriores
+        const firstFound = this.extractChapterNumber(currentChapter.id[0]);
+        console.log(`🔍 [ManhAstro] Testando capítulos antes de ${firstFound} diretamente...`);
+        
+        const baseUrl = currentChapter.id[0].replace(/capitulo-\d+.*$/, '');
+        
+        // Testar capítulos comuns: 1, 0, 0.5, 2, 3...
+        const testNumbers = [1, 0, 0.5, 2, 3, 4, 5];
+        
+        for (const testNum of testNumbers) {
+            if (testNum >= firstFound) continue; // Só testar números menores
+            
+            const testUrl = testNum === Math.floor(testNum) ? 
+                `${baseUrl}capitulo-${testNum}/` : 
+                `${baseUrl}capitulo-${testNum.toString().replace('.', '-')}/`;
+                
+            try {
+                const response = await this.http.getInstance().head(testUrl, { timeout: 3000 });
+                if (response.status === 200) {
+                    console.log(`🎯 [ManhAstro] Capítulo ${testNum} encontrado via busca direta!`);
+                    currentChapter = new Chapter([testUrl], `Capítulo ${testNum}`, currentChapter.name.split(' - ')[0]);
+                    break; // Usar o primeiro encontrado (ordem crescente)
+                }
+            } catch {
+                // Continuar testando
+            }
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        
+        console.log(`🎯 [ManhAstro] Primeiro capítulo determinado: ${currentChapter.name}`);
         return currentChapter;
     }
 
     // Buscar capítulo anterior via botão "Previous"
     private async findPreviousChapter(chapter: Chapter): Promise<Chapter | null> {
         try {
-            const response = await this.http.getInstance().get(chapter.id, { timeout: this.timeout });
+            const response = await this.http.getInstance().get(chapter.id[0], { timeout: this.timeout });
             const dom = new JSDOM(response.data);
             const document = dom.window.document;
             
-            // Seletor específico descoberto na análise real
-            const prevLink = document.querySelector('a.btn.prev_page') as HTMLAnchorElement;
-            
-            if (prevLink && prevLink.href && prevLink.href !== chapter.id) {
-                const prevUrl = new URL(prevLink.href, this.url).toString();
-                const prevName = this.extractChapterName(prevLink.textContent || '', prevUrl);
-                return new Chapter(prevUrl, prevName, chapter.name.split(' - ')[0]);
-            }
-            
-            // Fallback: seletores alternativos
-            const fallbackSelectors = [
+            // MÚTIPLOS SELETORES PARA NAVEGAÇÃO PREV
+            const prevSelectors = [
+                'a.btn.prev_page',
+                'a[rel="prev"]',
+                '.wp-manga-nav a[href*="capitulo"]:first-child',
                 '.nav-previous a',
-                'a[class*="prev"]',
-                '.wp-manga-nav a[href*="capitulo"]:first-child'
+                '.prev-chapter a',
+                'a:contains("Anterior")',
+                'a:contains("Previous")',
+                '.nav-links a[href*="capitulo"]:first-child'
             ];
             
-            for (const selector of fallbackSelectors) {
-                const link = document.querySelector(selector) as HTMLAnchorElement;
-                if (link && link.href && link.href !== chapter.id && link.href.includes('capitulo')) {
-                    const url = new URL(link.href, this.url).toString();
-                    const name = this.extractChapterName(link.textContent || '', url);
-                    return new Chapter(url, name, chapter.name.split(' - ')[0]);
+            let prevLink: HTMLAnchorElement | null = null;
+            
+            for (const selector of prevSelectors) {
+                if (selector.includes(':contains')) {
+                    // Buscar manualmente por conteúdo de texto
+                    const links = document.querySelectorAll('a[href*="capitulo"]') as NodeListOf<HTMLAnchorElement>;
+                    for (const link of links) {
+                        const text = (link.textContent || '').toLowerCase();
+                        if ((text.includes('anterior') || text.includes('previous') || text.includes('prev')) && 
+                            link.href !== chapter.id[0]) {
+                            prevLink = link;
+                            break;
+                        }
+                    }
+                } else {
+                    prevLink = document.querySelector(selector) as HTMLAnchorElement;
+                }
+                
+                if (prevLink && prevLink.href && prevLink.href !== chapter.id[0]) {
+                    const prevUrl = new URL(prevLink.href, this.url).toString();
+                    const prevName = this.extractChapterName(prevLink.textContent || '', prevUrl);
+                    console.log(`⏪ [ManhAstro] Prev encontrado: ${prevName} (${prevUrl})`);
+                    return new Chapter([prevUrl], prevName, chapter.name.split(' - ')[0]);
                 }
             }
             
+            console.log(`⚠️ [ManhAstro] Nenhum botão Previous encontrado para: ${chapter.name}`);
+            
+            // DEBUG: Mostrar todos os links disponíveis para diagnóstico
+            const allLinks = document.querySelectorAll('a[href*="capitulo"]') as NodeListOf<HTMLAnchorElement>;
+            console.log(`🔍 [ManhAstro] Links de capítulos disponíveis (${allLinks.length}):`);
+            Array.from(allLinks).slice(0, 5).forEach((link, index) => {
+                console.log(`  ${index + 1}. "${(link.textContent || '').trim().substring(0, 30)}..." -> ${link.href}`);
+            });
+            
             return null;
         } catch (error) {
+            console.log(`❌ [ManhAstro] Erro ao buscar Previous: ${error.message}`);
             return null;
         }
     }
@@ -465,37 +772,60 @@ export class ManhAstroProvider extends WordPressMadara {
     // Buscar próximo capítulo via botão "Next"
     private async findNextChapter(chapter: Chapter): Promise<Chapter | null> {
         try {
-            const response = await this.http.getInstance().get(chapter.id, { timeout: this.timeout });
+            const response = await this.http.getInstance().get(chapter.id[0], { timeout: this.timeout });
             const dom = new JSDOM(response.data);
             const document = dom.window.document;
             
-            // Seletor específico descoberto na análise real
-            const nextLink = document.querySelector('a.btn.next_page') as HTMLAnchorElement;
-            
-            if (nextLink && nextLink.href && nextLink.href !== chapter.id) {
-                const nextUrl = new URL(nextLink.href, this.url).toString();
-                const nextName = this.extractChapterName(nextLink.textContent || '', nextUrl);
-                return new Chapter(nextUrl, nextName, chapter.name.split(' - ')[0]);
-            }
-            
-            // Fallback: seletores alternativos
-            const fallbackSelectors = [
+            // MÚTIPLOS SELETORES PARA NAVEGAÇÃO NEXT
+            const nextSelectors = [
+                'a.btn.next_page',
+                'a[rel="next"]',
+                '.wp-manga-nav a[href*="capitulo"]:last-child',
                 '.nav-next a',
-                'a[class*="next"]',
-                '.wp-manga-nav a[href*="capitulo"]:last-child'
+                '.next-chapter a',
+                'a:contains("Próximo")',
+                'a:contains("Next")',
+                '.nav-links a[href*="capitulo"]:last-child'
             ];
             
-            for (const selector of fallbackSelectors) {
-                const link = document.querySelector(selector) as HTMLAnchorElement;
-                if (link && link.href && link.href !== chapter.id && link.href.includes('capitulo')) {
-                    const url = new URL(link.href, this.url).toString();
-                    const name = this.extractChapterName(link.textContent || '', url);
-                    return new Chapter(url, name, chapter.name.split(' - ')[0]);
+            let nextLink: HTMLAnchorElement | null = null;
+            
+            for (const selector of nextSelectors) {
+                if (selector.includes(':contains')) {
+                    // Buscar manualmente por conteúdo de texto
+                    const links = document.querySelectorAll('a[href*="capitulo"]') as NodeListOf<HTMLAnchorElement>;
+                    for (const link of links) {
+                        const text = (link.textContent || '').toLowerCase();
+                        if ((text.includes('próximo') || text.includes('next')) && 
+                            link.href !== chapter.id[0]) {
+                            nextLink = link;
+                            break;
+                        }
+                    }
+                } else {
+                    nextLink = document.querySelector(selector) as HTMLAnchorElement;
+                }
+                
+                if (nextLink && nextLink.href && nextLink.href !== chapter.id[0]) {
+                    const nextUrl = new URL(nextLink.href, this.url).toString();
+                    const nextName = this.extractChapterName(nextLink.textContent || '', nextUrl);
+                    console.log(`➡️ [ManhAstro] Next encontrado: ${nextName} (${nextUrl})`);
+                    return new Chapter([nextUrl], nextName, chapter.name.split(' - ')[0]);
                 }
             }
             
+            console.log(`⚠️ [ManhAstro] Nenhum botão Next encontrado para: ${chapter.name}`);
+            
+            // DEBUG: Mostrar todos os links disponíveis para diagnóstico
+            const allLinks = document.querySelectorAll('a[href*="capitulo"]') as NodeListOf<HTMLAnchorElement>;
+            console.log(`🔍 [ManhAstro] Links de capítulos disponíveis (${allLinks.length}):`);
+            Array.from(allLinks).slice(0, 5).forEach((link, index) => {
+                console.log(`  ${index + 1}. "${(link.textContent || '').trim().substring(0, 30)}..." -> ${link.href}`);
+            });
+            
             return null;
         } catch (error) {
+            console.log(`❌ [ManhAstro] Erro ao buscar Next: ${error.message}`);
             return null;
         }
     }
@@ -508,7 +838,14 @@ export class ManhAstroProvider extends WordPressMadara {
 
     // Extrair nome do capítulo de forma inteligente
     private extractChapterName(text: string, url: string): string {
-        // Tentar extrair do texto do link
+        // SEMPRE extrair da URL primeiro (mais confiável)
+        const urlMatch = url.match(/capitulo-(\d+(?:\.\d+)?)/);
+        if (urlMatch) {
+            const chapterNum = urlMatch[1];
+            return `Capítulo ${chapterNum}`;
+        }
+        
+        // Fallback: tentar extrair do texto do link
         if (text && text.trim()) {
             let cleanText = text.trim().replace(/\s+/g, ' ');
             
@@ -526,9 +863,9 @@ export class ManhAstroProvider extends WordPressMadara {
         }
         
         // Fallback: extrair da URL
-        const urlMatch = url.match(/capitulo-(\d+\.?\d*)/);
-        if (urlMatch) {
-            return `Capítulo ${urlMatch[1]}`;
+        const chapterMatch = url.match(/capitulo-(\d+\.?\d*)/);
+        if (chapterMatch) {
+            return `Capítulo ${chapterMatch[1]}`;
         }
         
         return 'Capítulo Desconhecido';
@@ -691,7 +1028,7 @@ export class ManhAstroProvider extends WordPressMadara {
             
             // Log silencioso - só mostrar erros importantes
             return new Chapter(
-                testUrl,
+                [testUrl],
                 `Capitulo ${chapterNum}`,
                 baseTitle
             );
@@ -713,7 +1050,7 @@ export class ManhAstroProvider extends WordPressMadara {
             
             if (response.status === 200) {
                 return new Chapter(
-                    testUrl,
+                    [testUrl],
                     `Capitulo ${chapterNum}`,
                     baseTitle
                 );
@@ -723,6 +1060,34 @@ export class ManhAstroProvider extends WordPressMadara {
         }
         
         return null;
+    }
+
+    // Validar se capítulo tem conteúdo real (imagens)
+    private async validateChapterContent(chapterUrl: string): Promise<boolean> {
+        try {
+            const response = await this.http.getInstance().get(chapterUrl, { timeout: 5000 });
+            const htmlContent = response.data;
+            
+            // Verificar se há JavaScript com imageLinks (padrão do ManhAstro)
+            const hasImageLinks = htmlContent.includes('var imageLinks');
+            if (hasImageLinks) {
+                const imageLinksMatch = htmlContent.match(/var\s+imageLinks\s*=\s*\[(.*?)\]/s);
+                if (imageLinksMatch && imageLinksMatch[1].trim().length > 10) {
+                    return true; // Tem array de imagens
+                }
+            }
+            
+            // Fallback: buscar por imagens diretas no HTML
+            const dom = new JSDOM(htmlContent);
+            const document = dom.window.document;
+            const images = document.querySelectorAll('div.reading-content img[src], div.page-break img[src]');
+            
+            // Considerar válido apenas se tiver pelo menos 3 imagens
+            return images.length >= 3;
+            
+        } catch (error) {
+            return false;
+        }
     }
 
     // Override para customizar busca de manga se necessário
@@ -757,6 +1122,85 @@ export class ManhAstroProvider extends WordPressMadara {
         } catch (error) {
             console.error(`❌ [ManhAstro] Erro ao buscar manga:`, error.message);
             throw error;
+        }
+    }
+
+    // LOGGING DE ERROS DE PÁGINAS ESPECÍFICAS
+    private logPageError(chapter: Chapter, error: any, attemptNumber: number): void {
+        const timestamp = new Date().toISOString();
+        const chapterNumber = this.extractChapterNumber(chapter.id[0]);
+        
+        const errorData = {
+            timestamp,
+            chapterUrl: chapter.id[0],
+            chapterNumber,
+            chapterName: chapter.name,
+            attemptNumber,
+            errorType: error.constructor.name,
+            errorMessage: error.message,
+            errorStack: error.stack?.split('\n').slice(0, 3).join('\n'), // Apenas primeiras 3 linhas
+            httpStatus: error.response?.status,
+            httpStatusText: error.response?.statusText
+        };
+        
+        // Log estruturado no console
+        console.error(`❌ [ManhAstro] Erro página específica:`, {
+            capítulo: chapterNumber,
+            tentativa: attemptNumber,
+            erro: error.message
+        });
+        
+        // Salvar em arquivo de log específico
+        const logDir = path.join(process.cwd(), 'logs', 'manhastro_errors');
+        if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
+        }
+        
+        const logFile = path.join(logDir, 'page_errors.jsonl');
+        const logLine = JSON.stringify(errorData) + '\n';
+        
+        try {
+            fs.appendFileSync(logFile, logLine);
+        } catch (logError) {
+            console.warn(`⚠️ [ManhAstro] Falha ao salvar log de erro:`, logError.message);
+        }
+    }
+
+    // LOGGING DE ERROS DE IMAGENS ESPECÍFICAS (para uso no consumer)
+    public logImageError(chapterNumber: string, pageNumber: number, imageUrl: string, error: any): void {
+        const timestamp = new Date().toISOString();
+        
+        const errorData = {
+            timestamp,
+            chapterNumber,
+            pageNumber,
+            imageUrl: imageUrl.substring(0, 100) + '...', // Truncar URL longa
+            errorType: error.constructor.name,
+            errorMessage: error.message,
+            httpStatus: error.response?.status,
+            httpStatusText: error.response?.statusText
+        };
+        
+        // Log estruturado no console
+        console.error(`❌ [ManhAstro] Erro imagem específica:`, {
+            capítulo: chapterNumber,
+            página: pageNumber,
+            erro: error.message
+        });
+        
+        // Salvar em arquivo de log específico
+        const logDir = path.join(process.cwd(), 'logs', 'manhastro_errors');
+        if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
+        }
+        
+        const logFile = path.join(logDir, 'image_errors.jsonl');
+        const logLine = JSON.stringify(errorData) + '\n';
+        
+        try {
+            fs.appendFileSync(logFile, logLine);
+        } catch (logError) {
+            console.warn(`⚠️ [ManhAstro] Falha ao salvar log de erro de imagem:`, logError.message);
         }
     }
 }

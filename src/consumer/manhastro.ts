@@ -103,7 +103,7 @@ async function downloadManga() {
         
         switch (downloadOption) {
             case '1':
-                // Descoberta sequencial via navegação prev/next COM DOWNLOAD SIMULTÂNEO
+                // Descoberta sequencial via navegação prev/next (ORIGINAL)
                 console.log('🚀 Iniciando navegação sequencial com download...');
                 
                 // Definir pasta de destino antecipadamente
@@ -111,7 +111,7 @@ async function downloadManga() {
                 console.log(`📁 Pasta de destino: ${mangaDir}`);
                 
                 // Criar callback para baixar cada capítulo descoberto
-                const downloadCallback = async (chapter: Chapter) => {
+                const downloadCallback = async (chapter) => {
                     const numberMatch = chapter.number.match(/\d+\.?\d*/);
                     const chapterNumber = numberMatch ? numberMatch[0] : chapter.number;
                     
@@ -131,13 +131,33 @@ async function downloadManga() {
                         fs.mkdirSync(chapterDir, { recursive: true });
                     }
 
-                    // Download das páginas
+                    // Download das páginas com anti-duplicação inteligente
                     await Bluebird.map(pages.pages, async (pageUrl, pageIndex) => {
                         const pageNumber = String(pageIndex + 1).padStart(2, '0');
-                        const imagePath = path.join(chapterDir, `${pageNumber}.jpg`);
                         
-                        if (!fs.existsSync(imagePath)) {
-                            await downloadImage(pageUrl, imagePath);
+                        // Detectar extensão da imagem da URL
+                        const urlExtension = pageUrl.match(/\.(avif|jpg|jpeg|png|webp|gif|bmp|tiff|svg)(\?|$)/i);
+                        const extension = urlExtension ? urlExtension[1].toLowerCase() : 'jpg';
+                        const imagePath = path.join(chapterDir, `${pageNumber}.${extension}`);
+                        
+                        // ANTI-DUPLICAÇÃO: Verificar se QUALQUER versão da página já existe
+                        const possibleExtensions = ['avif', 'jpg', 'jpeg', 'png', 'webp', 'gif'];
+                        const pageAlreadyExists = possibleExtensions.some(ext => {
+                            const testPath = path.join(chapterDir, `${pageNumber}.${ext}`);
+                            return fs.existsSync(testPath);
+                        });
+                        
+                        if (!pageAlreadyExists) {
+                            try {
+                                await downloadImage(pageUrl, imagePath);
+                                console.log(`✅ Página ${pageNumber}.${extension} baixada`);
+                            } catch (imageError) {
+                                // Log erro específico da imagem
+                                provider.logImageError(chapterNumber, pageIndex + 1, pageUrl, imageError);
+                                throw imageError; // Re-throw para manter comportamento
+                            }
+                        } else {
+                            console.log(`⏭️ Página ${pageNumber} já existe - pulando`);
                         }
                     }, { concurrency: 3 });
 
@@ -146,7 +166,7 @@ async function downloadManga() {
                         manga.name,
                         manga.id,
                         chapterNumber,
-                        chapter.id,
+                        chapter.id[0], // Primeiro ID do array
                         pages.pages.length,
                         chapterDir
                     );
@@ -232,18 +252,35 @@ async function downloadManga() {
                     fs.mkdirSync(chapterDir, { recursive: true });
                 }
 
-                // Download das páginas com concorrência controlada
+                // Download das páginas com anti-duplicação inteligente
                 await Bluebird.map(pages.pages, async (pageUrl, pageIndex) => {
                     const pageNumber = String(pageIndex + 1).padStart(2, '0');
-                    const imagePath = path.join(chapterDir, `${pageNumber}.jpg`);
                     
-                    // Pular se já existe
-                    if (fs.existsSync(imagePath)) {
-                        return;
+                    // Detectar extensão da imagem da URL
+                    const urlExtension = pageUrl.match(/\.(avif|jpg|jpeg|png|webp|gif|bmp|tiff|svg)(\?|$)/i);
+                    const extension = urlExtension ? urlExtension[1].toLowerCase() : 'jpg';
+                    const imagePath = path.join(chapterDir, `${pageNumber}.${extension}`);
+                    
+                    // ANTI-DUPLICAÇÃO: Verificar se QUALQUER versão da página já existe
+                    const possibleExtensions = ['avif', 'jpg', 'jpeg', 'png', 'webp', 'gif'];
+                    const pageAlreadyExists = possibleExtensions.some(ext => {
+                        const testPath = path.join(chapterDir, `${pageNumber}.${ext}`);
+                        return fs.existsSync(testPath);
+                    });
+                    
+                    if (!pageAlreadyExists) {
+                        try {
+                            await downloadImage(pageUrl, imagePath);
+                            console.log(`${progress} ⬇️  Página ${pageNumber}/${pages.pages.length} baixada (.${extension})`);
+                        } catch (imageError) {
+                            // Log erro específico da imagem
+                            provider.logImageError(chapterNumber, pageIndex + 1, pageUrl, imageError);
+                            console.error(`${progress} ❌ Erro na página ${pageNumber}: ${imageError.message}`);
+                            throw imageError; // Re-throw para manter comportamento
+                        }
+                    } else {
+                        console.log(`${progress} ⏭️  Página ${pageNumber} já existe - pulando`);
                     }
-
-                    await downloadImage(pageUrl, imagePath);
-                    console.log(`${progress} ⬇️  Página ${pageNumber}/${pages.pages.length} baixada`);
                 }, { concurrency: 3 }); // Concorrência reduzida para ser mais respeitoso
 
                 // Log de sucesso
@@ -251,7 +288,7 @@ async function downloadManga() {
                     manga.name,
                     manga.id,
                     chapterNumber,
-                    chapter.id,
+                    chapter.id[0], // Primeiro ID do array
                     pages.pages.length,
                     chapterDir
                 );
@@ -270,7 +307,8 @@ async function downloadManga() {
                     manga.name,
                     manga.id,
                     chapterNumber,
-                    chapter.id,
+                    chapter.id[0], // Primeiro ID do array
+                    1, // attempts
                     error.message
                 );
                 
